@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import time
 from typing import Any
 
 import httpx
@@ -20,16 +19,8 @@ log = logging.getLogger(__name__)
 
 def create_provider(config: Config) -> LiveProvider:
     """Factory: create the right provider from config."""
-    provider = config.api.provider.lower()
-    if provider == "sofascore":
-        from .providers.sofascore import SofaScoreProvider
-        return SofaScoreProvider()
-    elif provider == "flashlive":
-        from .providers.flashlive import FlashLiveProvider
-        return FlashLiveProvider(config.api.rapidapi_key)
-    else:
-        from .providers.api_tennis import ApiTennisProvider
-        return ApiTennisProvider(config.api.base_url, config.api.api_key)
+    from .providers.api_tennis import ApiTennisProvider
+    return ApiTennisProvider(config.api.base_url, config.api.api_key)
 
 
 class LiveScanner:
@@ -59,7 +50,6 @@ class LiveScanner:
 
     async def _poll(self, client: httpx.AsyncClient) -> None:
         events = await self.provider.fetch_events(client)
-        needs_enrich = hasattr(self.provider, "enrich_event")
         for event in events:
             match_id = str(event.get("event_key", ""))
             if not match_id:
@@ -70,14 +60,6 @@ class LiveScanner:
                 self.matches[match_id] = state
                 log.info("Tracking: %s vs %s [%s]", state.player_a, state.player_b, match_id)
                 print("\a", end="", flush=True)
-            enrich_interval = 60
-            if (needs_enrich and not event.get("pointbypoint")
-                    and time.monotonic() - state._last_enriched > enrich_interval):
-                try:
-                    await self.provider.enrich_event(client, event)
-                    state._last_enriched = time.monotonic()
-                except Exception:
-                    log.debug("Enrich failed for %s", match_id)
             self._update_state(state, event)
             self._evaluate(state)
         self._prune_finished(events)

@@ -29,12 +29,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--provider", type=str, default=None,
-        choices=["api-tennis", "sofascore", "flashlive"],
+        choices=["api-tennis"],
         help="Data provider (default: api-tennis)"
-    )
-    parser.add_argument(
-        "--rapidapi-key", type=str, default=None,
-        help="RapidAPI key (for flashlive provider)"
     )
     parser.add_argument(
         "--dashboard", action="store_true", help="Show live dashboard table"
@@ -60,15 +56,8 @@ def main() -> None:
         config.api.api_key = args.api_key
     if args.provider:
         config.api.provider = args.provider
-    if args.rapidapi_key:
-        config.api.rapidapi_key = args.rapidapi_key
 
-    if config.api.provider == "flashlive" and not config.api.rapidapi_key:
-        logging.error("FlashLive requires a RapidAPI key. Use --rapidapi-key, config file, or RAPIDAPI_KEY env var.")
-        logging.error("Sign up free at: https://rapidapi.com/tipsters/api/flashlive-sports")
-        sys.exit(1)
-
-    if config.api.provider not in ("sofascore", "flashlive") and not config.api.api_key:
+    if not config.api.api_key:
         logging.error("No API key set. Use --api-key, config file, or TENNIS_API_KEY env var.")
         sys.exit(1)
 
