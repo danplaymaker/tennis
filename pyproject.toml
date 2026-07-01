@@ -2,7 +2,7 @@
 name = "tennis-deuce-scanner"
 version = "0.1.0"
 description = "Tennis deuce-in-next-two-games live scanner and alerter"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
     "httpx>=0.27",
     "websockets>=13.0",
