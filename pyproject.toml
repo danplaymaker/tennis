@@ -24,3 +24,6 @@ dev = [
 [project.scripts]
 deuce-scanner = "src.cli:main"
 deuce-backtest = "src.backtest.runner:main"
+
+[tool.setuptools.packages.find]
+include = ["src*"]
