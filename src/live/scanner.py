@@ -66,7 +66,9 @@ class LiveScanner:
             return []
         result = data.get("result", [])
         if isinstance(result, list):
+            log.debug("API returned %d live events", len(result))
             return result
+        log.debug("API result is not a list: %s", type(result).__name__)
         return []
 
     def _init_match(self, event: dict[str, Any]) -> MatchState:
