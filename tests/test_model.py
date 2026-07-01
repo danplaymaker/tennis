@@ -71,6 +71,8 @@ class TestGameHistory:
         state = MatchState()
         state.record_game("A", False, is_tiebreak=True)
         assert state.game_history[0].is_tiebreak is True
+        assert state.total_games == 0
+        assert state.games_a_served == 0
 
 
 class TestWindowedRate:

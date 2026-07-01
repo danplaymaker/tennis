@@ -125,19 +125,21 @@ class MatchState:
 
     def record_game(self, server: str, was_deuce: bool, is_tiebreak: bool = False) -> None:
         self.game_history.append(GameRecord(server=server, was_deuce=was_deuce, is_tiebreak=is_tiebreak))
-        if server == "A":
-            self.games_a_served += 1
-            if was_deuce:
-                self.deuces_a += 1
-        else:
-            self.games_b_served += 1
-            if was_deuce:
-                self.deuces_b += 1
-        self.total_games += 1
-        self.next_server = "B" if server == "A" else "A"
+        if not is_tiebreak:
+            if server == "A":
+                self.games_a_served += 1
+                if was_deuce:
+                    self.deuces_a += 1
+            else:
+                self.games_b_served += 1
+                if was_deuce:
+                    self.deuces_b += 1
+            self.total_games += 1
+            self.next_server = "B" if server == "A" else "A"
 
     def settle_pending_bets(self) -> list:
         """Settle bets whose 2-game window has completed. Returns [(bet, won), ...]."""
+        non_tb = [g for g in self.game_history if not g.is_tiebreak]
         settled = []
         remaining = []
         for bet in self.pending_bets:
@@ -145,10 +147,10 @@ class MatchState:
                 idx1 = bet.fired_at_game
                 idx2 = bet.fired_at_game + 1
                 had_deuce = False
-                if idx1 < len(self.game_history):
-                    had_deuce = had_deuce or self.game_history[idx1].was_deuce
-                if idx2 < len(self.game_history):
-                    had_deuce = had_deuce or self.game_history[idx2].was_deuce
+                if idx1 < len(non_tb):
+                    had_deuce = had_deuce or non_tb[idx1].was_deuce
+                if idx2 < len(non_tb):
+                    had_deuce = had_deuce or non_tb[idx2].was_deuce
 
                 won = (bet.side == "YES" and had_deuce) or (bet.side == "NO" and not had_deuce)
                 payout = bet.stake * (bet.odds - 1) if won else -bet.stake
