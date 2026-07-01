@@ -30,7 +30,11 @@ class ApiTennisProvider(LiveProvider):
             return []
         result = data.get("result", [])
         if isinstance(result, list):
-            log.debug("api-tennis returned %d live events", len(result))
+            log.info("api-tennis returned %d live events", len(result))
+            for ev in result:
+                name = (ev.get("event_first_player", "") or ev.get("event_home_team", ""))
+                name += " vs " + (ev.get("event_second_player", "") or ev.get("event_away_team", ""))
+                log.info("  -> %s [%s] %s", name, ev.get("event_key", "?"), ev.get("event_status", ""))
             return result
         return []
 
