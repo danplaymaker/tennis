@@ -48,6 +48,7 @@ class LiveScanner:
                 state = self._init_match(event)
                 self.matches[match_id] = state
                 log.info("Tracking: %s vs %s [%s]", state.player_a, state.player_b, match_id)
+                print("\a", end="", flush=True)
             self._update_state(state, event)
             self._evaluate(state)
         self._prune_finished(events)
