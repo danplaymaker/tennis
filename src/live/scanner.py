@@ -10,8 +10,8 @@ import httpx
 
 from ..alerts.dispatcher import AlertDispatcher
 from ..core.config import Config
-from ..core.math import compute_ev, kelly_stake
-from ..core.model import MatchState, PlayerPrior
+from ..core.math import compute_ev, d_threshold_no, d_threshold_yes, kelly_stake
+from ..core.model import MatchState, PendingBet, PlayerPrior
 
 log = logging.getLogger(__name__)
 
@@ -107,7 +107,6 @@ class LiveScanner:
         if not isinstance(pbp, list):
             return
 
-        # pbp is a flat list of game dicts, each with set_number, number_game, etc.
         for i, game_data in enumerate(pbp):
             if not isinstance(game_data, dict):
                 continue
@@ -120,65 +119,116 @@ class LiveScanner:
             served = str(game_data.get("player_served", "")).lower()
             server = "A" if "first" in served else "B"
             was_deuce = _game_had_deuce(game_data)
-            state.record_game(server, was_deuce)
+            is_tb = _is_tiebreak(game_data)
+            state.record_game(server, was_deuce, is_tiebreak=is_tb)
 
     def _evaluate(self, state: MatchState) -> None:
-        if state.current_set < self.cfg.scanner.min_set:
+        cfg = self.cfg
+
+        settled = state.settle_pending_bets()
+        for bet, won in settled:
+            side_state = state.yes_state if bet.side == "YES" else state.no_state
+            result_str = "WON" if won else "LOST"
+            log.info("Settled %s %s: %s (streak=%d) [%s]",
+                     bet.side, result_str, f"£{bet.stake:.2f}",
+                     side_state.loss_streak, state.match_id)
+            if side_state.loss_streak >= cfg.scanner.loss_streak_halt:
+                side_state.halted = True
+                log.info("Circuit breaker: %s halted for %s (streak=%d)",
+                         bet.side, state.match_id, side_state.loss_streak)
+
+        if state.current_set < cfg.scanner.min_set:
             return
-        if state.total_games < self.cfg.scanner.min_games_for_alert:
+
+        long_rate = state.windowed_deuce_rate(cfg.scanner.win_long)
+        short_rate = state.windowed_deuce_rate(cfg.scanner.win_short)
+        if long_rate is None or short_rate is None:
             return
-        if state.total_games - state.last_alert_game < 2:
-            return
+
+        no_max = d_threshold_no(cfg.scanner.default_odds_no, cfg.scanner.enter_margin)
+        yes_min = d_threshold_yes(cfg.scanner.default_odds_yes, cfg.scanner.enter_margin)
+
+        window_side = None
+        if long_rate <= no_max and short_rate <= no_max:
+            window_side = "NO"
+        elif long_rate >= yes_min and short_rate >= yes_min:
+            window_side = "YES"
 
         est = state.estimate_deuce_rates()
-
         if state.next_server == "A":
             d_next, d_after = est.d_a, est.d_b
         else:
             d_next, d_after = est.d_b, est.d_a
 
         result = compute_ev(
-            d_next,
-            d_after,
-            self.cfg.scanner.default_odds_yes,
-            self.cfg.scanner.default_odds_no,
-            self.cfg.scanner.margin,
+            d_next, d_after,
+            cfg.scanner.default_odds_yes,
+            cfg.scanner.default_odds_no,
+            0.0,
         )
 
-        if result.side is None:
-            return
+        for check_side in ("YES", "NO"):
+            side_state = state.yes_state if check_side == "YES" else state.no_state
+            ev = result.ev_yes if check_side == "YES" else result.ev_no
 
-        odds = (
-            self.cfg.scanner.default_odds_yes
-            if result.side == "YES"
-            else self.cfg.scanner.default_odds_no
-        )
-        stake = kelly_stake(
-            result.margin_cleared,
-            odds,
-            self.cfg.staking.kelly_fraction,
-            self.cfg.staking.bankroll,
-            self.cfg.staking.max_stake_units,
-        )
+            if side_state.hot and ev < cfg.scanner.exit_margin:
+                side_state.hot = False
+                side_state.armed = True
 
-        state.last_alert_game = state.total_games
-        self.alert_match_ids.add(state.match_id)
+            if (window_side != check_side or
+                    not side_state.armed or
+                    side_state.halted or
+                    ev < cfg.scanner.enter_margin):
+                continue
 
-        self.dispatcher.send(
-            match=f"{state.player_a} vs {state.player_b}",
-            match_id=state.match_id,
-            side=result.side,
-            d_a=est.d_a,
-            d_b=est.d_b,
-            games_a=est.games_a,
-            games_b=est.games_b,
-            p_yes=result.p_yes,
-            ev=result.margin_cleared,
-            odds=odds,
-            stake=stake,
-            set_num=state.current_set,
-            total_games=state.total_games,
-        )
+            if -state.match_net_pnl >= cfg.staking.match_loss_cap:
+                log.info("Match loss cap reached for %s (P&L=%.2f)",
+                         state.match_id, state.match_net_pnl)
+                continue
+
+            odds = cfg.scanner.default_odds_yes if check_side == "YES" else cfg.scanner.default_odds_no
+            b = odds - 1.0
+            if b <= 0:
+                continue
+            p = (ev + 1.0) / odds
+            full_kelly = (p * b - (1 - p)) / b
+            taper = cfg.scanner.loss_taper ** side_state.loss_streak
+            stake = cfg.staking.kelly_fraction * full_kelly * taper * cfg.staking.bankroll
+            stake = min(stake, cfg.staking.max_stake_units * cfg.staking.bankroll / 100)
+
+            if stake < cfg.staking.min_stake:
+                continue
+
+            side_state.armed = False
+            side_state.hot = True
+            state.match_total_staked += stake
+            state.pending_bets.append(PendingBet(
+                side=check_side,
+                fired_at_game=state.total_games,
+                odds=odds,
+                stake=stake,
+            ))
+
+            self.alert_match_ids.add(state.match_id)
+
+            self.dispatcher.send(
+                match=f"{state.player_a} vs {state.player_b}",
+                match_id=state.match_id,
+                side=check_side,
+                d_a=est.d_a,
+                d_b=est.d_b,
+                games_a=est.games_a,
+                games_b=est.games_b,
+                p_yes=result.p_yes,
+                ev=ev,
+                odds=odds,
+                stake=stake,
+                set_num=state.current_set,
+                total_games=state.total_games,
+                long_rate=long_rate,
+                short_rate=short_rate,
+                loss_streak=side_state.loss_streak,
+            )
 
     def _prune_finished(self, live_events: list[dict[str, Any]]) -> None:
         live_ids = {str(e.get("event_key", "")) for e in live_events}
@@ -226,6 +276,19 @@ def _game_is_complete(game_data: dict[str, Any]) -> bool:
     return False
 
 
+def _is_tiebreak(game_data: dict[str, Any]) -> bool:
+    """Detect tiebreak games from API data."""
+    num = str(game_data.get("number_game", "")).lower().strip()
+    if "tb" in num or "tie" in num:
+        return True
+    try:
+        if int(num) == 13:
+            return True
+    except ValueError:
+        pass
+    return False
+
+
 def _current_set(event: dict[str, Any]) -> int:
     status = str(event.get("event_status", ""))
     if "set" in status.lower():
@@ -247,11 +310,7 @@ def _current_set(event: dict[str, Any]) -> int:
 def _extract_spw_from_stats(
     statistics: Any, first_key: str, second_key: str
 ) -> tuple[float, float]:
-    """Derive SPW from api-tennis statistics array.
-
-    Each stat is: {player_key, stat_name, stat_value, stat_won, stat_total, stat_period, stat_type}
-    We look for "Service Points Won" or compute from 1st/2nd serve won.
-    """
+    """Derive SPW from api-tennis statistics array."""
     if not isinstance(statistics, list) or not statistics:
         return 0.62, 0.62
 

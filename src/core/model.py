@@ -1,4 +1,4 @@
-"""Deuce rate estimation with Bayesian shrinkage toward a prior."""
+"""Deuce rate estimation with rolling windows and circuit breaker."""
 
 from __future__ import annotations
 
@@ -31,6 +31,29 @@ SURFACE_SPW_ADJUSTMENT = {
 
 
 @dataclass
+class GameRecord:
+    server: str  # "A" or "B"
+    was_deuce: bool
+    is_tiebreak: bool = False
+
+
+@dataclass
+class PendingBet:
+    side: str  # "YES" or "NO"
+    fired_at_game: int  # total_games when alert fired
+    odds: float
+    stake: float
+
+
+@dataclass
+class SideState:
+    armed: bool = True
+    hot: bool = False  # EV crossed ENTER, waiting for EXIT to re-arm
+    loss_streak: int = 0
+    halted: bool = False
+
+
+@dataclass
 class MatchState:
     player_a: str = ""
     player_b: str = ""
@@ -46,6 +69,12 @@ class MatchState:
     last_alert_game: int = -10
     match_id: str = ""
     surface: str = "hard"
+    game_history: list = field(default_factory=list)
+    pending_bets: list = field(default_factory=list)
+    yes_state: SideState = field(default_factory=SideState)
+    no_state: SideState = field(default_factory=SideState)
+    match_total_staked: float = 0.0
+    match_net_pnl: float = 0.0
 
     @property
     def empirical_d_a(self) -> float | None:
@@ -59,12 +88,16 @@ class MatchState:
             return None
         return self.deuces_b / self.games_b_served
 
-    def estimate_deuce_rates(self, prior_weight: float = 6.0) -> DeuceEstimate:
-        """Shrinkage estimator blending prior with in-match observations.
+    def windowed_deuce_rate(self, window: int) -> float | None:
+        """Match-level deuce rate over last `window` non-tiebreak games."""
+        non_tb = [g for g in self.game_history if not g.is_tiebreak]
+        if len(non_tb) < window:
+            return None
+        recent = non_tb[-window:]
+        return sum(1 for g in recent if g.was_deuce) / window
 
-        prior_weight: equivalent number of "prior games" — controls how fast
-        the estimate moves away from the prior as real games accumulate.
-        """
+    def estimate_deuce_rates(self, prior_weight: float = 6.0) -> DeuceEstimate:
+        """Shrinkage estimator blending prior with in-match observations."""
         adj = SURFACE_SPW_ADJUSTMENT.get(self.surface, 0.0)
 
         p_a = server_point_win_prob(
@@ -89,7 +122,8 @@ class MatchState:
             d_a=d_a, d_b=d_b, games_a=self.games_a_served, games_b=self.games_b_served
         )
 
-    def record_game(self, server: str, was_deuce: bool) -> None:
+    def record_game(self, server: str, was_deuce: bool, is_tiebreak: bool = False) -> None:
+        self.game_history.append(GameRecord(server=server, was_deuce=was_deuce, is_tiebreak=is_tiebreak))
         if server == "A":
             self.games_a_served += 1
             if was_deuce:
@@ -100,3 +134,32 @@ class MatchState:
                 self.deuces_b += 1
         self.total_games += 1
         self.next_server = "B" if server == "A" else "A"
+
+    def settle_pending_bets(self) -> list:
+        """Settle bets whose 2-game window has completed. Returns [(bet, won), ...]."""
+        settled = []
+        remaining = []
+        for bet in self.pending_bets:
+            if self.total_games >= bet.fired_at_game + 2:
+                idx1 = bet.fired_at_game
+                idx2 = bet.fired_at_game + 1
+                had_deuce = False
+                if idx1 < len(self.game_history):
+                    had_deuce = had_deuce or self.game_history[idx1].was_deuce
+                if idx2 < len(self.game_history):
+                    had_deuce = had_deuce or self.game_history[idx2].was_deuce
+
+                won = (bet.side == "YES" and had_deuce) or (bet.side == "NO" and not had_deuce)
+                payout = bet.stake * (bet.odds - 1) if won else -bet.stake
+                self.match_net_pnl += payout
+
+                side_state = self.yes_state if bet.side == "YES" else self.no_state
+                if won:
+                    side_state.loss_streak = 0
+                else:
+                    side_state.loss_streak += 1
+                settled.append((bet, won))
+            else:
+                remaining.append(bet)
+        self.pending_bets = remaining
+        return settled

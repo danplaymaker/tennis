@@ -16,7 +16,13 @@ class ScannerConfig:
     min_games_for_alert: int = 8
     alert_cooldown_seconds: int = 300
     default_odds_yes: float = 1.6667
-    default_odds_no: float = 2.5
+    default_odds_no: float = 1.6667
+    win_long: int = 10
+    win_short: int = 6
+    enter_margin: float = 0.10
+    exit_margin: float = 0.00
+    loss_streak_halt: int = 3
+    loss_taper: float = 0.5
 
 
 @dataclass
@@ -44,7 +50,9 @@ class AlertConfig:
 class StakingConfig:
     kelly_fraction: float = 0.25
     max_stake_units: float = 3.0
-    bankroll: float = 1000.0
+    bankroll: float = 500.0
+    min_stake: float = 2.0
+    match_loss_cap: float = 20.0
 
 
 @dataclass

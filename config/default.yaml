@@ -5,6 +5,12 @@ scanner:
   alert_cooldown_seconds: 300
   default_odds_yes: 1.6667  # 4/6 decimal
   default_odds_no: 1.6667   # 4/6 decimal (both sides ~4/6 with overround)
+  win_long: 10
+  win_short: 6
+  enter_margin: 0.10
+  exit_margin: 0.00
+  loss_streak_halt: 3
+  loss_taper: 0.5
 
 api:
   provider: "api-tennis"
@@ -23,4 +29,6 @@ alerts:
 staking:
   kelly_fraction: 0.25
   max_stake_units: 3.0
-  bankroll: 1000.0
+  bankroll: 500.0
+  min_stake: 2.0
+  match_loss_cap: 20.0

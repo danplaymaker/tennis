@@ -1,6 +1,6 @@
 """Tests for the deuce rate estimation model."""
 
-from src.core.model import MatchState, PlayerPrior
+from src.core.model import GameRecord, MatchState, PendingBet, PlayerPrior, SideState
 
 
 class TestMatchState:
@@ -54,3 +54,123 @@ class TestMatchState:
 
         est = state.estimate_deuce_rates()
         assert est.d_match == (est.d_a * 4 + est.d_b * 6) / 10
+
+
+class TestGameHistory:
+    def test_record_game_appends_history(self):
+        state = MatchState()
+        state.record_game("A", True)
+        state.record_game("B", False)
+        assert len(state.game_history) == 2
+        assert state.game_history[0].server == "A"
+        assert state.game_history[0].was_deuce is True
+        assert state.game_history[1].server == "B"
+        assert state.game_history[1].was_deuce is False
+
+    def test_tiebreak_recorded(self):
+        state = MatchState()
+        state.record_game("A", False, is_tiebreak=True)
+        assert state.game_history[0].is_tiebreak is True
+
+
+class TestWindowedRate:
+    def test_returns_none_below_window(self):
+        state = MatchState()
+        for _ in range(5):
+            state.record_game("A", False)
+        assert state.windowed_deuce_rate(6) is None
+
+    def test_exact_window(self):
+        state = MatchState()
+        for _ in range(4):
+            state.record_game("A", True)
+        for _ in range(6):
+            state.record_game("B", False)
+        rate = state.windowed_deuce_rate(10)
+        assert abs(rate - 0.4) < 0.001
+
+    def test_sliding_window(self):
+        state = MatchState()
+        for _ in range(6):
+            state.record_game("A", False)
+        for _ in range(6):
+            state.record_game("B", True)
+        rate = state.windowed_deuce_rate(6)
+        assert abs(rate - 1.0) < 0.001
+
+    def test_excludes_tiebreaks(self):
+        state = MatchState()
+        for _ in range(5):
+            state.record_game("A", False)
+        state.record_game("A", True, is_tiebreak=True)
+        for _ in range(5):
+            state.record_game("B", False)
+        rate = state.windowed_deuce_rate(10)
+        assert abs(rate - 0.0) < 0.001
+
+
+class TestSettleBets:
+    def test_settle_yes_win(self):
+        state = MatchState()
+        state.pending_bets.append(PendingBet(side="YES", fired_at_game=0, odds=1.6667, stake=10.0))
+        state.record_game("A", True)
+        state.record_game("B", False)
+        settled = state.settle_pending_bets()
+        assert len(settled) == 1
+        assert settled[0][1] is True  # won
+        assert state.match_net_pnl > 0
+        assert state.yes_state.loss_streak == 0
+
+    def test_settle_yes_loss(self):
+        state = MatchState()
+        state.pending_bets.append(PendingBet(side="YES", fired_at_game=0, odds=1.6667, stake=10.0))
+        state.record_game("A", False)
+        state.record_game("B", False)
+        settled = state.settle_pending_bets()
+        assert len(settled) == 1
+        assert settled[0][1] is False  # lost
+        assert state.match_net_pnl < 0
+        assert state.yes_state.loss_streak == 1
+
+    def test_settle_no_win(self):
+        state = MatchState()
+        state.pending_bets.append(PendingBet(side="NO", fired_at_game=0, odds=1.6667, stake=10.0))
+        state.record_game("A", False)
+        state.record_game("B", False)
+        settled = state.settle_pending_bets()
+        assert settled[0][1] is True
+
+    def test_settle_no_loss(self):
+        state = MatchState()
+        state.pending_bets.append(PendingBet(side="NO", fired_at_game=0, odds=1.6667, stake=10.0))
+        state.record_game("A", True)
+        state.record_game("B", False)
+        settled = state.settle_pending_bets()
+        assert settled[0][1] is False
+        assert state.no_state.loss_streak == 1
+
+    def test_not_settled_until_two_games(self):
+        state = MatchState()
+        state.pending_bets.append(PendingBet(side="YES", fired_at_game=0, odds=1.6667, stake=10.0))
+        state.record_game("A", True)
+        settled = state.settle_pending_bets()
+        assert len(settled) == 0
+        assert len(state.pending_bets) == 1
+
+    def test_loss_streak_accumulates(self):
+        state = MatchState()
+        for i in range(3):
+            state.pending_bets.append(PendingBet(side="NO", fired_at_game=i * 2, odds=1.6667, stake=10.0))
+            state.record_game("A", True)
+            state.record_game("B", False)
+        state.settle_pending_bets()
+        assert state.no_state.loss_streak == 3
+
+    def test_win_resets_streak(self):
+        state = MatchState()
+        state.no_state.loss_streak = 2
+        state.pending_bets.append(PendingBet(side="NO", fired_at_game=0, odds=1.6667, stake=10.0))
+        state.record_game("A", False)
+        state.record_game("B", False)
+        state.settle_pending_bets()
+        assert state.no_state.loss_streak == 0

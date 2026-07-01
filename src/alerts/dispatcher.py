@@ -68,8 +68,12 @@ def format_alert(
     stake: float,
     set_num: int,
     total_games: int,
+    long_rate: float = 0.0,
+    short_rate: float = 0.0,
+    loss_streak: int = 0,
     **_: Any,
 ) -> str:
+    taper_note = f" (taper: streak {loss_streak})" if loss_streak > 0 else ""
     return (
         f"Match: {match}\n"
         f"Set {set_num} | {total_games} games played\n"
@@ -77,10 +81,11 @@ def format_alert(
         f"Side: {side} (deuce in next 2 games)\n"
         f"d_A: {d_a:.1%} ({games_a} service games)\n"
         f"d_B: {d_b:.1%} ({games_b} service games)\n"
+        f"Window: {long_rate:.1%} (L10) / {short_rate:.1%} (S6)\n"
         f"P(YES): {p_yes:.1%}\n"
         f"Assumed odds: {odds:.4f}\n"
         f"EV: {ev:+.1%}\n"
-        f"Suggested stake: {stake:.2f}\n"
+        f"Suggested stake: £{stake:.2f}{taper_note}\n"
         f"---\n"
         f"Verify bet365 price before placing!"
     )

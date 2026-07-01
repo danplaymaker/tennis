@@ -6,9 +6,27 @@ from src.live.scanner import (
     _extract_spw_from_stats,
     _game_had_deuce,
     _game_is_complete,
+    _is_tiebreak,
     _detect_surface,
     _player_name,
 )
+
+
+class TestTiebreakDetection:
+    def test_tb_label(self):
+        assert _is_tiebreak({"number_game": "TB"}) is True
+
+    def test_tiebreak_label(self):
+        assert _is_tiebreak({"number_game": "Tie Break"}) is True
+
+    def test_game_13(self):
+        assert _is_tiebreak({"number_game": "13"}) is True
+
+    def test_normal_game(self):
+        assert _is_tiebreak({"number_game": "7"}) is False
+
+    def test_missing_number(self):
+        assert _is_tiebreak({}) is False
 
 
 class TestPlayerName:
