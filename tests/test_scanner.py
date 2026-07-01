@@ -1,12 +1,13 @@
 """Tests for the live scanner's API-Tennis parsing logic."""
 
 from src.live.scanner import (
+    _collapse_pbp_games,
     _current_set,
     _extract_spw_from_pbp,
     _extract_spw_from_stats,
     _game_had_deuce,
     _game_is_complete,
-    _is_tiebreak,
+    _is_tiebreak_entry,
     _detect_surface,
     _player_name,
 )
@@ -14,19 +15,73 @@ from src.live.scanner import (
 
 class TestTiebreakDetection:
     def test_tb_label(self):
-        assert _is_tiebreak({"number_game": "TB"}) is True
+        assert _is_tiebreak_entry({"number_game": "TB"}) is True
 
     def test_tiebreak_label(self):
-        assert _is_tiebreak({"number_game": "Tie Break"}) is True
+        assert _is_tiebreak_entry({"number_game": "Tie Break"}) is True
 
     def test_game_13(self):
-        assert _is_tiebreak({"number_game": "13"}) is True
+        assert _is_tiebreak_entry({"number_game": "13"}) is True
 
     def test_normal_game(self):
-        assert _is_tiebreak({"number_game": "7"}) is False
+        assert _is_tiebreak_entry({"number_game": "7"}) is False
 
     def test_missing_number(self):
-        assert _is_tiebreak({}) is False
+        assert _is_tiebreak_entry({}) is False
+
+    def test_tiebreak_from_point_scoring(self):
+        entry = {"number_game": "13", "points": [
+            {"score": "1 - 0"}, {"score": "1 - 1"}, {"score": "2 - 1"},
+        ]}
+        assert _is_tiebreak_entry(entry) is True
+
+    def test_normal_scoring_not_tiebreak(self):
+        entry = {"number_game": "5", "points": [
+            {"score": "15 - 0"}, {"score": "30 - 0"}, {"score": "40 - 0"},
+        ]}
+        assert _is_tiebreak_entry(entry) is False
+
+
+class TestCollapsePbpGames:
+    def test_normal_games_stay_separate(self):
+        pbp = [
+            {"set_number": "Set 1", "number_game": "1", "player_served": "First",
+             "serve_winner": "First", "points": [{"score": "15-0"}, {"score": "game"}]},
+            {"set_number": "Set 1", "number_game": "2", "player_served": "Second",
+             "serve_winner": "Second", "points": [{"score": "0-15"}, {"score": "game"}]},
+        ]
+        games = _collapse_pbp_games(pbp)
+        assert len(games) == 2
+
+    def test_tiebreak_points_collapsed(self):
+        pbp = [
+            {"set_number": "Set 1", "number_game": "1", "player_served": "First",
+             "serve_winner": "First", "points": [{"score": "15-0"}, {"score": "game"}]},
+        ]
+        for i in range(16):
+            pbp.append({
+                "set_number": "Set 1", "number_game": "13",
+                "player_served": "First",
+                "points": [{"score": f"{i//2} - {i - i//2}"}],
+            })
+        pbp[-1]["serve_winner"] = "First"
+        games = _collapse_pbp_games(pbp)
+        assert len(games) == 2
+        assert games[1][2] is True  # is_tiebreak
+
+    def test_tiebreak_points_merged_into_single_entry(self):
+        pbp = []
+        for i in range(10):
+            pbp.append({
+                "set_number": "Set 1", "number_game": "TB",
+                "player_served": "First",
+                "points": [{"score": f"{i} - 0"}],
+            })
+        pbp[-1]["serve_winner"] = "First"
+        games = _collapse_pbp_games(pbp)
+        assert len(games) == 1
+        assert len(games[0][1]["points"]) == 10
+        assert games[0][2] is True
 
 
 class TestPlayerName:

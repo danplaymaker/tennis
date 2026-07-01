@@ -75,6 +75,7 @@ class MatchState:
     no_state: SideState = field(default_factory=SideState)
     match_total_staked: float = 0.0
     match_net_pnl: float = 0.0
+    _seen_game_keys: set = field(default_factory=set)
 
     @property
     def empirical_d_a(self) -> float | None:

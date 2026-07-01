@@ -107,19 +107,17 @@ class LiveScanner:
         if not isinstance(pbp, list):
             return
 
-        for i, game_data in enumerate(pbp):
-            if not isinstance(game_data, dict):
-                continue
-            game_num = i + 1
-            if game_num <= state.total_games:
+        games = _collapse_pbp_games(pbp)
+        for game_key, game_data, is_tb in games:
+            if game_key in state._seen_game_keys:
                 continue
             if not _game_is_complete(game_data):
                 continue
 
+            state._seen_game_keys.add(game_key)
             served = str(game_data.get("player_served", "")).lower()
             server = "A" if "first" in served else "B"
             was_deuce = _game_had_deuce(game_data)
-            is_tb = _is_tiebreak(game_data)
             state.record_game(server, was_deuce, is_tiebreak=is_tb)
 
     def _evaluate(self, state: MatchState) -> None:
@@ -238,6 +236,81 @@ class LiveScanner:
             del self.matches[mid]
 
 
+def _collapse_pbp_games(pbp: list) -> list:
+    """Group flat pbp entries into logical games.
+
+    Returns [(game_key, merged_game_data, is_tiebreak), ...].
+    Tiebreak points sharing the same (set_number, number_game) are merged
+    into a single game entry.  Entries without set/game numbers fall back
+    to index-based keys.
+    """
+    from collections import OrderedDict
+
+    groups: OrderedDict[str, dict] = OrderedDict()
+    tb_keys: set[str] = set()
+
+    for i, entry in enumerate(pbp):
+        if not isinstance(entry, dict):
+            continue
+
+        set_num = str(entry.get("set_number", "")).strip()
+        game_num = str(entry.get("number_game", "")).strip()
+
+        if set_num and game_num:
+            key = f"{set_num}:{game_num}"
+        else:
+            key = f"idx:{i}"
+
+        is_tb = _is_tiebreak_entry(entry)
+
+        if key not in groups:
+            groups[key] = dict(entry)
+            if is_tb:
+                tb_keys.add(key)
+        else:
+            existing = groups[key]
+            ep = existing.get("points", [])
+            np_ = entry.get("points", [])
+            if isinstance(ep, list) and isinstance(np_, list):
+                existing["points"] = ep + np_
+            for f in ("serve_winner", "serve_lost", "result", "player_served"):
+                if not existing.get(f) and entry.get(f):
+                    existing[f] = entry[f]
+            if is_tb:
+                tb_keys.add(key)
+
+    result = []
+    for key, data in groups.items():
+        result.append((key, data, key in tb_keys))
+    return result
+
+
+def _is_tiebreak_entry(entry: dict[str, Any]) -> bool:
+    """Detect tiebreak from game number or point scoring pattern."""
+    num = str(entry.get("number_game", "")).lower().strip()
+    if "tb" in num or "tie" in num:
+        return True
+    try:
+        if int(num) >= 13:
+            return True
+    except ValueError:
+        pass
+    points = entry.get("points", [])
+    if isinstance(points, list) and len(points) >= 2:
+        for p in points[:3]:
+            score = str(p.get("score", "") if isinstance(p, dict) else p).strip()
+            parts = score.replace(" - ", "-").split("-")
+            if len(parts) == 2:
+                left, right = parts[0].strip(), parts[1].strip()
+                try:
+                    l, r = int(left), int(right)
+                    if l + r >= 1 and l <= 7 and r <= 7 and left not in ("15", "30", "40"):
+                        return True
+                except ValueError:
+                    pass
+    return False
+
+
 def _player_name(event: dict[str, Any], which: str) -> str:
     """Extract player name, trying both naming conventions."""
     return (
@@ -273,19 +346,6 @@ def _game_is_complete(game_data: dict[str, Any]) -> bool:
         last = points[-1]
         last_str = str(last.get("score", "") if isinstance(last, dict) else last).lower()
         return "game" in last_str
-    return False
-
-
-def _is_tiebreak(game_data: dict[str, Any]) -> bool:
-    """Detect tiebreak games from API data."""
-    num = str(game_data.get("number_game", "")).lower().strip()
-    if "tb" in num or "tie" in num:
-        return True
-    try:
-        if int(num) == 13:
-            return True
-    except ValueError:
-        pass
     return False
 
 
