@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 HOST = "flashlive-sports.p.rapidapi.com"
 BASE = f"https://{HOST}"
-TENNIS_SPORT_ID = "2"
+TENNIS_SPORT_ID = "25"
 
 
 class FlashLiveProvider(LiveProvider):
@@ -31,12 +31,21 @@ class FlashLiveProvider(LiveProvider):
         }
 
     async def fetch_events(self, client: httpx.AsyncClient) -> list[dict[str, Any]]:
-        resp = await client.get(
-            f"{BASE}/v1/events/live",
-            params={"sport_id": TENNIS_SPORT_ID, "locale": "en_INT"},
-            headers=self._headers(),
-        )
-        resp.raise_for_status()
+        try:
+            resp = await client.get(
+                f"{BASE}/v1/events/live-list",
+                params={"sport_id": TENNIS_SPORT_ID, "locale": "en_INT"},
+                headers=self._headers(),
+            )
+            resp.raise_for_status()
+        except httpx.HTTPStatusError:
+            resp = await client.get(
+                f"{BASE}/v1/events/list",
+                params={"sport_id": TENNIS_SPORT_ID, "locale": "en_INT",
+                        "indent_days": "0", "timezone": "0"},
+                headers=self._headers(),
+            )
+            resp.raise_for_status()
         data = resp.json()
 
         raw_events = []

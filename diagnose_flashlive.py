@@ -42,7 +42,7 @@ def main():
             for s in sports:
                 name = s.get("NAME", s.get("name", "?"))
                 sid = s.get("ID", s.get("id", "?"))
-                if "tennis" in str(name).lower():
+                if "tennis" in str(name).lower() and "table" not in str(name).lower():
                     tennis_id = str(sid)
                     print(f"  >>> {name}: sport_id={sid} <<<")
                 else:
@@ -55,60 +55,73 @@ def main():
             print(f"Error listing sports: {ex}")
             return
 
-        # 2. Fetch live tennis events
+        # 2. Try multiple endpoint paths to find live events
         print(f"\n{'=' * 60}")
-        print(f"STEP 2: LIVE TENNIS EVENTS (sport_id={tennis_id})")
+        print(f"STEP 2: FINDING LIVE EVENTS ENDPOINT (sport_id={tennis_id})")
         print("=" * 60)
-        try:
-            resp = client.get(
-                f"{BASE}/v1/events/live",
-                params={"sport_id": tennis_id, "locale": "en_INT"},
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            top = data.get("DATA", [])
-            print(f"Top-level DATA has {len(top)} items")
 
-            all_events = []
-            for i, item in enumerate(top[:5]):
-                print(f"\n--- Tournament group {i} ---")
-                print(f"  Keys: {sorted(item.keys())}")
-                print(f"  NAME: {item.get('NAME', '?')}")
-                print(f"  COUNTRY_NAME: {item.get('COUNTRY_NAME', '?')}")
+        endpoints = [
+            ("/v1/events/live-list", {"sport_id": tennis_id, "locale": "en_INT"}),
+            ("/v1/events/live", {"sport_id": tennis_id, "locale": "en_INT"}),
+            ("/v1/events/list", {"sport_id": tennis_id, "locale": "en_INT",
+                                 "indent_days": "0", "timezone": "0"}),
+        ]
 
-                events = item.get("EVENTS", [])
-                if events:
-                    print(f"  EVENTS count: {len(events)}")
-                    for j, e in enumerate(events[:3]):
-                        all_events.append(e)
-                        print(f"\n    Event {j}:")
-                        print(f"      ALL KEYS: {sorted(e.keys())}")
-                        for k in sorted(e.keys()):
-                            v = e[k]
-                            if not isinstance(v, (dict, list)):
-                                print(f"      {k}: {v}")
-                            elif isinstance(v, list) and len(v) < 5:
-                                print(f"      {k}: {v}")
-                elif "EVENT_ID" in item:
-                    all_events.append(item)
-                    print(f"  (Flat event, not grouped)")
-                    for k in sorted(item.keys()):
-                        v = item[k]
-                        if not isinstance(v, (dict, list)):
-                            print(f"  {k}: {v}")
+        all_events = []
+        working_endpoint = None
 
-            total = sum(len(item.get("EVENTS", [])) for item in top)
-            if not total:
-                total = len([i for i in top if "EVENT_ID" in i])
-            print(f"\nTotal events across all tournaments: {total}")
+        for path, params in endpoints:
+            try:
+                resp = client.get(f"{BASE}{path}", params=params)
+                print(f"\n  {path} -> {resp.status_code}")
+                if resp.status_code == 200:
+                    data = resp.json()
+                    top = data.get("DATA", [])
+                    print(f"    DATA has {len(top)} items")
+                    if top:
+                        working_endpoint = path
+                        print(f"    First item keys: {sorted(top[0].keys()) if isinstance(top[0], dict) else type(top[0])}")
 
-        except Exception as ex:
-            print(f"Error fetching live events: {ex}")
-            import traceback
-            traceback.print_exc()
+                        for i, item in enumerate(top[:3]):
+                            if not isinstance(item, dict):
+                                continue
+                            events = item.get("EVENTS", [])
+                            if events:
+                                print(f"\n    Tournament: {item.get('NAME', '?')}")
+                                print(f"    Country: {item.get('COUNTRY_NAME', '?')}")
+                                print(f"    Events: {len(events)}")
+                                for j, e in enumerate(events[:2]):
+                                    all_events.append(e)
+                                    print(f"\n      Event {j} keys: {sorted(e.keys())}")
+                                    for k in sorted(e.keys()):
+                                        v = e[k]
+                                        if not isinstance(v, (dict, list)):
+                                            print(f"        {k}: {v}")
+                            elif "EVENT_ID" in item or "HOME_NAME" in item:
+                                all_events.append(item)
+                                print(f"\n    Flat event keys: {sorted(item.keys())}")
+                                for k in sorted(item.keys()):
+                                    v = item[k]
+                                    if not isinstance(v, (dict, list)):
+                                        print(f"      {k}: {v}")
+
+                        total = sum(len(it.get("EVENTS", [])) for it in top if isinstance(it, dict))
+                        if not total:
+                            total = len([it for it in top if isinstance(it, dict) and ("EVENT_ID" in it or "HOME_NAME" in it)])
+                        print(f"\n    Total events: {total}")
+                        break
+                else:
+                    print(f"    Body: {resp.text[:200]}")
+            except Exception as ex:
+                print(f"    Error: {ex}")
+
+        if not working_endpoint:
+            print("\nNo working endpoint found!")
             return
 
-        # 3. Fetch detail for first event
+        print(f"\n>>> WORKING ENDPOINT: {working_endpoint} <<<")
+
+        # 3. Fetch statistics for first event
         if all_events:
             eid = all_events[0].get("EVENT_ID", all_events[0].get("id"))
             if eid:
@@ -143,11 +156,28 @@ def main():
                         print(f"Status {resp.status_code}: {resp.text[:500]}")
                 except Exception as ex:
                     print(f"Error: {ex}")
+
+                # Also try points history (might have point-by-point for tennis)
+                print(f"\n{'=' * 60}")
+                print(f"STEP 5: EVENT POINTS HISTORY (event_id={eid})")
+                print("=" * 60)
+                try:
+                    resp = client.get(
+                        f"{BASE}/v1/events/points-history",
+                        params={"event_id": eid, "locale": "en_INT"},
+                    )
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        print(json.dumps(data, indent=2)[:3000])
+                    else:
+                        print(f"Status {resp.status_code}: {resp.text[:500]}")
+                except Exception as ex:
+                    print(f"Error: {ex}")
         else:
-            print("\nNo live events to inspect detail for.")
+            print("\nNo events found to inspect.")
 
     print(f"\n{'=' * 60}")
-    print("DONE — copy-paste the output above so we can tune the provider.")
+    print("DONE — paste output above so we can tune the provider.")
     print("=" * 60)
 
 
