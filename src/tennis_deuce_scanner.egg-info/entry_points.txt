@@ -1,3 +1,0 @@
-[console_scripts]
-deuce-backtest = src.backtest.runner:main
-deuce-scanner = src.cli:main
