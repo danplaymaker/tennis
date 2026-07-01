@@ -3,6 +3,7 @@
 from src.live.scanner import (
     _current_set,
     _extract_spw_from_pbp,
+    _extract_spw_from_stats,
     _game_had_deuce,
     _game_is_complete,
     _detect_surface,
@@ -81,7 +82,7 @@ class TestSetDetection:
                 {"score_first": "3", "score_second": "6", "score_set": "2"},
             ],
         }
-        assert _current_set(event) == 3  # 2 completed sets + 1 in progress
+        assert _current_set(event) == 3
 
     def test_set_from_scores_dict(self):
         event = {
@@ -95,46 +96,57 @@ class TestSetDetection:
         assert _current_set(event) == 2
 
 
+class TestSPWFromStats:
+    def test_extracts_from_stat_array(self):
+        stats = [
+            {"player_key": "100", "stat_name": "Service Points Won", "stat_won": "45", "stat_total": "70", "stat_period": "all"},
+            {"player_key": "200", "stat_name": "Service Points Won", "stat_won": "38", "stat_total": "65", "stat_period": "all"},
+        ]
+        spw_a, spw_b = _extract_spw_from_stats(stats, "100", "200")
+        assert abs(spw_a - 45 / 70) < 0.001
+        assert abs(spw_b - 38 / 65) < 0.001
+
+    def test_defaults_without_data(self):
+        assert _extract_spw_from_stats([], "1", "2") == (0.62, 0.62)
+
+    def test_needs_minimum_points(self):
+        stats = [
+            {"player_key": "100", "stat_name": "Service Points Won", "stat_won": "3", "stat_total": "5", "stat_period": "all"},
+        ]
+        spw_a, _ = _extract_spw_from_stats(stats, "100", "200")
+        assert spw_a == 0.62
+
+
 class TestSPWFromPBP:
-    def test_basic_extraction(self):
-        pbp = [{
-            "set_number": "Set 1",
-            "games": [
-                {
-                    "player_served": "First Player",
-                    "serve_winner": "First Player",
-                    "points": [
-                        {"score": "15 - 0"}, {"score": "30 - 0"},
-                        {"score": "40 - 0"}, {"score": "game"},
-                    ],
-                },
-                {
-                    "player_served": "Second Player",
-                    "serve_winner": "Second Player",
-                    "points": [
-                        {"score": "0 - 15"}, {"score": "0 - 30"},
-                        {"score": "0 - 40"}, {"score": "game"},
-                    ],
-                },
-            ] * 5,  # repeat to get >= 10 points per server
-        }]
+    def test_flat_game_list(self):
+        """pbp is a flat list of game dicts, not nested sets."""
+        pbp = [
+            {
+                "set_number": "Set 1", "number_game": "1",
+                "player_served": "First Player", "serve_winner": "First Player",
+                "points": [{"score": "15 - 0"}, {"score": "30 - 0"}, {"score": "40 - 0"}, {"score": "game"}],
+            },
+            {
+                "set_number": "Set 1", "number_game": "2",
+                "player_served": "Second Player", "serve_winner": "Second Player",
+                "points": [{"score": "0 - 15"}, {"score": "0 - 30"}, {"score": "0 - 40"}, {"score": "game"}],
+            },
+        ] * 5  # repeat for >= 10 points per server
         spw_first, spw_second = _extract_spw_from_pbp(pbp)
         assert spw_first > 0.5
         assert spw_second > 0.5
 
     def test_defaults_without_data(self):
-        spw_h, spw_a = _extract_spw_from_pbp([])
-        assert spw_h == 0.62
-        assert spw_a == 0.62
+        assert _extract_spw_from_pbp([]) == (0.62, 0.62)
 
     def test_handles_none(self):
-        spw_h, spw_a = _extract_spw_from_pbp(None)
-        assert spw_h == 0.62
+        assert _extract_spw_from_pbp(None) == (0.62, 0.62)
 
 
 class TestSurfaceDetection:
     def test_wimbledon_is_grass(self):
         assert _detect_surface({"league_name": "ATP - Wimbledon"}) == "grass"
+        assert _detect_surface({"tournament_name": "Wimbledon"}) == "grass"
 
     def test_roland_garros_is_clay(self):
         assert _detect_surface({"league_name": "ATP - Roland Garros"}) == "clay"

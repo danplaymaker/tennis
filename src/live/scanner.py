@@ -74,7 +74,14 @@ class LiveScanner:
         home = _player_name(event, "first")
         away = _player_name(event, "second")
 
-        spw_home, spw_away = _extract_spw_from_pbp(event.get("pointbypoint", []))
+        first_key = str(event.get("first_player_key", ""))
+        second_key = str(event.get("second_player_key", ""))
+
+        spw_home, spw_away = _extract_spw_from_stats(
+            event.get("statistics", []), first_key, second_key
+        )
+        if spw_home == 0.62 and spw_away == 0.62:
+            spw_home, spw_away = _extract_spw_from_pbp(event.get("pointbypoint", []))
 
         return MatchState(
             match_id=str(event.get("event_key", "")),
@@ -98,26 +105,20 @@ class LiveScanner:
         if not isinstance(pbp, list):
             return
 
-        game_counter = 0
-        for set_data in pbp:
-            if not isinstance(set_data, dict):
+        # pbp is a flat list of game dicts, each with set_number, number_game, etc.
+        for i, game_data in enumerate(pbp):
+            if not isinstance(game_data, dict):
                 continue
-            games = set_data.get("games", [])
-            if not isinstance(games, list):
-                games = []
-            for game_data in games:
-                if not isinstance(game_data, dict):
-                    continue
-                game_counter += 1
-                if game_counter <= state.total_games:
-                    continue
-                if not _game_is_complete(game_data):
-                    continue
+            game_num = i + 1
+            if game_num <= state.total_games:
+                continue
+            if not _game_is_complete(game_data):
+                continue
 
-                served = str(game_data.get("player_served", "")).lower()
-                server = "A" if "first" in served else "B"
-                was_deuce = _game_had_deuce(game_data)
-                state.record_game(server, was_deuce)
+            served = str(game_data.get("player_served", "")).lower()
+            server = "A" if "first" in served else "B"
+            was_deuce = _game_had_deuce(game_data)
+            state.record_game(server, was_deuce)
 
     def _evaluate(self, state: MatchState) -> None:
         if state.current_set < self.cfg.scanner.min_set:
@@ -240,12 +241,47 @@ def _current_set(event: dict[str, Any]) -> int:
     return 1
 
 
-def _extract_spw_from_pbp(pbp: Any) -> tuple[float, float]:
-    """Derive serve-point-won rates from point-by-point data.
+def _extract_spw_from_stats(
+    statistics: Any, first_key: str, second_key: str
+) -> tuple[float, float]:
+    """Derive SPW from api-tennis statistics array.
 
-    Counts points won on serve for each player across all completed games.
-    Falls back to defaults if insufficient data.
+    Each stat is: {player_key, stat_name, stat_value, stat_won, stat_total, stat_period, stat_type}
+    We look for "Service Points Won" or compute from 1st/2nd serve won.
     """
+    if not isinstance(statistics, list) or not statistics:
+        return 0.62, 0.62
+
+    first_won = first_total = 0
+    second_won = second_total = 0
+
+    for stat in statistics:
+        if not isinstance(stat, dict):
+            continue
+        name = str(stat.get("stat_name", "")).lower()
+        pkey = str(stat.get("player_key", ""))
+        period = str(stat.get("stat_period", "")).lower()
+
+        if period not in ("", "all", "match", "total"):
+            continue
+
+        won = _safe_int(stat.get("stat_won", stat.get("stat_value", 0)))
+        total = _safe_int(stat.get("stat_total", 0))
+
+        if "service points won" in name or "serve points won" in name:
+            if pkey == first_key:
+                first_won, first_total = won, total
+            elif pkey == second_key:
+                second_won, second_total = won, total
+
+    spw_first = first_won / first_total if first_total >= 10 else 0.62
+    spw_second = second_won / second_total if second_total >= 10 else 0.62
+
+    return spw_first, spw_second
+
+
+def _extract_spw_from_pbp(pbp: Any) -> tuple[float, float]:
+    """Derive SPW from point-by-point data (flat list of game dicts)."""
     if not isinstance(pbp, list) or not pbp:
         return 0.62, 0.62
 
@@ -254,37 +290,26 @@ def _extract_spw_from_pbp(pbp: Any) -> tuple[float, float]:
     second_serve_pts = 0
     second_serve_won = 0
 
-    for set_data in pbp:
-        if not isinstance(set_data, dict):
+    for game in pbp:
+        if not isinstance(game, dict):
             continue
-        games = set_data.get("games", [])
-        if not isinstance(games, list):
+        if not _game_is_complete(game):
             continue
-        for game in games:
-            if not isinstance(game, dict):
-                continue
-            if not _game_is_complete(game):
-                continue
 
-            served = str(game.get("player_served", "")).lower()
-            is_first = "first" in served
-            winner = str(game.get("serve_winner", "") or "").lower()
-            held = bool(winner)
+        served = str(game.get("player_served", "")).lower()
+        is_first = "first" in served
 
-            points = game.get("points", [])
-            if not isinstance(points, list):
-                continue
+        points = game.get("points", [])
+        if not isinstance(points, list) or not points:
+            continue
 
-            n_points = len(points)
-            if n_points == 0:
-                continue
-
-            if is_first:
-                first_serve_pts += n_points
-                first_serve_won += _count_server_points_won(points, is_first_server=True)
-            else:
-                second_serve_pts += n_points
-                second_serve_won += _count_server_points_won(points, is_first_server=False)
+        n_points = len(points)
+        if is_first:
+            first_serve_pts += n_points
+            first_serve_won += _count_server_points_won(points, is_first_server=True)
+        else:
+            second_serve_pts += n_points
+            second_serve_won += _count_server_points_won(points, is_first_server=False)
 
     spw_first = first_serve_won / first_serve_pts if first_serve_pts >= 10 else 0.62
     spw_second = second_serve_won / second_serve_pts if second_serve_pts >= 10 else 0.62
@@ -293,7 +318,7 @@ def _extract_spw_from_pbp(pbp: Any) -> tuple[float, float]:
 
 
 def _count_server_points_won(points: list, is_first_server: bool) -> int:
-    """Count how many points the server won by tracking score progression."""
+    """Count server points won by tracking score progression."""
     won = 0
     prev_server_score = 0
     score_map = {"0": 0, "15": 1, "30": 2, "40": 3, "ad": 4, "game": 99}
@@ -324,13 +349,11 @@ def _count_server_points_won(points: list, is_first_server: bool) -> int:
     return won
 
 
-def _parse_pct(val: str) -> float:
-    val = val.strip().rstrip("%")
+def _safe_int(val: Any) -> int:
     try:
-        v = float(val)
-        return v / 100 if v > 1 else v
+        return int(val)
     except (TypeError, ValueError):
-        return 0.0
+        return 0
 
 
 def _detect_surface(event: dict[str, Any]) -> str:
