@@ -54,8 +54,7 @@ class LiveScanner:
 
     async def _fetch_live_events(self, client: httpx.AsyncClient) -> list[dict[str, Any]]:
         params: dict[str, str] = {
-            "method": "get_events",
-            "event_type": "live",
+            "method": "get_livescore",
             "APIkey": self.cfg.api.api_key,
         }
         resp = await client.get(self.cfg.api.base_url, params=params)
