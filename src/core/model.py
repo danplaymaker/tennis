@@ -76,6 +76,7 @@ class MatchState:
     match_total_staked: float = 0.0
     match_net_pnl: float = 0.0
     _seen_game_keys: set = field(default_factory=set)
+    _last_enriched: float = 0.0
 
     @property
     def empirical_d_a(self) -> float | None:

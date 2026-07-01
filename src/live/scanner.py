@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 from typing import Any
 
 import httpx
@@ -55,6 +56,7 @@ class LiveScanner:
 
     async def _poll(self, client: httpx.AsyncClient) -> None:
         events = await self.provider.fetch_events(client)
+        needs_enrich = hasattr(self.provider, "enrich_event")
         for event in events:
             match_id = str(event.get("event_key", ""))
             if not match_id:
@@ -65,6 +67,14 @@ class LiveScanner:
                 self.matches[match_id] = state
                 log.info("Tracking: %s vs %s [%s]", state.player_a, state.player_b, match_id)
                 print("\a", end="", flush=True)
+            enrich_interval = 60
+            if (needs_enrich and not event.get("pointbypoint")
+                    and time.monotonic() - state._last_enriched > enrich_interval):
+                try:
+                    await self.provider.enrich_event(client, event)
+                    state._last_enriched = time.monotonic()
+                except Exception:
+                    log.debug("Enrich failed for %s", match_id)
             self._update_state(state, event)
             self._evaluate(state)
         self._prune_finished(events)
