@@ -28,6 +28,11 @@ def main() -> None:
         "--api-key", type=str, default=None, help="API key for tennis data provider"
     )
     parser.add_argument(
+        "--provider", type=str, default=None,
+        choices=["api-tennis", "sofascore"],
+        help="Data provider (default: api-tennis)"
+    )
+    parser.add_argument(
         "--dashboard", action="store_true", help="Show live dashboard table"
     )
     parser.add_argument(
@@ -49,8 +54,10 @@ def main() -> None:
         config.scanner.margin = args.margin
     if args.api_key:
         config.api.api_key = args.api_key
+    if args.provider:
+        config.api.provider = args.provider
 
-    if not config.api.api_key:
+    if config.api.provider != "sofascore" and not config.api.api_key:
         logging.error("No API key set. Use --api-key, config file, or TENNIS_API_KEY env var.")
         sys.exit(1)
 

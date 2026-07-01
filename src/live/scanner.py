@@ -1,4 +1,4 @@
-"""Live match scanner — polls api-tennis.com, maintains per-match state, triggers alerts."""
+"""Live match scanner — polls live data providers, maintains per-match state, triggers alerts."""
 
 from __future__ import annotations
 
@@ -12,21 +12,36 @@ from ..alerts.dispatcher import AlertDispatcher
 from ..core.config import Config
 from ..core.math import compute_ev, d_threshold_no, d_threshold_yes, kelly_stake
 from ..core.model import MatchState, PendingBet, PlayerPrior
+from .providers.base import LiveProvider
 
 log = logging.getLogger(__name__)
 
 
+def create_provider(config: Config) -> LiveProvider:
+    """Factory: create the right provider from config."""
+    provider = config.api.provider.lower()
+    if provider == "sofascore":
+        from .providers.sofascore import SofaScoreProvider
+        return SofaScoreProvider()
+    else:
+        from .providers.api_tennis import ApiTennisProvider
+        return ApiTennisProvider(config.api.base_url, config.api.api_key)
+
+
 class LiveScanner:
-    def __init__(self, config: Config, dispatcher: AlertDispatcher) -> None:
+    def __init__(self, config: Config, dispatcher: AlertDispatcher,
+                 provider: LiveProvider | None = None) -> None:
         self.cfg = config
         self.dispatcher = dispatcher
+        self.provider = provider or create_provider(config)
         self.matches: dict[str, MatchState] = {}
         self.alert_match_ids: set[str] = set()
         self._running = False
 
     async def run(self) -> None:
         self._running = True
-        log.info("Live scanner started (poll every %ds)", self.cfg.api.poll_interval_seconds)
+        log.info("Live scanner started (provider=%s, poll every %ds)",
+                 type(self.provider).__name__, self.cfg.api.poll_interval_seconds)
         async with httpx.AsyncClient(timeout=15) as client:
             while self._running:
                 try:
@@ -39,7 +54,7 @@ class LiveScanner:
         self._running = False
 
     async def _poll(self, client: httpx.AsyncClient) -> None:
-        events = await self._fetch_live_events(client)
+        events = await self.provider.fetch_events(client)
         for event in events:
             match_id = str(event.get("event_key", ""))
             if not match_id:
@@ -53,24 +68,6 @@ class LiveScanner:
             self._update_state(state, event)
             self._evaluate(state)
         self._prune_finished(events)
-
-    async def _fetch_live_events(self, client: httpx.AsyncClient) -> list[dict[str, Any]]:
-        params: dict[str, str] = {
-            "method": "get_livescore",
-            "APIkey": self.cfg.api.api_key,
-        }
-        resp = await client.get(self.cfg.api.base_url, params=params)
-        resp.raise_for_status()
-        data = resp.json()
-        if data.get("success") != 1:
-            log.warning("API returned success=%s", data.get("success"))
-            return []
-        result = data.get("result", [])
-        if isinstance(result, list):
-            log.debug("API returned %d live events", len(result))
-            return result
-        log.debug("API result is not a list: %s", type(result).__name__)
-        return []
 
     def _init_match(self, event: dict[str, Any]) -> MatchState:
         home = _player_name(event, "first")
