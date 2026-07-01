@@ -4,7 +4,7 @@ scanner:
   min_games_for_alert: 8
   alert_cooldown_seconds: 300
   default_odds_yes: 1.6667  # 4/6 decimal
-  default_odds_no: 2.5      # 6/4 decimal
+  default_odds_no: 1.6667   # 4/6 decimal (both sides ~4/6 with overround)
 
 api:
   provider: "api-tennis"
