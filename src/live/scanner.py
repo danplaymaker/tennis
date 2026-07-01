@@ -70,10 +70,10 @@ class LiveScanner:
         return []
 
     def _init_match(self, event: dict[str, Any]) -> MatchState:
-        home = event.get("event_home_team", "Player A")
-        away = event.get("event_away_team", "Player B")
+        home = _player_name(event, "first")
+        away = _player_name(event, "second")
 
-        spw_home, spw_away = _extract_spw(event.get("statistics", []))
+        spw_home, spw_away = _extract_spw_from_pbp(event.get("pointbypoint", []))
 
         return MatchState(
             match_id=str(event.get("event_key", "")),
@@ -87,17 +87,11 @@ class LiveScanner:
     def _update_state(self, state: MatchState, event: dict[str, Any]) -> None:
         state.current_set = _current_set(event)
 
-        service = event.get("event_service", "")
-        if service == "home":
+        service = event.get("event_serve", "")
+        if "first" in str(service).lower():
             state.next_server = "A"
-        elif service == "away":
+        elif "second" in str(service).lower():
             state.next_server = "B"
-
-        spw_home, spw_away = _extract_spw(event.get("statistics", []))
-        if spw_home != 0.62:
-            state.prior_a = PlayerPrior(spw=spw_home, rpw=1 - spw_away)
-        if spw_away != 0.62:
-            state.prior_b = PlayerPrior(spw=spw_away, rpw=1 - spw_home)
 
         pbp = event.get("pointbypoint", [])
         if not isinstance(pbp, list):
@@ -109,15 +103,18 @@ class LiveScanner:
                 continue
             games = set_data.get("games", [])
             if not isinstance(games, list):
-                continue
+                games = []
             for game_data in games:
+                if not isinstance(game_data, dict):
+                    continue
                 game_counter += 1
                 if game_counter <= state.total_games:
                     continue
                 if not _game_is_complete(game_data):
                     continue
 
-                server = "A" if game_data.get("serve") == "home" else "B"
+                served = str(game_data.get("player_served", "")).lower()
+                server = "A" if "first" in served else "B"
                 was_deuce = _game_had_deuce(game_data)
                 state.record_game(server, was_deuce)
 
@@ -186,22 +183,41 @@ class LiveScanner:
             del self.matches[mid]
 
 
+def _player_name(event: dict[str, Any], which: str) -> str:
+    """Extract player name, trying both naming conventions."""
+    return (
+        event.get(f"event_{which}_player")
+        or event.get(f"event_{'home' if which == 'first' else 'away'}_team")
+        or f"Player {'A' if which == 'first' else 'B'}"
+    )
+
+
 def _game_had_deuce(game_data: dict[str, Any]) -> bool:
+    """Check if a completed game reached deuce (40-40)."""
     points = game_data.get("points", [])
     if isinstance(points, list):
-        return any("40-40" in str(p) for p in points)
+        for p in points:
+            score = str(p.get("score", "") if isinstance(p, dict) else p)
+            if "40 - 40" in score or "40-40" in score or "deuce" in score.lower():
+                return True
     if isinstance(points, str):
-        return "40-40" in points
+        return "40 - 40" in points or "40-40" in points
     return False
 
 
 def _game_is_complete(game_data: dict[str, Any]) -> bool:
+    """A game is complete if it has a serve_winner or result."""
+    if game_data.get("serve_winner"):
+        return True
+    if game_data.get("serve_lost"):
+        return True
     if game_data.get("result"):
         return True
     points = game_data.get("points", [])
     if isinstance(points, list) and points:
-        last = str(points[-1]).lower()
-        return "game" in last or last == ""
+        last = points[-1]
+        last_str = str(last.get("score", "") if isinstance(last, dict) else last).lower()
+        return "game" in last_str
     return False
 
 
@@ -214,50 +230,97 @@ def _current_set(event: dict[str, Any]) -> int:
             except ValueError:
                 continue
 
-    scores = event.get("scores", {})
+    scores = event.get("scores", [])
+    if isinstance(scores, list):
+        return len(scores) + (1 if event.get("event_live") == "1" else 0)
     if isinstance(scores, dict):
         set_keys = [k for k in scores if k != "game"]
         return len(set_keys)
     return 1
 
 
-def _extract_spw(statistics: Any) -> tuple[float, float]:
-    """Derive serve-point-won rate from api-tennis statistics array."""
-    if not isinstance(statistics, list):
+def _extract_spw_from_pbp(pbp: Any) -> tuple[float, float]:
+    """Derive serve-point-won rates from point-by-point data.
+
+    Counts points won on serve for each player across all completed games.
+    Falls back to defaults if insufficient data.
+    """
+    if not isinstance(pbp, list) or not pbp:
         return 0.62, 0.62
 
-    first_pct_h = first_pct_a = 0.0
-    first_won_h = first_won_a = 0.0
-    second_won_h = second_won_a = 0.0
+    first_serve_pts = 0
+    first_serve_won = 0
+    second_serve_pts = 0
+    second_serve_won = 0
 
-    for stat in statistics:
-        if not isinstance(stat, dict):
+    for set_data in pbp:
+        if not isinstance(set_data, dict):
             continue
-        stype = str(stat.get("type", "")).lower()
-        home = str(stat.get("home", "0"))
-        away = str(stat.get("away", "0"))
+        games = set_data.get("games", [])
+        if not isinstance(games, list):
+            continue
+        for game in games:
+            if not isinstance(game, dict):
+                continue
+            if not _game_is_complete(game):
+                continue
 
-        if "1st serve %" in stype and "won" not in stype:
-            first_pct_h = _parse_pct(home)
-            first_pct_a = _parse_pct(away)
-        elif "1st serve won" in stype:
-            first_won_h = _parse_pct(home)
-            first_won_a = _parse_pct(away)
-        elif "2nd serve won" in stype:
-            second_won_h = _parse_pct(home)
-            second_won_a = _parse_pct(away)
+            served = str(game.get("player_served", "")).lower()
+            is_first = "first" in served
+            winner = str(game.get("serve_winner", "") or "").lower()
+            held = bool(winner)
 
-    if first_pct_h > 0 and first_won_h > 0:
-        spw_h = first_pct_h * first_won_h + (1 - first_pct_h) * second_won_h
-    else:
-        spw_h = 0.62
+            points = game.get("points", [])
+            if not isinstance(points, list):
+                continue
 
-    if first_pct_a > 0 and first_won_a > 0:
-        spw_a = first_pct_a * first_won_a + (1 - first_pct_a) * second_won_a
-    else:
-        spw_a = 0.62
+            n_points = len(points)
+            if n_points == 0:
+                continue
 
-    return spw_h, spw_a
+            if is_first:
+                first_serve_pts += n_points
+                first_serve_won += _count_server_points_won(points, is_first_server=True)
+            else:
+                second_serve_pts += n_points
+                second_serve_won += _count_server_points_won(points, is_first_server=False)
+
+    spw_first = first_serve_won / first_serve_pts if first_serve_pts >= 10 else 0.62
+    spw_second = second_serve_won / second_serve_pts if second_serve_pts >= 10 else 0.62
+
+    return spw_first, spw_second
+
+
+def _count_server_points_won(points: list, is_first_server: bool) -> int:
+    """Count how many points the server won by tracking score progression."""
+    won = 0
+    prev_server_score = 0
+    score_map = {"0": 0, "15": 1, "30": 2, "40": 3, "ad": 4, "game": 99}
+
+    for p in points:
+        score_str = str(p.get("score", "") if isinstance(p, dict) else p).lower().strip()
+
+        if "game" in score_str:
+            won += 1
+            continue
+
+        parts = score_str.replace(" - ", "-").split("-")
+        if len(parts) != 2:
+            continue
+
+        left = parts[0].strip()
+        right = parts[1].strip()
+
+        if is_first_server:
+            cur = score_map.get(left, -1)
+        else:
+            cur = score_map.get(right, -1)
+
+        if cur > prev_server_score:
+            won += 1
+        prev_server_score = max(cur, 0)
+
+    return won
 
 
 def _parse_pct(val: str) -> float:
@@ -270,9 +333,10 @@ def _parse_pct(val: str) -> float:
 
 
 def _detect_surface(event: dict[str, Any]) -> str:
-    league = str(event.get("league_name", "")).lower()
-    if "wimbledon" in league or "halle" in league or "queen" in league or "s-hertogenbosch" in league:
-        return "grass"
-    if "roland garros" in league or "rome" in league or "madrid" in league or "barcelona" in league or "monte carlo" in league:
-        return "clay"
+    for field in ("league_name", "tournament_name"):
+        name = str(event.get(field, "")).lower()
+        if any(t in name for t in ("wimbledon", "halle", "queen", "s-hertogenbosch", "mallorca", "eastbourne", "stuttgart grass")):
+            return "grass"
+        if any(t in name for t in ("roland garros", "rome", "madrid", "barcelona", "monte carlo", "buenos aires", "rio", "hamburg", "lyon")):
+            return "clay"
     return "hard"
