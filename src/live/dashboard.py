@@ -39,6 +39,7 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
     else:
         for state in sorted(scanner.matches.values(), key=lambda s: s.match_id):
             est = state.estimate_deuce_rates()
+            is_new = state.match_id in scanner.new_match_ids
 
             if state.next_server == "A":
                 d_next, d_after = est.d_a, est.d_b
@@ -67,8 +68,12 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
             ev_yes_str = f"{result.ev_yes:+.1%}"
             ev_no_str = f"{result.ev_no:+.1%}"
 
+            match_label = f"{state.player_a} vs {state.player_b}"
+            if is_new:
+                match_label = f"[bold yellow]* {match_label}[/bold yellow]"
+
             table.add_row(
-                f"{state.player_a} vs {state.player_b}",
+                match_label,
                 str(state.current_set),
                 f"{state.total_games} ({est.games_a}A/{est.games_b}B)",
                 serving,
@@ -79,6 +84,8 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
                 f"[green]{ev_no_str}[/green]" if result.ev_no > 0 else ev_no_str,
                 f"[{signal_style}]{signal}[/{signal_style}]" if signal_style else signal,
             )
+
+        scanner.new_match_ids.clear()
 
     console.print(table)
     console.print(

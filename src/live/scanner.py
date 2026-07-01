@@ -21,6 +21,7 @@ class LiveScanner:
         self.cfg = config
         self.dispatcher = dispatcher
         self.matches: dict[str, MatchState] = {}
+        self.new_match_ids: set[str] = set()
         self._running = False
 
     async def run(self) -> None:
@@ -47,6 +48,7 @@ class LiveScanner:
             if state is None:
                 state = self._init_match(event)
                 self.matches[match_id] = state
+                self.new_match_ids.add(match_id)
                 log.info("Tracking: %s vs %s [%s]", state.player_a, state.player_b, match_id)
                 print("\a", end="", flush=True)
             self._update_state(state, event)
