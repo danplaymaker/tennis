@@ -30,6 +30,7 @@ class APIConfig:
     provider: str = "api-tennis"
     base_url: str = "https://api.api-tennis.com/tennis/"
     api_key: str = ""
+    rapidapi_key: str = ""
     poll_interval_seconds: int = 5
 
 
@@ -81,10 +82,12 @@ def load_config(path: str | Path | None = None) -> Config:
 
     if a := raw.get("api"):
         key = a.get("api_key") or os.environ.get("TENNIS_API_KEY", "")
+        rapid_key = a.get("rapidapi_key") or os.environ.get("RAPIDAPI_KEY", "")
         cfg.api = APIConfig(
             provider=a.get("provider", "api-tennis"),
             base_url=a.get("base_url", cfg.api.base_url),
             api_key=key,
+            rapidapi_key=rapid_key,
             poll_interval_seconds=a.get("poll_interval_seconds", 5),
         )
 

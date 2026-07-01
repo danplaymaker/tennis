@@ -24,6 +24,9 @@ def create_provider(config: Config) -> LiveProvider:
     if provider == "sofascore":
         from .providers.sofascore import SofaScoreProvider
         return SofaScoreProvider()
+    elif provider == "flashlive":
+        from .providers.flashlive import FlashLiveProvider
+        return FlashLiveProvider(config.api.rapidapi_key)
     else:
         from .providers.api_tennis import ApiTennisProvider
         return ApiTennisProvider(config.api.base_url, config.api.api_key)
