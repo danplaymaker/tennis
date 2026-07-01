@@ -1,0 +1,26 @@
+[project]
+name = "tennis-deuce-scanner"
+version = "0.1.0"
+description = "Tennis deuce-in-next-two-games live scanner and alerter"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.27",
+    "websockets>=13.0",
+    "python-telegram-bot>=21.0",
+    "pyyaml>=6.0",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+backtest = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[project.scripts]
+deuce-scanner = "src.cli:main"
+deuce-backtest = "src.backtest.runner:main"

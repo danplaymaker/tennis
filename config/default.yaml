@@ -1,0 +1,26 @@
+scanner:
+  margin: 0.10
+  min_set: 2
+  min_games_for_alert: 8
+  alert_cooldown_seconds: 300
+  default_odds_yes: 1.6667  # 4/6 decimal
+  default_odds_no: 2.5      # 6/4 decimal
+
+api:
+  provider: "api-tennis"
+  base_url: "https://api.api-tennis.com/tennis/"
+  api_key: ""
+  poll_interval_seconds: 5
+
+alerts:
+  telegram:
+    enabled: false
+    bot_token: ""
+    chat_id: ""
+  console:
+    enabled: true
+
+staking:
+  kelly_fraction: 0.25
+  max_stake_units: 3.0
+  bankroll: 1000.0

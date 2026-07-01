@@ -1,0 +1,97 @@
+"""Configuration loader."""
+
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+
+import yaml
+
+
+@dataclass
+class ScannerConfig:
+    margin: float = 0.10
+    min_set: int = 2
+    min_games_for_alert: int = 8
+    alert_cooldown_seconds: int = 300
+    default_odds_yes: float = 1.6667
+    default_odds_no: float = 2.5
+
+
+@dataclass
+class APIConfig:
+    provider: str = "api-tennis"
+    base_url: str = "https://api.api-tennis.com/tennis/"
+    api_key: str = ""
+    poll_interval_seconds: int = 5
+
+
+@dataclass
+class TelegramConfig:
+    enabled: bool = False
+    bot_token: str = ""
+    chat_id: str = ""
+
+
+@dataclass
+class AlertConfig:
+    telegram: TelegramConfig = field(default_factory=TelegramConfig)
+    console_enabled: bool = True
+
+
+@dataclass
+class StakingConfig:
+    kelly_fraction: float = 0.25
+    max_stake_units: float = 3.0
+    bankroll: float = 1000.0
+
+
+@dataclass
+class Config:
+    scanner: ScannerConfig = field(default_factory=ScannerConfig)
+    api: APIConfig = field(default_factory=APIConfig)
+    alerts: AlertConfig = field(default_factory=AlertConfig)
+    staking: StakingConfig = field(default_factory=StakingConfig)
+
+
+def load_config(path: str | Path | None = None) -> Config:
+    if path is None:
+        path = Path(__file__).parent.parent.parent / "config" / "default.yaml"
+    path = Path(path)
+
+    if not path.exists():
+        return Config()
+
+    with open(path) as f:
+        raw = yaml.safe_load(f) or {}
+
+    cfg = Config()
+
+    if s := raw.get("scanner"):
+        cfg.scanner = ScannerConfig(**{k: v for k, v in s.items() if v is not None})
+
+    if a := raw.get("api"):
+        key = a.get("api_key") or os.environ.get("TENNIS_API_KEY", "")
+        cfg.api = APIConfig(
+            provider=a.get("provider", "api-tennis"),
+            base_url=a.get("base_url", cfg.api.base_url),
+            api_key=key,
+            poll_interval_seconds=a.get("poll_interval_seconds", 5),
+        )
+
+    if al := raw.get("alerts"):
+        tg = al.get("telegram", {})
+        cfg.alerts = AlertConfig(
+            telegram=TelegramConfig(
+                enabled=tg.get("enabled", False),
+                bot_token=tg.get("bot_token") or os.environ.get("TELEGRAM_BOT_TOKEN", ""),
+                chat_id=tg.get("chat_id") or os.environ.get("TELEGRAM_CHAT_ID", ""),
+            ),
+            console_enabled=al.get("console", {}).get("enabled", True),
+        )
+
+    if st := raw.get("staking"):
+        cfg.staking = StakingConfig(**{k: v for k, v in st.items() if v is not None})
+
+    return cfg
