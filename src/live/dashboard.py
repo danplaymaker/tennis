@@ -23,6 +23,7 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
     table.add_column("Match", style="white", min_width=30)
     table.add_column("Set", justify="center")
     table.add_column("Games", justify="center")
+    table.add_column("Deuces", justify="center")
     table.add_column("Serving", justify="center")
     table.add_column("W(L10)", justify="right")
     table.add_column("W(S6)", justify="right")
@@ -94,10 +95,14 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
             if has_alert:
                 match_label = f"[bold yellow]* {match_label}[/bold yellow]"
 
+            total_deuces = state.deuces_a + state.deuces_b
+            deuce_str = f"{total_deuces}/{state.total_games}"
+
             table.add_row(
                 match_label,
                 str(state.current_set),
                 f"{state.total_games} ({est.games_a}A/{est.games_b}B)",
+                deuce_str,
                 serving,
                 long_str,
                 short_str,

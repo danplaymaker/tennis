@@ -110,6 +110,16 @@ class LiveScanner:
             served = str(game_data.get("player_served", "")).lower()
             server = "A" if "first" in served else "B"
             was_deuce = _game_had_deuce(game_data)
+
+            points = game_data.get("points", [])
+            score_summary = ""
+            if isinstance(points, list):
+                scores = [str(p.get("score", "") if isinstance(p, dict) else p) for p in points[-6:]]
+                score_summary = " | ".join(scores)
+            result_str = game_data.get("result", game_data.get("serve_winner", ""))
+            log.info("Game %s: server=%s deuce=%s tb=%s result=%s scores=[%s]",
+                     game_key, server, was_deuce, is_tb, result_str, score_summary)
+
             state.record_game(server, was_deuce, is_tiebreak=is_tb)
 
     def _evaluate(self, state: MatchState) -> None:
@@ -314,14 +324,23 @@ def _player_name(event: dict[str, Any], which: str) -> str:
 
 def _game_had_deuce(game_data: dict[str, Any]) -> bool:
     """Check if a completed game reached deuce (40-40)."""
+    result = str(game_data.get("result", "")).lower()
+    if "deuce" in result or "40-40" in result or "40 - 40" in result:
+        return True
+
     points = game_data.get("points", [])
     if isinstance(points, list):
         for p in points:
             score = str(p.get("score", "") if isinstance(p, dict) else p)
-            if "40 - 40" in score or "40-40" in score or "deuce" in score.lower():
+            normalized = score.replace(" ", "").lower()
+            if "40-40" in normalized or "40:40" in normalized or "deuce" in normalized:
+                return True
+            if "ad" in normalized or "advantage" in normalized:
                 return True
     if isinstance(points, str):
-        return "40 - 40" in points or "40-40" in points
+        normalized = points.replace(" ", "").lower()
+        if "40-40" in normalized or "40:40" in normalized or "deuce" in normalized or "ad" in normalized:
+            return True
     return False
 
 
