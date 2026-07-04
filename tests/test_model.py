@@ -55,6 +55,25 @@ class TestMatchState:
         est = state.estimate_deuce_rates()
         assert est.d_match == (est.d_a * 4 + est.d_b * 6) / 10
 
+    def test_d_floor_ceil(self):
+        state = MatchState(prior_a=PlayerPrior(spw=0.65, rpw=0.35))
+        for _ in range(20):
+            state.record_game("A", was_deuce=False)
+        est = state.estimate_deuce_rates(d_floor=0.08, d_ceil=0.42)
+        assert est.d_a >= 0.08
+
+    def test_cumulative_deuce_rate(self):
+        state = MatchState()
+        for _ in range(3):
+            state.record_game("A", True)
+        for _ in range(7):
+            state.record_game("B", False)
+        assert abs(state.cumulative_deuce_rate - 0.3) < 0.001
+
+    def test_cumulative_deuce_rate_none_when_empty(self):
+        state = MatchState()
+        assert state.cumulative_deuce_rate is None
+
 
 class TestGameHistory:
     def test_record_game_appends_history(self):

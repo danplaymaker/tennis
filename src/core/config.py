@@ -12,7 +12,6 @@ import yaml
 @dataclass
 class ScannerConfig:
     margin: float = 0.10
-    min_set: int = 2
     min_games_for_alert: int = 8
     alert_cooldown_seconds: int = 300
     default_odds_yes: float = 1.6667
@@ -23,6 +22,15 @@ class ScannerConfig:
     exit_margin: float = 0.00
     loss_streak_halt: int = 3
     loss_taper: float = 0.5
+    # v2: two-phase selection thresholds
+    set1_min_games: int = 8
+    no_set1_max: float = 0.00
+    yes_set1_min: float = 0.50
+    no_post_max: float = 0.10
+    yes_post_min: float = 0.40
+    d_floor: float = 0.08
+    d_ceil: float = 0.42
+    set1_stake_factor: float = 0.5
 
 
 @dataclass

@@ -1,16 +1,24 @@
 scanner:
   margin: 0.10
-  min_set: 2
   min_games_for_alert: 8
   alert_cooldown_seconds: 300
   default_odds_yes: 1.6667  # 4/6 decimal
-  default_odds_no: 1.6667   # 4/6 decimal (both sides ~4/6 with overround)
+  default_odds_no: 1.6667   # 4/6 decimal
   win_long: 10
   win_short: 6
   enter_margin: 0.10
   exit_margin: 0.00
   loss_streak_halt: 3
   loss_taper: 0.5
+  # v2: two-phase selection
+  set1_min_games: 8
+  no_set1_max: 0.00      # cumulative, set 1 — any deuce disqualifies NO
+  yes_set1_min: 0.50     # cumulative, set 1
+  no_post_max: 0.10      # windowed, set 2+
+  yes_post_min: 0.40     # windowed, set 2+
+  d_floor: 0.08
+  d_ceil: 0.42
+  set1_stake_factor: 0.5
 
 api:
   provider: "api-tennis"

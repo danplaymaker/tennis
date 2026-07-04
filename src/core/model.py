@@ -89,6 +89,12 @@ class MatchState:
             return None
         return self.deuces_b / self.games_b_served
 
+    @property
+    def cumulative_deuce_rate(self) -> float | None:
+        if self.total_games == 0:
+            return None
+        return (self.deuces_a + self.deuces_b) / self.total_games
+
     def windowed_deuce_rate(self, window: int) -> float | None:
         """Match-level deuce rate over last `window` non-tiebreak games."""
         non_tb = [g for g in self.game_history if not g.is_tiebreak]
@@ -97,7 +103,8 @@ class MatchState:
         recent = non_tb[-window:]
         return sum(1 for g in recent if g.was_deuce) / window
 
-    def estimate_deuce_rates(self, prior_weight: float = 6.0) -> DeuceEstimate:
+    def estimate_deuce_rates(self, prior_weight: float = 6.0,
+                             d_floor: float = 0.0, d_ceil: float = 1.0) -> DeuceEstimate:
         """Shrinkage estimator blending prior with in-match observations."""
         adj = SURFACE_SPW_ADJUSTMENT.get(self.surface, 0.0)
 
@@ -118,6 +125,9 @@ class MatchState:
 
         d_a = (prior_weight * prior_d_a + w_a * emp_a) / (prior_weight + w_a)
         d_b = (prior_weight * prior_d_b + w_b * emp_b) / (prior_weight + w_b)
+
+        d_a = min(max(d_a, d_floor), d_ceil)
+        d_b = min(max(d_b, d_floor), d_ceil)
 
         return DeuceEstimate(
             d_a=d_a, d_b=d_b, games_a=self.games_a_served, games_b=self.games_b_served

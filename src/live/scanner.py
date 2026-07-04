@@ -137,24 +137,34 @@ class LiveScanner:
                 log.info("Circuit breaker: %s halted for %s (streak=%d)",
                          bet.side, state.match_id, side_state.loss_streak)
 
-        if state.current_set < cfg.scanner.min_set:
-            return
+        is_set1 = state.current_set == 1
+        g = state.total_games
 
-        long_rate = state.windowed_deuce_rate(cfg.scanner.win_long)
-        short_rate = state.windowed_deuce_rate(cfg.scanner.win_short)
-        if long_rate is None or short_rate is None:
-            return
+        # Phase 1: determine selection side via two-phase gates
+        selection_side = None
+        if is_set1:
+            if g >= cfg.scanner.set1_min_games:
+                cum_rate = state.cumulative_deuce_rate
+                if cum_rate is not None:
+                    if cum_rate <= cfg.scanner.no_set1_max:
+                        selection_side = "NO"
+                    elif cum_rate >= cfg.scanner.yes_set1_min:
+                        selection_side = "YES"
+        else:
+            long_rate = state.windowed_deuce_rate(cfg.scanner.win_long)
+            short_rate = state.windowed_deuce_rate(cfg.scanner.win_short)
+            if long_rate is not None:
+                if long_rate <= cfg.scanner.no_post_max:
+                    if short_rate is None or short_rate <= cfg.scanner.no_post_max:
+                        selection_side = "NO"
+                if long_rate >= cfg.scanner.yes_post_min:
+                    if short_rate is None or short_rate >= cfg.scanner.yes_post_min:
+                        selection_side = "YES"
 
-        no_max = d_threshold_no(cfg.scanner.default_odds_no, cfg.scanner.enter_margin)
-        yes_min = d_threshold_yes(cfg.scanner.default_odds_yes, cfg.scanner.enter_margin)
-
-        window_side = None
-        if long_rate <= no_max and short_rate <= no_max:
-            window_side = "NO"
-        elif long_rate >= yes_min and short_rate >= yes_min:
-            window_side = "YES"
-
-        est = state.estimate_deuce_rates()
+        # Phase 2: compute EV using clamped shrinkage estimate
+        est = state.estimate_deuce_rates(
+            d_floor=cfg.scanner.d_floor, d_ceil=cfg.scanner.d_ceil,
+        )
         if state.next_server == "A":
             d_next, d_after = est.d_a, est.d_b
         else:
@@ -175,7 +185,7 @@ class LiveScanner:
                 side_state.hot = False
                 side_state.armed = True
 
-            if (window_side != check_side or
+            if (selection_side != check_side or
                     not side_state.armed or
                     side_state.halted or
                     ev < cfg.scanner.enter_margin):
@@ -196,6 +206,9 @@ class LiveScanner:
             stake = cfg.staking.kelly_fraction * full_kelly * taper * cfg.staking.bankroll
             stake = min(stake, cfg.staking.max_stake_units * cfg.staking.bankroll / 100)
 
+            if is_set1:
+                stake *= cfg.scanner.set1_stake_factor
+
             if stake < cfg.staking.min_stake:
                 continue
 
@@ -211,6 +224,8 @@ class LiveScanner:
 
             self.alert_match_ids.add(state.match_id)
 
+            long_r = state.windowed_deuce_rate(cfg.scanner.win_long)
+            short_r = state.windowed_deuce_rate(cfg.scanner.win_short)
             self.dispatcher.send(
                 match=f"{state.player_a} vs {state.player_b}",
                 match_id=state.match_id,
@@ -225,8 +240,8 @@ class LiveScanner:
                 stake=stake,
                 set_num=state.current_set,
                 total_games=state.total_games,
-                long_rate=long_rate,
-                short_rate=short_rate,
+                long_rate=long_r,
+                short_rate=short_r,
                 loss_streak=side_state.loss_streak,
             )
 
