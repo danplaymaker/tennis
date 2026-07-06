@@ -24,7 +24,7 @@ api:
   provider: "api-tennis"
   base_url: "https://api.api-tennis.com/tennis/"
   api_key: ""
-  poll_interval_seconds: 5
+  poll_interval_seconds: 20
 
 alerts:
   telegram:

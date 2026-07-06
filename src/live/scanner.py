@@ -10,7 +10,7 @@ import httpx
 
 from ..alerts.dispatcher import AlertDispatcher
 from ..core.config import Config
-from ..core.math import compute_ev, d_threshold_no, d_threshold_yes, kelly_stake
+from ..core.math import compute_ev
 from ..core.model import MatchState, PendingBet, PlayerPrior
 from .providers.base import LiveProvider
 
@@ -125,6 +125,7 @@ class LiveScanner:
     def _evaluate(self, state: MatchState) -> None:
         cfg = self.cfg
 
+        # --- Risk control: settle bets, update breaker ---
         settled = state.settle_pending_bets()
         for bet, won in settled:
             side_state = state.yes_state if bet.side == "YES" else state.no_state
@@ -137,31 +138,7 @@ class LiveScanner:
                 log.info("Circuit breaker: %s halted for %s (streak=%d)",
                          bet.side, state.match_id, side_state.loss_streak)
 
-        is_set1 = state.current_set == 1
-        g = state.total_games
-
-        # Phase 1: determine selection side via two-phase gates
-        selection_side = None
-        if is_set1:
-            if g >= cfg.scanner.set1_min_games:
-                cum_rate = state.cumulative_deuce_rate
-                if cum_rate is not None:
-                    if cum_rate <= cfg.scanner.no_set1_max:
-                        selection_side = "NO"
-                    elif cum_rate >= cfg.scanner.yes_set1_min:
-                        selection_side = "YES"
-        else:
-            long_rate = state.windowed_deuce_rate(cfg.scanner.win_long)
-            short_rate = state.windowed_deuce_rate(cfg.scanner.win_short)
-            if long_rate is not None:
-                if long_rate <= cfg.scanner.no_post_max:
-                    if short_rate is None or short_rate <= cfg.scanner.no_post_max:
-                        selection_side = "NO"
-                if long_rate >= cfg.scanner.yes_post_min:
-                    if short_rate is None or short_rate >= cfg.scanner.yes_post_min:
-                        selection_side = "YES"
-
-        # Phase 2: compute EV using clamped shrinkage estimate
+        # --- Estimation: shrunk, clamped d_est ---
         est = state.estimate_deuce_rates(
             d_floor=cfg.scanner.d_floor, d_ceil=cfg.scanner.d_ceil,
         )
@@ -177,25 +154,53 @@ class LiveScanner:
             0.0,
         )
 
+        is_set1 = state.current_set == 1
+
+        # --- Conviction filters (quality gate on raw observed rates) ---
+        conviction = {"YES": False, "NO": False}
+        if is_set1:
+            if state.total_games >= cfg.scanner.set1_min_games:
+                cum_rate = state.cumulative_deuce_rate
+                if cum_rate is not None:
+                    if cum_rate <= cfg.scanner.no_set1_max:
+                        conviction["NO"] = True
+                    if cum_rate >= cfg.scanner.yes_set1_min:
+                        conviction["YES"] = True
+        else:
+            long_rate = state.windowed_deuce_rate(cfg.scanner.win_long)
+            if long_rate is not None:
+                if long_rate <= cfg.scanner.no_post_max:
+                    conviction["NO"] = True
+                if long_rate >= cfg.scanner.yes_post_min:
+                    conviction["YES"] = True
+
+            # Short-window veto: 2+ deuces in last 6 games suspends NO
+            short_deuces = state.windowed_deuce_count(cfg.scanner.win_short)
+            if short_deuces is not None and short_deuces >= 2:
+                conviction["NO"] = False
+
         for check_side in ("YES", "NO"):
             side_state = state.yes_state if check_side == "YES" else state.no_state
             ev = result.ev_yes if check_side == "YES" else result.ev_no
 
+            # --- Risk control: hysteresis ---
             if side_state.hot and ev < cfg.scanner.exit_margin:
                 side_state.hot = False
                 side_state.armed = True
 
-            if (selection_side != check_side or
-                    not side_state.armed or
-                    side_state.halted or
-                    ev < cfg.scanner.enter_margin):
+            # --- Selection: EV is the primary trigger ---
+            if ev < cfg.scanner.enter_margin:
                 continue
-
+            if not conviction[check_side]:
+                continue
+            if not side_state.armed or side_state.halted:
+                continue
             if -state.match_net_pnl >= cfg.staking.match_loss_cap:
                 log.info("Match loss cap reached for %s (P&L=%.2f)",
                          state.match_id, state.match_net_pnl)
                 continue
 
+            # --- Staking: Kelly + taper + set-1 reduction ---
             odds = cfg.scanner.default_odds_yes if check_side == "YES" else cfg.scanner.default_odds_no
             b = odds - 1.0
             if b <= 0:
@@ -212,6 +217,7 @@ class LiveScanner:
             if stake < cfg.staking.min_stake:
                 continue
 
+            # --- Fire alert ---
             side_state.armed = False
             side_state.hot = True
             state.match_total_staked += stake
@@ -224,8 +230,6 @@ class LiveScanner:
 
             self.alert_match_ids.add(state.match_id)
 
-            long_r = state.windowed_deuce_rate(cfg.scanner.win_long)
-            short_r = state.windowed_deuce_rate(cfg.scanner.win_short)
             self.dispatcher.send(
                 match=f"{state.player_a} vs {state.player_b}",
                 match_id=state.match_id,
@@ -240,8 +244,8 @@ class LiveScanner:
                 stake=stake,
                 set_num=state.current_set,
                 total_games=state.total_games,
-                long_rate=long_r,
-                short_rate=short_r,
+                long_rate=state.windowed_deuce_rate(cfg.scanner.win_long),
+                short_rate=state.windowed_deuce_rate(cfg.scanner.win_short),
                 loss_streak=side_state.loss_streak,
             )
 

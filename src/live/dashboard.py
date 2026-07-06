@@ -16,7 +16,7 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
     cfg = scanner.cfg
 
     table = Table(
-        title="Deuce Scanner — Live Matches (v2)",
+        title="Deuce Scanner — Live Matches",
         show_lines=True,
         title_style="bold cyan",
     )
@@ -26,13 +26,14 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
     table.add_column("Deuces", justify="center")
     table.add_column("Serving", justify="center")
     table.add_column("Rate", justify="right")
+    table.add_column("d(est)", justify="right")
     table.add_column("P(YES)", justify="right")
     table.add_column("EV Y/N", justify="right")
     table.add_column("Signal", justify="center", style="bold")
     table.add_column("Status", justify="center")
 
     if not scanner.matches:
-        table.add_row("No live matches", *["—"] * 9)
+        table.add_row("No live matches", *["—"] * 10)
     else:
         for state in sorted(scanner.matches.values(), key=lambda s: s.match_id):
             est = state.estimate_deuce_rates(
@@ -56,33 +57,35 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
 
             is_set1 = state.current_set == 1
             long_rate = state.windowed_deuce_rate(cfg.scanner.win_long)
-            short_rate = state.windowed_deuce_rate(cfg.scanner.win_short)
             cum_rate = state.cumulative_deuce_rate
+            short_deuces = state.windowed_deuce_count(cfg.scanner.win_short)
 
-            # Two-phase signal
-            signal = "—"
-            signal_style = ""
+            # Conviction check (mirrors _evaluate logic)
+            conv_yes = conv_no = False
             if is_set1:
                 if state.total_games >= cfg.scanner.set1_min_games and cum_rate is not None:
                     if cum_rate <= cfg.scanner.no_set1_max:
-                        signal = "NO·S1"
-                        signal_style = "bold red"
-                    elif cum_rate >= cfg.scanner.yes_set1_min:
-                        signal = "YES·S1"
-                        signal_style = "bold green"
+                        conv_no = True
+                    if cum_rate >= cfg.scanner.yes_set1_min:
+                        conv_yes = True
             else:
                 if long_rate is not None:
-                    no_ok = long_rate <= cfg.scanner.no_post_max
-                    yes_ok = long_rate >= cfg.scanner.yes_post_min
-                    if short_rate is not None:
-                        no_ok = no_ok and short_rate <= cfg.scanner.no_post_max
-                        yes_ok = yes_ok and short_rate >= cfg.scanner.yes_post_min
-                    if no_ok:
-                        signal = "NO"
-                        signal_style = "bold red"
-                    elif yes_ok:
-                        signal = "YES"
-                        signal_style = "bold green"
+                    if long_rate <= cfg.scanner.no_post_max:
+                        conv_no = True
+                    if long_rate >= cfg.scanner.yes_post_min:
+                        conv_yes = True
+                if short_deuces is not None and short_deuces >= 2:
+                    conv_no = False
+
+            # Signal: EV primary trigger + conviction filter
+            signal = "—"
+            signal_style = ""
+            if result.ev_no >= cfg.scanner.enter_margin and conv_no:
+                signal = "NO·S1" if is_set1 else "NO"
+                signal_style = "bold red"
+            elif result.ev_yes >= cfg.scanner.enter_margin and conv_yes:
+                signal = "YES·S1" if is_set1 else "YES"
+                signal_style = "bold green"
 
             ev_yes_str = f"{result.ev_yes:+.1%}"
             ev_no_str = f"{result.ev_no:+.1%}"
@@ -90,19 +93,15 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
             ev_combined += " / "
             ev_combined += f"[green]{ev_no_str}[/green]" if result.ev_no > 0 else ev_no_str
 
-            # Rate column: show the relevant rate for the current phase
+            # Rate: show relevant phase rate
             if is_set1:
                 rate_str = f"S1:{cum_rate:.0%}" if cum_rate is not None else "—"
             else:
-                parts = []
-                if long_rate is not None:
-                    parts.append(f"L:{long_rate:.0%}")
-                if short_rate is not None:
-                    parts.append(f"S:{short_rate:.0%}")
-                rate_str = " ".join(parts) if parts else "—"
+                rate_str = f"W:{long_rate:.0%}" if long_rate is not None else "—"
 
             total_deuces = state.deuces_a + state.deuces_b
             deuce_str = f"{total_deuces}/{state.total_games}"
+            d_est_str = f"{est.d_match:.0%}"
 
             status_parts = []
             if state.yes_state.halted:
@@ -128,6 +127,7 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
                 deuce_str,
                 serving,
                 rate_str,
+                d_est_str,
                 f"{result.p_yes:.1%}",
                 ev_combined,
                 f"[{signal_style}]{signal}[/{signal_style}]" if signal_style else signal,
@@ -138,8 +138,9 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
 
     console.print(table)
     console.print(
-        f"[dim]Set1: NO={cfg.scanner.no_set1_max:.0%} YES>{cfg.scanner.yes_set1_min:.0%} (≥{cfg.scanner.set1_min_games}g, stake×{cfg.scanner.set1_stake_factor}) | "
-        f"Post: NO<{cfg.scanner.no_post_max:.0%} YES>{cfg.scanner.yes_post_min:.0%} (L{cfg.scanner.win_long}/S{cfg.scanner.win_short}) | "
-        f"Floor/Ceil: {cfg.scanner.d_floor:.0%}/{cfg.scanner.d_ceil:.0%} | "
-        f"Halt after {cfg.scanner.loss_streak_halt} losses[/dim]"
+        f"[dim]EV trigger: ≥{cfg.scanner.enter_margin:.0%} | "
+        f"Conviction — S1: NO={cfg.scanner.no_set1_max:.0%} YES>{cfg.scanner.yes_set1_min:.0%} (≥{cfg.scanner.set1_min_games}g) | "
+        f"Post: NO<{cfg.scanner.no_post_max:.0%} YES>{cfg.scanner.yes_post_min:.0%} (W{cfg.scanner.win_long}) | "
+        f"Veto: ≥2d in {cfg.scanner.win_short}g | "
+        f"K=4 Floor={cfg.scanner.d_floor:.0%} Ceil={cfg.scanner.d_ceil:.0%}[/dim]"
     )

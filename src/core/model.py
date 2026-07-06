@@ -103,7 +103,14 @@ class MatchState:
         recent = non_tb[-window:]
         return sum(1 for g in recent if g.was_deuce) / window
 
-    def estimate_deuce_rates(self, prior_weight: float = 6.0,
+    def windowed_deuce_count(self, window: int) -> int | None:
+        """Count of deuces in last `window` non-tiebreak games."""
+        non_tb = [g for g in self.game_history if not g.is_tiebreak]
+        if len(non_tb) < window:
+            return None
+        return sum(1 for g in non_tb[-window:] if g.was_deuce)
+
+    def estimate_deuce_rates(self, prior_weight: float = 4.0,
                              d_floor: float = 0.0, d_ceil: float = 1.0) -> DeuceEstimate:
         """Shrinkage estimator blending prior with in-match observations."""
         adj = SURFACE_SPW_ADJUSTMENT.get(self.surface, 0.0)
