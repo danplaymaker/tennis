@@ -195,3 +195,65 @@ class TestSettleBets:
         state.record_game("B", False)
         state.settle_pending_bets()
         assert state.no_state.loss_streak == 0
+
+
+class TestHoldQuality:
+    def test_hold_quality_counts(self):
+        state = MatchState()
+        state.record_game("A", False, hold_margin=0, server_held=True)
+        state.record_game("A", False, hold_margin=0, server_held=True)
+        state.record_game("A", False, hold_margin=1, server_held=True)
+        state.record_game("A", False, hold_margin=2, server_held=True)
+        q = state.hold_quality("A")
+        assert q["love"] == 2
+        assert q["15"] == 1
+        assert q["30"] == 1
+        assert q["40"] == 0
+        assert q["deuce"] == 0
+        assert q["broken"] == 0
+
+    def test_hold_quality_broken(self):
+        state = MatchState()
+        state.record_game("A", False, hold_margin=-1, server_held=False)
+        q = state.hold_quality("A")
+        assert q["broken"] == 1
+
+    def test_hold_quality_deuce(self):
+        state = MatchState()
+        state.record_game("B", True, hold_margin=4, server_held=True)
+        q = state.hold_quality("B")
+        assert q["deuce"] == 1
+
+    def test_hold_quality_ignores_tiebreaks(self):
+        state = MatchState()
+        state.record_game("A", False, is_tiebreak=True, hold_margin=0, server_held=True)
+        q = state.hold_quality("A")
+        assert sum(q.values()) == 0
+
+    def test_hold_quality_ignores_other_server(self):
+        state = MatchState()
+        state.record_game("A", False, hold_margin=0, server_held=True)
+        state.record_game("B", False, hold_margin=2, server_held=True)
+        q = state.hold_quality("A")
+        assert q["love"] == 1
+        assert sum(q.values()) == 1
+
+    def test_dominance_score(self):
+        state = MatchState()
+        state.record_game("A", False, hold_margin=0, server_held=True)
+        state.record_game("A", False, hold_margin=1, server_held=True)
+        state.record_game("A", False, hold_margin=2, server_held=True)
+        state.record_game("A", True, hold_margin=4, server_held=True)
+        dom = state.dominance_score("A")
+        assert abs(dom - 0.75) < 0.001
+
+    def test_dominance_score_empty(self):
+        state = MatchState()
+        assert state.dominance_score("A") is None
+
+    def test_dominance_ignores_unknown(self):
+        state = MatchState()
+        state.record_game("A", False, hold_margin=-99, server_held=True)
+        state.record_game("A", False, hold_margin=0, server_held=True)
+        dom = state.dominance_score("A")
+        assert abs(dom - 1.0) < 0.001

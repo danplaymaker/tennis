@@ -35,6 +35,8 @@ class GameRecord:
     server: str  # "A" or "B"
     was_deuce: bool
     is_tiebreak: bool = False
+    hold_margin: int = -99  # returner's max score: 0=love,1=15,2=30,3=40,4=deuce,-1=broken,-99=unknown
+    server_held: bool = True
 
 
 @dataclass
@@ -110,6 +112,25 @@ class MatchState:
             return None
         return sum(1 for g in non_tb[-window:] if g.was_deuce)
 
+    def hold_quality(self, server: str) -> dict[str, int]:
+        """Hold quality distribution for a server. Returns counts keyed by margin label."""
+        counts = {"love": 0, "15": 0, "30": 0, "40": 0, "deuce": 0, "broken": 0}
+        margin_labels = {0: "love", 1: "15", 2: "30", 3: "40", 4: "deuce", -1: "broken"}
+        for g in self.game_history:
+            if g.is_tiebreak or g.server != server or g.hold_margin == -99:
+                continue
+            label = margin_labels.get(g.hold_margin, "40")
+            counts[label] += 1
+        return counts
+
+    def dominance_score(self, server: str) -> float | None:
+        """Fraction of service games held to love, 15, or 30. Higher = more dominant."""
+        quality = self.hold_quality(server)
+        total = sum(quality.values())
+        if total == 0:
+            return None
+        return (quality["love"] + quality["15"] + quality["30"]) / total
+
     def estimate_deuce_rates(self, prior_weight: float = 4.0,
                              d_floor: float = 0.0, d_ceil: float = 1.0) -> DeuceEstimate:
         """Shrinkage estimator blending prior with in-match observations."""
@@ -140,8 +161,12 @@ class MatchState:
             d_a=d_a, d_b=d_b, games_a=self.games_a_served, games_b=self.games_b_served
         )
 
-    def record_game(self, server: str, was_deuce: bool, is_tiebreak: bool = False) -> None:
-        self.game_history.append(GameRecord(server=server, was_deuce=was_deuce, is_tiebreak=is_tiebreak))
+    def record_game(self, server: str, was_deuce: bool, is_tiebreak: bool = False,
+                    hold_margin: int = -99, server_held: bool = True) -> None:
+        self.game_history.append(GameRecord(
+            server=server, was_deuce=was_deuce, is_tiebreak=is_tiebreak,
+            hold_margin=hold_margin, server_held=server_held,
+        ))
         if not is_tiebreak:
             if server == "A":
                 self.games_a_served += 1

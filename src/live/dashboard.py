@@ -24,6 +24,8 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
     table.add_column("Set", justify="center")
     table.add_column("Games", justify="center")
     table.add_column("Deuces", justify="center")
+    table.add_column("Hold A", justify="center")
+    table.add_column("Hold B", justify="center")
     table.add_column("Serving", justify="center")
     table.add_column("Rate", justify="right")
     table.add_column("d(est)", justify="right")
@@ -33,7 +35,7 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
     table.add_column("Status", justify="center")
 
     if not scanner.matches:
-        table.add_row("No live matches", *["—"] * 10)
+        table.add_row("No live matches", *["—"] * 12)
     else:
         for state in sorted(scanner.matches.values(), key=lambda s: s.match_id):
             est = state.estimate_deuce_rates(
@@ -103,6 +105,9 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
             deuce_str = f"{total_deuces}/{state.total_games}"
             d_est_str = f"{est.d_match:.0%}"
 
+            hold_a_str = _format_hold(state, "A")
+            hold_b_str = _format_hold(state, "B")
+
             status_parts = []
             if state.yes_state.halted:
                 status_parts.append("Y:HALT")
@@ -125,6 +130,8 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
                 str(state.current_set),
                 f"{state.total_games} ({est.games_a}A/{est.games_b}B)",
                 deuce_str,
+                hold_a_str,
+                hold_b_str,
                 serving,
                 rate_str,
                 d_est_str,
@@ -144,3 +151,26 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
         f"Veto: ≥2d in {cfg.scanner.win_short}g | "
         f"K=4 Floor={cfg.scanner.d_floor:.0%} Ceil={cfg.scanner.d_ceil:.0%}[/dim]"
     )
+    console.print(
+        "[dim]Hold: L=love 15/30/40=returner max score D=deuce BK=broken | "
+        "DOM%=holds to ≤30[/dim]"
+    )
+
+
+def _format_hold(state, server: str) -> str:
+    """Compact hold quality string: 'L3 15:1 30:1 (75%)'."""
+    q = state.hold_quality(server)
+    total = sum(q.values())
+    if total == 0:
+        return "—"
+
+    parts = []
+    labels = [("love", "L"), ("15", "15"), ("30", "30"), ("40", "40"), ("deuce", "D"), ("broken", "BK")]
+    for key, short in labels:
+        if q[key] > 0:
+            parts.append(f"{short}:{q[key]}")
+
+    dom = state.dominance_score(server)
+    dom_str = f" [bold green]{dom:.0%}[/bold green]" if dom is not None and dom >= 0.7 else f" {dom:.0%}" if dom is not None else ""
+
+    return " ".join(parts) + dom_str

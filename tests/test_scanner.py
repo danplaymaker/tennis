@@ -7,6 +7,7 @@ from src.live.scanner import (
     _extract_spw_from_stats,
     _game_had_deuce,
     _game_is_complete,
+    _hold_margin,
     _is_tiebreak_entry,
     _detect_surface,
     _player_name,
@@ -229,3 +230,85 @@ class TestSurfaceDetection:
 
     def test_unknown_defaults_hard(self):
         assert _detect_surface({"league_name": "ATP - US Open"}) == "hard"
+
+
+class TestHoldMargin:
+    def test_hold_to_love(self):
+        game = {
+            "serve_winner": "first",
+            "points": [
+                {"score": "15 - 0"}, {"score": "30 - 0"},
+                {"score": "40 - 0"}, {"score": "game"},
+            ],
+        }
+        margin, held = _hold_margin(game, is_first_server=True)
+        assert margin == 0
+        assert held is True
+
+    def test_hold_to_15(self):
+        game = {
+            "serve_winner": "first",
+            "points": [
+                {"score": "15 - 0"}, {"score": "15 - 15"},
+                {"score": "30 - 15"}, {"score": "40 - 15"}, {"score": "game"},
+            ],
+        }
+        margin, held = _hold_margin(game, is_first_server=True)
+        assert margin == 1
+        assert held is True
+
+    def test_hold_to_30(self):
+        game = {
+            "serve_winner": "first",
+            "points": [
+                {"score": "15 - 0"}, {"score": "15 - 15"},
+                {"score": "15 - 30"}, {"score": "30 - 30"},
+                {"score": "40 - 30"}, {"score": "game"},
+            ],
+        }
+        margin, held = _hold_margin(game, is_first_server=True)
+        assert margin == 2
+        assert held is True
+
+    def test_broken(self):
+        game = {
+            "serve_lost": "first",
+            "points": [
+                {"score": "0 - 15"}, {"score": "0 - 30"},
+                {"score": "0 - 40"}, {"score": "game"},
+            ],
+        }
+        margin, held = _hold_margin(game, is_first_server=True)
+        assert margin == -1
+        assert held is False
+
+    def test_deuce_hold(self):
+        game = {
+            "serve_winner": "first",
+            "points": [
+                {"score": "15 - 0"}, {"score": "15 - 15"},
+                {"score": "30 - 15"}, {"score": "30 - 30"},
+                {"score": "40 - 30"}, {"score": "40 - 40"},
+                {"score": "ad - 40"}, {"score": "game"},
+            ],
+        }
+        margin, held = _hold_margin(game, is_first_server=True)
+        assert margin == 4
+        assert held is True
+
+    def test_second_server_returner_is_left(self):
+        game = {
+            "serve_winner": "second",
+            "points": [
+                {"score": "15 - 0"}, {"score": "15 - 15"},
+                {"score": "15 - 30"}, {"score": "15 - 40"}, {"score": "game"},
+            ],
+        }
+        margin, held = _hold_margin(game, is_first_server=False)
+        assert margin == 1
+        assert held is True
+
+    def test_no_points_unknown(self):
+        game = {"serve_winner": "first"}
+        margin, held = _hold_margin(game, is_first_server=True)
+        assert margin == -99

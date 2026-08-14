@@ -110,6 +110,7 @@ class LiveScanner:
             served = str(game_data.get("player_served", "")).lower()
             server = "A" if "first" in served else "B"
             was_deuce = _game_had_deuce(game_data)
+            hold_margin, server_held = _hold_margin(game_data, server == "A")
 
             points = game_data.get("points", [])
             score_summary = ""
@@ -117,10 +118,11 @@ class LiveScanner:
                 scores = [str(p.get("score", "") if isinstance(p, dict) else p) for p in points[-6:]]
                 score_summary = " | ".join(scores)
             result_str = game_data.get("result", game_data.get("serve_winner", ""))
-            log.info("Game %s: server=%s deuce=%s tb=%s result=%s scores=[%s]",
-                     game_key, server, was_deuce, is_tb, result_str, score_summary)
+            log.info("Game %s: server=%s deuce=%s tb=%s hold=%d held=%s result=%s scores=[%s]",
+                     game_key, server, was_deuce, is_tb, hold_margin, server_held, result_str, score_summary)
 
-            state.record_game(server, was_deuce, is_tiebreak=is_tb)
+            state.record_game(server, was_deuce, is_tiebreak=is_tb,
+                              hold_margin=hold_margin, server_held=server_held)
 
     def _evaluate(self, state: MatchState) -> None:
         cfg = self.cfg
@@ -339,6 +341,52 @@ def _player_name(event: dict[str, Any], which: str) -> str:
         or event.get(f"event_{'home' if which == 'first' else 'away'}_team")
         or f"Player {'A' if which == 'first' else 'B'}"
     )
+
+
+def _hold_margin(game_data: dict[str, Any], is_first_server: bool) -> tuple[int, bool]:
+    """Determine how comfortably the server held.
+
+    Returns (margin, server_held) where margin is the returner's max score:
+    0=love, 1=15, 2=30, 3=40, 4=deuce, -1=broken, -99=unknown.
+    """
+    score_val = {"0": 0, "15": 1, "30": 2, "40": 3}
+
+    server_won = bool(game_data.get("serve_winner"))
+    server_lost = bool(game_data.get("serve_lost"))
+    if not server_won and not server_lost:
+        result = str(game_data.get("result", "")).lower()
+        if "winner" in result or "hold" in result:
+            server_won = True
+        elif "lost" in result or "break" in result:
+            server_lost = True
+
+    had_deuce = _game_had_deuce(game_data)
+    if had_deuce:
+        if server_lost:
+            return (-1, False)
+        return (4, not server_lost)
+
+    points = game_data.get("points", [])
+    max_returner = 0
+    if isinstance(points, list):
+        for p in points:
+            score = str(p.get("score", "") if isinstance(p, dict) else p)
+            normalized = score.replace(" ", "").lower()
+            parts = normalized.replace(":", "-").split("-")
+            if len(parts) != 2:
+                continue
+            returner_part = parts[1] if is_first_server else parts[0]
+            val = score_val.get(returner_part, -1)
+            if val > max_returner:
+                max_returner = val
+
+    if server_lost:
+        return (-1, False)
+
+    if not isinstance(points, list) or not points:
+        return (-99, not server_lost)
+
+    return (max_returner, True)
 
 
 def _game_had_deuce(game_data: dict[str, Any]) -> bool:
