@@ -37,9 +37,13 @@ class ApiTennisProvider(LiveProvider):
         if isinstance(result, list):
             log.info("api-tennis returned %d live events", len(result))
             for ev in result:
-                name = (ev.get("event_first_player", "") or ev.get("event_home_team", ""))
-                name += " vs " + (ev.get("event_second_player", "") or ev.get("event_away_team", ""))
-                log.info("  -> %s [%s] %s", name, ev.get("event_key", "?"), ev.get("event_status", ""))
+                if isinstance(ev, dict):
+                    name = (ev.get("event_first_player", "") or ev.get("event_home_team", ""))
+                    name += " vs " + (ev.get("event_second_player", "") or ev.get("event_away_team", ""))
+                    log.info("  -> %s [%s] %s", name, ev.get("event_key", "?"), ev.get("event_status", ""))
+                    if not name.strip().replace("vs", "").strip():
+                        sample_keys = list(ev.keys())[:20]
+                        log.info("  -> empty names, event keys: %s", sample_keys)
             return result
         return []
 
