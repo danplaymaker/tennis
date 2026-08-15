@@ -25,9 +25,14 @@ class ApiTennisProvider(LiveProvider):
         resp = await client.get(self.base_url, params=params)
         resp.raise_for_status()
         data = resp.json()
-        if data.get("success") != 1:
-            log.warning("API returned success=%s", data.get("success"))
-            return []
+        success = data.get("success")
+        if success not in (1, "1", True):
+            log.warning("API returned success=%s (type=%s), keys=%s",
+                        success, type(success).__name__, list(data.keys()))
+            if isinstance(data.get("result"), list) and data["result"]:
+                log.info("Result present despite success=%s, using it", success)
+            else:
+                return []
         result = data.get("result", [])
         if isinstance(result, list):
             log.info("api-tennis returned %d live events", len(result))
