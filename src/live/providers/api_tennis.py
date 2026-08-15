@@ -33,18 +33,25 @@ class ApiTennisProvider(LiveProvider):
                 log.info("Result present despite success=%s, using it", success)
             else:
                 return []
+        error_msg = data.get("error")
+        if error_msg:
+            log.info("API error field: %s", error_msg)
+
         result = data.get("result", [])
         if isinstance(result, list):
-            log.info("api-tennis returned %d live events", len(result))
+            events = []
             for ev in result:
-                if isinstance(ev, dict):
-                    name = (ev.get("event_first_player", "") or ev.get("event_home_team", ""))
-                    name += " vs " + (ev.get("event_second_player", "") or ev.get("event_away_team", ""))
-                    log.info("  -> %s [%s] %s", name, ev.get("event_key", "?"), ev.get("event_status", ""))
-                    if not name.strip().replace("vs", "").strip():
-                        sample_keys = list(ev.keys())[:20]
-                        log.info("  -> empty names, event keys: %s", sample_keys)
-            return result
+                if not isinstance(ev, dict):
+                    continue
+                if "event_key" not in ev:
+                    log.info("Skipping non-event item: %s", ev)
+                    continue
+                events.append(ev)
+                name = (ev.get("event_first_player", "") or ev.get("event_home_team", ""))
+                name += " vs " + (ev.get("event_second_player", "") or ev.get("event_away_team", ""))
+                log.info("  -> %s [%s] %s", name, ev.get("event_key", "?"), ev.get("event_status", ""))
+            log.info("api-tennis: %d events (%d raw items)", len(events), len(result))
+            return events
         return []
 
     def normalize(self, raw: dict[str, Any]) -> dict[str, Any]:
