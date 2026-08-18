@@ -124,7 +124,15 @@ class MatchState:
         return counts
 
     def dominance_score(self, server: str) -> float | None:
-        """Fraction of service games held to love, 15, or 30. Higher = more dominant."""
+        """Fraction of holds (excluding breaks) that were clean (love/15/30)."""
+        quality = self.hold_quality(server)
+        holds = quality["love"] + quality["15"] + quality["30"] + quality["40"] + quality["deuce"]
+        if holds == 0:
+            return None
+        return (quality["love"] + quality["15"] + quality["30"]) / holds
+
+    def clean_service_pct(self, server: str) -> float | None:
+        """Fraction of all service games (including breaks) held cleanly."""
         quality = self.hold_quality(server)
         total = sum(quality.values())
         if total == 0:

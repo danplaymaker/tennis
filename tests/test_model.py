@@ -245,7 +245,26 @@ class TestHoldQuality:
         state.record_game("A", False, hold_margin=2, server_held=True)
         state.record_game("A", True, hold_margin=4, server_held=True)
         dom = state.dominance_score("A")
+        # 3 clean holds out of 4 holds (no breaks) = 75%
         assert abs(dom - 0.75) < 0.001
+
+    def test_dominance_excludes_breaks(self):
+        state = MatchState()
+        state.record_game("A", False, hold_margin=0, server_held=True)
+        state.record_game("A", False, hold_margin=0, server_held=True)
+        state.record_game("A", False, hold_margin=-1, server_held=False)
+        dom = state.dominance_score("A")
+        # 2 clean holds out of 2 holds (break excluded) = 100%
+        assert abs(dom - 1.0) < 0.001
+
+    def test_clean_service_pct_includes_breaks(self):
+        state = MatchState()
+        state.record_game("A", False, hold_margin=0, server_held=True)
+        state.record_game("A", False, hold_margin=0, server_held=True)
+        state.record_game("A", False, hold_margin=-1, server_held=False)
+        pct = state.clean_service_pct("A")
+        # 2 clean out of 3 total service games = 66.7%
+        assert abs(pct - 2 / 3) < 0.001
 
     def test_dominance_score_empty(self):
         state = MatchState()
