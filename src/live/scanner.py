@@ -246,8 +246,8 @@ class LiveScanner:
                 stake=stake,
                 set_num=state.current_set,
                 total_games=state.total_games,
-                long_rate=state.windowed_deuce_rate(cfg.scanner.win_long),
-                short_rate=state.windowed_deuce_rate(cfg.scanner.win_short),
+                long_rate=state.windowed_deuce_rate(cfg.scanner.win_long) or 0.0,
+                short_rate=state.windowed_deuce_rate(cfg.scanner.win_short) or 0.0,
                 loss_streak=side_state.loss_streak,
             )
 
