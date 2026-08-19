@@ -153,7 +153,7 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
     )
     console.print(
         "[dim]Hold: L=love 15/30/40=returner max score D=deuce BK=broken | "
-        "DOM%=holds to ≤30[/dim]"
+        "%=clean service games (held to ≤30)[/dim]"
     )
 
 
@@ -170,7 +170,7 @@ def _format_hold(state, server: str) -> str:
         if q[key] > 0:
             parts.append(f"{short}:{q[key]}")
 
-    dom = state.dominance_score(server)
-    dom_str = f" [bold green]{dom:.0%}[/bold green]" if dom is not None and dom >= 0.7 else f" {dom:.0%}" if dom is not None else ""
+    csp = state.clean_service_pct(server)
+    csp_str = f" [bold green]{csp:.0%}[/bold green]" if csp is not None and csp >= 0.7 else f" {csp:.0%}" if csp is not None else ""
 
-    return " ".join(parts) + dom_str
+    return " ".join(parts) + csp_str
