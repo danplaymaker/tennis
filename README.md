@@ -7,6 +7,27 @@ message into a destination channel of your own, in real time. Relayed messages
 keep the original author's display name and avatar, so the destination channel
 reads like a mirror of the source.
 
+It reads with either a **personal account** (`ACCOUNT_TYPE=user`, the default) or
+a **bot account** (`ACCOUNT_TYPE=bot`). Read the warning below before using a
+personal account.
+
+### Read this before using a personal account
+
+Automating a personal account — a "self-bot" — is against
+[Discord's Terms of Service](https://discord.com/terms). Discord does enforce
+this, and the enforcement lands on the account: termination, usually without
+warning and without appeal. Points worth knowing:
+
+- **Your user token is equivalent to your password**, except it bypasses 2FA.
+  Anyone who obtains it can read your DMs and act as you. Keep it in `.env`
+  (gitignored here), never in a commit, a screenshot, or a paste.
+- **The token rotates** whenever you change your password or log out, so the
+  script will need a fresh one after either.
+- Point this at an account you can afford to lose, and prefer a bot account for
+  any channel where that option exists.
+
+The script logs a warning at startup in user mode so this stays visible.
+
 ### What it handles
 
 - Live forwarding over the Discord gateway (no polling, no cron)
@@ -15,39 +36,42 @@ reads like a mirror of the source.
   (anything over `MAX_ATTACHMENT_BYTES` is forwarded as a link instead)
 - Replies quoted with the message they answer, plus a jump link back to the original
 - Messages over 2000 characters split on line/word boundaries
-- Stickers and rich embeds
-- Rate-limit backoff, automatic gateway reconnects, and loop protection so the
-  bot can never forward its own output
+- Stickers, rich embeds, and `@mention` markup resolved to readable names
+- Rate-limit backoff, automatic reconnect with session RESUME, and loop
+  protection so the relay can never forward its own output
 
 Mentions in forwarded text are neutered (`allowed_mentions: parse: []`), so a
 relayed `@everyone` will not ping your destination server.
 
 ### Setup
 
-**1. Create the bot**
+**1. Get a token**
 
-At <https://discord.com/developers/applications>: New Application → **Bot** →
-Reset Token and copy it. On that same page enable the **Message Content Intent**
-under *Privileged Gateway Intents* — without it Discord delivers empty message
-bodies and everything forwards blank.
+*Personal account* — open Discord **in a browser** (the desktop app has
+DevTools disabled), press F12, go to the **Network** tab, send or load any
+message, click any request to `discord.com/api`, and copy the `Authorization`
+request header. That value is your token. Do not include any prefix.
 
-**2. Invite the bot to the source server**
+*Bot account* — at <https://discord.com/developers/applications>: New
+Application → **Bot** → Reset Token. Enable the **Message Content Intent** under
+*Privileged Gateway Intents*, then invite the bot via *OAuth2 → URL Generator*
+with the `bot` scope and **View Channels** + **Read Message History**. Set
+`ACCOUNT_TYPE=bot`.
 
-*OAuth2 → URL Generator*, scope `bot`, permissions **View Channels** and
-**Read Message History**. Open the generated URL and add it to the server you
-want to read. You need permission to add a bot to that server; if it is someone
-else's server, ask an admin.
+A personal account needs no invite step — it already sees every channel you are
+in, including DMs and servers where you cannot add a bot. That is the practical
+reason to use one.
 
-**3. Create the destination webhook**
+**2. Create the destination webhook**
 
 In the channel you want messages delivered to: *Channel Settings → Integrations
-→ Webhooks → New Webhook → Copy Webhook URL*. This is where you have full
-control — your own server, or a DM-like private channel only you can see.
+→ Webhooks → New Webhook → Copy Webhook URL*. This should be a channel you
+control — your own server works well.
 
-**4. Configure and run**
+**3. Configure and run**
 
 ```bash
-cp .env.example .env       # then fill in the three required values
+cp .env.example .env       # then fill in the token, source IDs, and webhook URL
 pip install -r requirements.txt
 python discord_forwarder.py
 ```
@@ -58,19 +82,23 @@ then right-clicking a channel → **Copy Channel ID**.
 Expected startup output:
 
 ```
-INFO  forwarder: Destination webhook 'relay' resolved to channel 987654321
-INFO  forwarder: Connected as Relay#1234 (112233445566)
-INFO  forwarder: Watching #general (111222333444)
+WARNING forwarder: Running against a USER account. Automating a personal account ...
+INFO    forwarder: Destination webhook 'relay' resolved to channel 987654321
+INFO    forwarder: Authenticated as Me (user account)
+INFO    forwarder: Connected as Me (112233445566)
+INFO    forwarder: Watching #general (111222333444)
 ```
 
 ### Configuration
 
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |
-| `DISCORD_BOT_TOKEN` | yes | — | Bot token |
+| `DISCORD_TOKEN` | yes | — | User or bot token, no `Bot ` prefix |
 | `SOURCE_CHANNEL_IDS` | yes | — | Comma-separated channel IDs to read |
 | `DESTINATION_WEBHOOK_URL` | yes | — | Webhook to post into |
-| `FORWARD_BOTS` | no | `false` | Also forward other bots' messages |
+| `ACCOUNT_TYPE` | no | `user` | `user` or `bot` |
+| `FORWARD_BOTS` | no | `false` | Also forward bots' and webhooks' messages |
+| `FORWARD_OWN` | no | `false` | Also forward your own messages |
 | `RELAY_IDENTITY` | no | `true` | Use the author's name/avatar |
 | `SHOW_SOURCE` | no | auto | Prepend `[Server / #channel]`; on when watching >1 channel |
 | `FORWARD_EDITS` | no | `false` | Repost a message when it is edited |
@@ -79,10 +107,22 @@ INFO  forwarder: Watching #general (111222333444)
 | `MESSAGE_PREFIX` | no | — | Text prepended to every forwarded message |
 | `LOG_LEVEL` | no | `INFO` | Set `DEBUG` for verbose logs |
 
+### Implementation note
+
+The gateway protocol is implemented directly on `aiohttp` rather than through
+`discord.py`, which rejects user tokens by design. The only dependency is
+`aiohttp`. Avoiding a self-bot fork of `discord.py` also sidesteps a packaging
+trap: those forks install under the same `discord` import name, so they cannot
+coexist with `discord.py` in one environment.
+
+In user mode the client sends the browser fingerprint (`X-Super-Properties`,
+matching user agent) and omits gateway intents, because a user IDENTIFY that
+carries intents is rejected.
+
 ### Running it continuously
 
-The script is a long-lived process — it reconnects on its own, but it needs
-something to restart it if the host reboots. A systemd unit:
+The script is a long-lived process — it reconnects and resumes on its own, but
+needs something to restart it if the host reboots. A systemd unit:
 
 ```ini
 [Unit]
@@ -100,7 +140,7 @@ WantedBy=multi-user.target
 ```
 
 If you run it in a sandboxed or firewalled environment, allow egress to
-`discord.com` and `gateway.discord.gg`.
+`discord.com`, `gateway.discord.gg`, and `cdn.discordapp.com`.
 
 ### Tests
 
@@ -108,13 +148,8 @@ If you run it in a sandboxed or firewalled environment, allow egress to
 pip install pytest && python -m pytest
 ```
 
-Covers config parsing/validation, message chunking, and username sanitizing.
-
-### A note on scope
-
-This uses a **bot** account, which is the supported way to read a channel.
-Automating a personal user account to read channels (a "selfbot") is against
-Discord's Terms of Service and risks the account, so this script does not do
-that — it only reads channels a bot has been legitimately invited to. Bear in
-mind that forwarding other people's messages out of a server may still be
-against that server's rules even when it is technically permitted.
+26 tests. `test_discord_forwarder.py` covers config parsing, chunking, name and
+URL building, and the forwarding filter (including loop protection).
+`test_gateway_integration.py` runs the client against a local fake Discord
+websocket to verify the HELLO/IDENTIFY handshake, RESUME after a dropped
+connection, heartbeat replies, and abort-on-fatal-close-code.
