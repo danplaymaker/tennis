@@ -9,6 +9,21 @@ from ..core.config import AlertConfig
 
 log = logging.getLogger(__name__)
 
+MARKET_LABELS = {
+    "deuce": "DEUCE",
+    "break": "BREAK",
+}
+
+MARKET_DESCRIPTIONS = {
+    "deuce": "deuce in next 2 games",
+    "break": "break in next 2 games",
+}
+
+RATE_LABELS = {
+    "deuce": ("d_A", "d_B"),
+    "break": ("b_A", "b_B"),
+}
+
 
 class AlertDispatcher:
     def __init__(self, config: AlertConfig) -> None:
@@ -21,27 +36,30 @@ class AlertDispatcher:
 
     def send(self, **kwargs: Any) -> None:
         msg = format_alert(**kwargs)
+        market = kwargs.get("market", "deuce")
         for backend in self._backends:
             try:
-                backend.send(msg)
+                backend.send(msg, market=market)
             except Exception:
                 log.exception("Alert backend %s failed", type(backend).__name__)
 
 
 class AlertBackend:
-    def send(self, message: str) -> None:
+    def send(self, message: str, market: str = "deuce") -> None:
         raise NotImplementedError
 
 
 class ConsoleBackend(AlertBackend):
-    def send(self, message: str) -> None:
+    def send(self, message: str, market: str = "deuce") -> None:
+        label = MARKET_LABELS.get(market, market.upper())
+        color = "magenta" if market == "break" else "red"
         try:
             from rich.console import Console
             from rich.panel import Panel
             console = Console()
-            console.print(Panel(message, title="[bold red]DEUCE ALERT[/bold red]", border_style="red"))
+            console.print(Panel(message, title=f"[bold {color}]{label} ALERT[/bold {color}]", border_style=color))
         except ImportError:
-            print(f"\n{'='*60}\n  DEUCE ALERT\n{'='*60}\n{message}\n{'='*60}\n")
+            print(f"\n{'='*60}\n  {label} ALERT\n{'='*60}\n{message}\n{'='*60}\n")
 
 
 class TelegramBackend(AlertBackend):
@@ -49,7 +67,7 @@ class TelegramBackend(AlertBackend):
         self.bot_token = bot_token
         self.chat_id = chat_id
 
-    def send(self, message: str) -> None:
+    def send(self, message: str, market: str = "deuce") -> None:
         import httpx
         url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
         httpx.post(url, json={"chat_id": self.chat_id, "text": message, "parse_mode": "Markdown"})
@@ -71,16 +89,19 @@ def format_alert(
     long_rate: float = 0.0,
     short_rate: float = 0.0,
     loss_streak: int = 0,
+    market: str = "deuce",
     **_: Any,
 ) -> str:
+    desc = MARKET_DESCRIPTIONS.get(market, f"{market} in next 2 games")
+    label_a, label_b = RATE_LABELS.get(market, ("rate_A", "rate_B"))
     taper_note = f" (taper: streak {loss_streak})" if loss_streak > 0 else ""
     return (
         f"Match: {match}\n"
         f"Set {set_num} | {total_games} games played\n"
         f"---\n"
-        f"Side: {side} (deuce in next 2 games)\n"
-        f"d_A: {d_a:.1%} ({games_a} service games)\n"
-        f"d_B: {d_b:.1%} ({games_b} service games)\n"
+        f"Side: {side} ({desc})\n"
+        f"{label_a}: {d_a:.1%} ({games_a} service games)\n"
+        f"{label_b}: {d_b:.1%} ({games_b} service games)\n"
         f"Window: {long_rate:.1%} (L10) / {short_rate:.1%} (S6)\n"
         f"P(YES): {p_yes:.1%}\n"
         f"Assumed odds: {odds:.4f}\n"

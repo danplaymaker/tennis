@@ -34,6 +34,27 @@ class ScannerConfig:
 
 
 @dataclass
+class BreakConfig:
+    enabled: bool = True
+    default_odds_yes: float = 1.6667
+    default_odds_no: float = 1.6667
+    enter_margin: float = 0.10
+    exit_margin: float = 0.00
+    # Conviction: break markets use inverse logic to deuce —
+    # high break rate = YES conviction, low = NO conviction
+    set1_min_games: int = 8
+    no_set1_max: float = 0.00     # cumulative break rate for NO (no breaks → NO)
+    yes_set1_min: float = 0.30    # cumulative break rate for YES
+    no_post_max: float = 0.10     # windowed break rate for NO
+    yes_post_min: float = 0.30    # windowed break rate for YES
+    b_floor: float = 0.05
+    b_ceil: float = 0.50
+    loss_streak_halt: int = 3
+    loss_taper: float = 0.5
+    set1_stake_factor: float = 0.5
+
+
+@dataclass
 class APIConfig:
     provider: str = "api-tennis"
     base_url: str = "https://api.api-tennis.com/tennis/"
@@ -66,6 +87,7 @@ class StakingConfig:
 @dataclass
 class Config:
     scanner: ScannerConfig = field(default_factory=ScannerConfig)
+    break_market: BreakConfig = field(default_factory=BreakConfig)
     api: APIConfig = field(default_factory=APIConfig)
     alerts: AlertConfig = field(default_factory=AlertConfig)
     staking: StakingConfig = field(default_factory=StakingConfig)
@@ -86,6 +108,9 @@ def load_config(path: str | Path | None = None) -> Config:
 
     if s := raw.get("scanner"):
         cfg.scanner = ScannerConfig(**{k: v for k, v in s.items() if v is not None})
+
+    if bk := raw.get("break_market"):
+        cfg.break_market = BreakConfig(**{k: v for k, v in bk.items() if v is not None})
 
     if a := raw.get("api"):
         key = a.get("api_key") or os.environ.get("TENNIS_API_KEY", "")

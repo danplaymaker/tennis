@@ -1,11 +1,11 @@
-"""Rich live dashboard showing all tracked matches and their deuce stats."""
+"""Rich live dashboard showing all tracked matches and their market stats."""
 
 from __future__ import annotations
 
 from rich.console import Console
 from rich.table import Table
 
-from ..core.math import compute_ev
+from ..core.math import compute_break_ev, compute_ev
 from .scanner import LiveScanner
 
 
@@ -16,7 +16,7 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
     cfg = scanner.cfg
 
     table = Table(
-        title="Deuce Scanner — Live Matches",
+        title="Tennis Flash Scanner — Live Matches",
         show_lines=True,
         title_style="bold cyan",
     )
@@ -62,7 +62,7 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
             cum_rate = state.cumulative_deuce_rate
             short_deuces = state.windowed_deuce_count(cfg.scanner.win_short)
 
-            # Conviction check (mirrors _evaluate logic)
+            # Deuce conviction check (mirrors _evaluate logic)
             conv_yes = conv_no = False
             if is_set1:
                 if state.total_games >= cfg.scanner.set1_min_games and cum_rate is not None:
@@ -79,7 +79,51 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
                 if short_deuces is not None and short_deuces >= 2:
                     conv_no = False
 
-            # Signal: EV primary trigger + conviction filter
+            # Break market signal
+            break_signal = ""
+            if cfg.break_market.enabled:
+                best = state.estimate_break_rates(
+                    b_floor=cfg.break_market.b_floor, b_ceil=cfg.break_market.b_ceil,
+                )
+                if state.next_server == "A":
+                    b_next, b_after = best.b_a, best.b_b
+                else:
+                    b_next, b_after = best.b_b, best.b_a
+
+                bresult = compute_break_ev(
+                    b_next, b_after,
+                    cfg.break_market.default_odds_yes,
+                    cfg.break_market.default_odds_no,
+                    0.0,
+                )
+
+                bcfg = cfg.break_market
+                bconv_yes = bconv_no = False
+                if is_set1:
+                    if state.total_games >= bcfg.set1_min_games:
+                        bcum = state.cumulative_break_rate
+                        if bcum is not None:
+                            if bcum <= bcfg.no_set1_max:
+                                bconv_no = True
+                            if bcum >= bcfg.yes_set1_min:
+                                bconv_yes = True
+                else:
+                    blong = state.windowed_break_rate(cfg.scanner.win_long)
+                    if blong is not None:
+                        if blong <= bcfg.no_post_max:
+                            bconv_no = True
+                        if blong >= bcfg.yes_post_min:
+                            bconv_yes = True
+                    bshort = state.windowed_break_count(cfg.scanner.win_short)
+                    if bshort is not None and bshort >= 2:
+                        bconv_no = False
+
+                if bresult.ev_no >= bcfg.enter_margin and bconv_no:
+                    break_signal = " [bold magenta]BK:NO[/bold magenta]"
+                elif bresult.ev_yes >= bcfg.enter_margin and bconv_yes:
+                    break_signal = " [bold blue]BK:YES[/bold blue]"
+
+            # Deuce signal
             signal = "—"
             signal_style = ""
             if result.ev_no >= cfg.scanner.enter_margin and conv_no:
@@ -88,6 +132,9 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
             elif result.ev_yes >= cfg.scanner.enter_margin and conv_yes:
                 signal = "YES·S1" if is_set1 else "YES"
                 signal_style = "bold green"
+
+            signal_str = f"[{signal_style}]{signal}[/{signal_style}]" if signal_style else signal
+            signal_str += break_signal
 
             ev_yes_str = f"{result.ev_yes:+.1%}"
             ev_no_str = f"{result.ev_no:+.1%}"
@@ -110,13 +157,21 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
 
             status_parts = []
             if state.yes_state.halted:
-                status_parts.append("Y:HALT")
+                status_parts.append("dY:HALT")
             elif state.yes_state.loss_streak > 0:
-                status_parts.append(f"Y:L{state.yes_state.loss_streak}")
+                status_parts.append(f"dY:L{state.yes_state.loss_streak}")
             if state.no_state.halted:
-                status_parts.append("N:HALT")
+                status_parts.append("dN:HALT")
             elif state.no_state.loss_streak > 0:
-                status_parts.append(f"N:L{state.no_state.loss_streak}")
+                status_parts.append(f"dN:L{state.no_state.loss_streak}")
+            if state.break_yes_state.halted:
+                status_parts.append("bY:HALT")
+            elif state.break_yes_state.loss_streak > 0:
+                status_parts.append(f"bY:L{state.break_yes_state.loss_streak}")
+            if state.break_no_state.halted:
+                status_parts.append("bN:HALT")
+            elif state.break_no_state.loss_streak > 0:
+                status_parts.append(f"bN:L{state.break_no_state.loss_streak}")
             if state.match_net_pnl != 0:
                 status_parts.append(f"£{state.match_net_pnl:+.0f}")
             status_str = " ".join(status_parts) if status_parts else "—"
@@ -137,7 +192,7 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
                 d_est_str,
                 f"{result.p_yes:.1%}",
                 ev_combined,
-                f"[{signal_style}]{signal}[/{signal_style}]" if signal_style else signal,
+                signal_str,
                 status_str,
             )
 
@@ -145,12 +200,18 @@ def print_dashboard(scanner: LiveScanner, console: Console | None = None) -> Non
 
     console.print(table)
     console.print(
-        f"[dim]EV trigger: ≥{cfg.scanner.enter_margin:.0%} | "
-        f"Conviction — S1: NO={cfg.scanner.no_set1_max:.0%} YES>{cfg.scanner.yes_set1_min:.0%} (≥{cfg.scanner.set1_min_games}g) | "
+        f"[dim]Deuce: EV≥{cfg.scanner.enter_margin:.0%} | "
+        f"S1: NO={cfg.scanner.no_set1_max:.0%} YES>{cfg.scanner.yes_set1_min:.0%} (≥{cfg.scanner.set1_min_games}g) | "
         f"Post: NO<{cfg.scanner.no_post_max:.0%} YES>{cfg.scanner.yes_post_min:.0%} (W{cfg.scanner.win_long}) | "
-        f"Veto: ≥2d in {cfg.scanner.win_short}g | "
-        f"K=4 Floor={cfg.scanner.d_floor:.0%} Ceil={cfg.scanner.d_ceil:.0%}[/dim]"
+        f"Veto: ≥2d in {cfg.scanner.win_short}g[/dim]"
     )
+    if cfg.break_market.enabled:
+        bcfg = cfg.break_market
+        console.print(
+            f"[dim]Break: EV≥{bcfg.enter_margin:.0%} | "
+            f"S1: NO={bcfg.no_set1_max:.0%} YES>{bcfg.yes_set1_min:.0%} | "
+            f"Post: NO<{bcfg.no_post_max:.0%} YES>{bcfg.yes_post_min:.0%}[/dim]"
+        )
     console.print(
         "[dim]Hold: L=love 15/30/40=returner max score D=deuce BK=broken | "
         "%=clean service games (held to ≤30)[/dim]"

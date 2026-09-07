@@ -10,7 +10,7 @@ import httpx
 
 from ..alerts.dispatcher import AlertDispatcher
 from ..core.config import Config
-from ..core.math import compute_ev
+from ..core.math import compute_break_ev, compute_ev
 from ..core.model import MatchState, PendingBet, PlayerPrior
 from .providers.base import LiveProvider
 
@@ -233,6 +233,7 @@ class LiveScanner:
             self.alert_match_ids.add(state.match_id)
 
             self.dispatcher.send(
+                market="deuce",
                 match=f"{state.player_a} vs {state.player_b}",
                 match_id=state.match_id,
                 side=check_side,
@@ -248,6 +249,134 @@ class LiveScanner:
                 total_games=state.total_games,
                 long_rate=state.windowed_deuce_rate(cfg.scanner.win_long) or 0.0,
                 short_rate=state.windowed_deuce_rate(cfg.scanner.win_short) or 0.0,
+                loss_streak=side_state.loss_streak,
+            )
+
+        # --- Break market evaluation ---
+        if cfg.break_market.enabled:
+            self._evaluate_break(state)
+
+    def _evaluate_break(self, state: MatchState) -> None:
+        cfg = self.cfg
+        bcfg = cfg.break_market
+
+        # --- Settle break bets ---
+        settled = state.settle_pending_bets()
+        for bet, won in settled:
+            if bet.market != "break":
+                continue
+            side_state = state._side_state("break", bet.side)
+            result_str = "WON" if won else "LOST"
+            log.info("Settled BREAK %s %s: %s (streak=%d) [%s]",
+                     bet.side, result_str, f"£{bet.stake:.2f}",
+                     side_state.loss_streak, state.match_id)
+            if side_state.loss_streak >= bcfg.loss_streak_halt:
+                side_state.halted = True
+
+        # --- Estimation ---
+        best = state.estimate_break_rates(
+            b_floor=bcfg.b_floor, b_ceil=bcfg.b_ceil,
+        )
+        if state.next_server == "A":
+            b_next, b_after = best.b_a, best.b_b
+        else:
+            b_next, b_after = best.b_b, best.b_a
+
+        result = compute_break_ev(
+            b_next, b_after,
+            bcfg.default_odds_yes,
+            bcfg.default_odds_no,
+            0.0,
+        )
+
+        is_set1 = state.current_set == 1
+
+        # --- Conviction filters ---
+        conviction = {"YES": False, "NO": False}
+        if is_set1:
+            if state.total_games >= bcfg.set1_min_games:
+                cum_rate = state.cumulative_break_rate
+                if cum_rate is not None:
+                    if cum_rate <= bcfg.no_set1_max:
+                        conviction["NO"] = True
+                    if cum_rate >= bcfg.yes_set1_min:
+                        conviction["YES"] = True
+        else:
+            long_rate = state.windowed_break_rate(cfg.scanner.win_long)
+            if long_rate is not None:
+                if long_rate <= bcfg.no_post_max:
+                    conviction["NO"] = True
+                if long_rate >= bcfg.yes_post_min:
+                    conviction["YES"] = True
+
+            # Short-window veto for NO: if 2+ breaks in last 6, don't bet NO
+            short_breaks = state.windowed_break_count(cfg.scanner.win_short)
+            if short_breaks is not None and short_breaks >= 2:
+                conviction["NO"] = False
+
+        for check_side in ("YES", "NO"):
+            side_state = state._side_state("break", check_side)
+            ev = result.ev_yes if check_side == "YES" else result.ev_no
+
+            if side_state.hot and ev < bcfg.exit_margin:
+                side_state.hot = False
+                side_state.armed = True
+
+            if ev < bcfg.enter_margin:
+                continue
+            if not conviction[check_side]:
+                continue
+            if not side_state.armed or side_state.halted:
+                continue
+            if -state.match_net_pnl >= cfg.staking.match_loss_cap:
+                continue
+
+            odds = bcfg.default_odds_yes if check_side == "YES" else bcfg.default_odds_no
+            b = odds - 1.0
+            if b <= 0:
+                continue
+            p = (ev + 1.0) / odds
+            full_kelly = (p * b - (1 - p)) / b
+            taper = bcfg.loss_taper ** side_state.loss_streak
+            stake = cfg.staking.kelly_fraction * full_kelly * taper * cfg.staking.bankroll
+            stake = min(stake, cfg.staking.max_stake_units * cfg.staking.bankroll / 100)
+
+            if is_set1:
+                stake *= bcfg.set1_stake_factor
+
+            if stake < cfg.staking.min_stake:
+                continue
+
+            side_state.armed = False
+            side_state.hot = True
+            state.match_total_staked += stake
+            state.pending_bets.append(PendingBet(
+                side=check_side,
+                fired_at_game=state.total_games,
+                odds=odds,
+                stake=stake,
+                market="break",
+            ))
+
+            self.alert_match_ids.add(state.match_id)
+
+            self.dispatcher.send(
+                market="break",
+                match=f"{state.player_a} vs {state.player_b}",
+                match_id=state.match_id,
+                side=check_side,
+                d_a=best.b_a,
+                d_b=best.b_b,
+                games_a=best.games_a,
+                games_b=best.games_b,
+                p_yes=result.p_yes,
+                ev=ev,
+                odds=odds,
+                stake=stake,
+                set_num=state.current_set,
+                total_games=state.total_games,
+                long_rate=state.windowed_break_rate(cfg.scanner.win_long) or 0.0,
+                short_rate=state.windowed_break_rate(cfg.scanner.win_short) or 0.0,
                 loss_streak=side_state.loss_streak,
             )
 

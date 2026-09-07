@@ -20,6 +20,23 @@ scanner:
   d_ceil: 0.42
   set1_stake_factor: 0.5
 
+break_market:
+  enabled: true
+  default_odds_yes: 1.6667
+  default_odds_no: 1.6667
+  enter_margin: 0.10
+  exit_margin: 0.00
+  set1_min_games: 8
+  no_set1_max: 0.00      # cumulative break rate — 0 breaks → NO conviction
+  yes_set1_min: 0.30     # cumulative break rate for YES
+  no_post_max: 0.10      # windowed break rate for NO
+  yes_post_min: 0.30     # windowed break rate for YES
+  b_floor: 0.05
+  b_ceil: 0.50
+  loss_streak_halt: 3
+  loss_taper: 0.5
+  set1_stake_factor: 0.5
+
 api:
   provider: "api-tennis"
   base_url: "https://api.api-tennis.com/tennis/"

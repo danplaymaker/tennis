@@ -4,7 +4,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .math import DeuceEstimate, deuce_prob_from_p, server_point_win_prob
+from .math import (
+    BreakEstimate,
+    DeuceEstimate,
+    break_prob_from_p,
+    deuce_prob_from_p,
+    server_point_win_prob,
+)
 
 
 @dataclass
@@ -45,6 +51,7 @@ class PendingBet:
     fired_at_game: int  # total_games when alert fired
     odds: float
     stake: float
+    market: str = "deuce"  # "deuce" or "break"
 
 
 @dataclass
@@ -75,6 +82,11 @@ class MatchState:
     pending_bets: list = field(default_factory=list)
     yes_state: SideState = field(default_factory=SideState)
     no_state: SideState = field(default_factory=SideState)
+    # Break market state
+    breaks_a: int = 0  # times A was broken
+    breaks_b: int = 0  # times B was broken
+    break_yes_state: SideState = field(default_factory=SideState)
+    break_no_state: SideState = field(default_factory=SideState)
     match_total_staked: float = 0.0
     match_net_pnl: float = 0.0
     _seen_game_keys: set = field(default_factory=set)
@@ -139,6 +151,71 @@ class MatchState:
             return None
         return (quality["love"] + quality["15"] + quality["30"]) / total
 
+    # --- Break rate tracking ---
+
+    @property
+    def empirical_break_a(self) -> float | None:
+        """Empirical break rate when A serves (how often A gets broken)."""
+        if self.games_a_served == 0:
+            return None
+        return self.breaks_a / self.games_a_served
+
+    @property
+    def empirical_break_b(self) -> float | None:
+        if self.games_b_served == 0:
+            return None
+        return self.breaks_b / self.games_b_served
+
+    @property
+    def cumulative_break_rate(self) -> float | None:
+        if self.total_games == 0:
+            return None
+        return (self.breaks_a + self.breaks_b) / self.total_games
+
+    def windowed_break_rate(self, window: int) -> float | None:
+        """Break rate over last `window` non-tiebreak games."""
+        non_tb = [g for g in self.game_history if not g.is_tiebreak]
+        if len(non_tb) < window:
+            return None
+        return sum(1 for g in non_tb[-window:] if not g.server_held and g.hold_margin != -99) / window
+
+    def windowed_break_count(self, window: int) -> int | None:
+        """Count of breaks in last `window` non-tiebreak games."""
+        non_tb = [g for g in self.game_history if not g.is_tiebreak]
+        if len(non_tb) < window:
+            return None
+        return sum(1 for g in non_tb[-window:] if not g.server_held and g.hold_margin != -99)
+
+    def estimate_break_rates(self, prior_weight: float = 4.0,
+                             b_floor: float = 0.0, b_ceil: float = 1.0) -> BreakEstimate:
+        """Shrinkage estimator for break probability per server."""
+        adj = SURFACE_SPW_ADJUSTMENT.get(self.surface, 0.0)
+
+        p_a = server_point_win_prob(
+            self.prior_a.spw + adj, self.prior_b.rpw
+        )
+        p_b = server_point_win_prob(
+            self.prior_b.spw + adj, self.prior_a.rpw
+        )
+
+        prior_b_a = break_prob_from_p(p_a)
+        prior_b_b = break_prob_from_p(p_b)
+
+        w_a = self.games_a_served
+        w_b = self.games_b_served
+        emp_a = self.empirical_break_a if self.empirical_break_a is not None else prior_b_a
+        emp_b = self.empirical_break_b if self.empirical_break_b is not None else prior_b_b
+
+        b_a = (prior_weight * prior_b_a + w_a * emp_a) / (prior_weight + w_a)
+        b_b = (prior_weight * prior_b_b + w_b * emp_b) / (prior_weight + w_b)
+
+        b_a = min(max(b_a, b_floor), b_ceil)
+        b_b = min(max(b_b, b_floor), b_ceil)
+
+        return BreakEstimate(
+            b_a=b_a, b_b=b_b, games_a=self.games_a_served, games_b=self.games_b_served
+        )
+
     def estimate_deuce_rates(self, prior_weight: float = 4.0,
                              d_floor: float = 0.0, d_ceil: float = 1.0) -> DeuceEstimate:
         """Shrinkage estimator blending prior with in-match observations."""
@@ -180,10 +257,14 @@ class MatchState:
                 self.games_a_served += 1
                 if was_deuce:
                     self.deuces_a += 1
+                if not server_held and hold_margin != -99:
+                    self.breaks_a += 1
             else:
                 self.games_b_served += 1
                 if was_deuce:
                     self.deuces_b += 1
+                if not server_held and hold_margin != -99:
+                    self.breaks_b += 1
             self.total_games += 1
             self.next_server = "B" if server == "A" else "A"
 
@@ -196,17 +277,27 @@ class MatchState:
             if self.total_games >= bet.fired_at_game + 2:
                 idx1 = bet.fired_at_game
                 idx2 = bet.fired_at_game + 1
-                had_deuce = False
-                if idx1 < len(non_tb):
-                    had_deuce = had_deuce or non_tb[idx1].was_deuce
-                if idx2 < len(non_tb):
-                    had_deuce = had_deuce or non_tb[idx2].was_deuce
 
-                won = (bet.side == "YES" and had_deuce) or (bet.side == "NO" and not had_deuce)
+                if bet.market == "break":
+                    had_event = False
+                    if idx1 < len(non_tb):
+                        g = non_tb[idx1]
+                        had_event = had_event or (not g.server_held and g.hold_margin != -99)
+                    if idx2 < len(non_tb):
+                        g = non_tb[idx2]
+                        had_event = had_event or (not g.server_held and g.hold_margin != -99)
+                else:
+                    had_event = False
+                    if idx1 < len(non_tb):
+                        had_event = had_event or non_tb[idx1].was_deuce
+                    if idx2 < len(non_tb):
+                        had_event = had_event or non_tb[idx2].was_deuce
+
+                won = (bet.side == "YES" and had_event) or (bet.side == "NO" and not had_event)
                 payout = bet.stake * (bet.odds - 1) if won else -bet.stake
                 self.match_net_pnl += payout
 
-                side_state = self.yes_state if bet.side == "YES" else self.no_state
+                side_state = self._side_state(bet.market, bet.side)
                 if won:
                     side_state.loss_streak = 0
                 else:
@@ -216,3 +307,9 @@ class MatchState:
                 remaining.append(bet)
         self.pending_bets = remaining
         return settled
+
+    def _side_state(self, market: str, side: str) -> SideState:
+        """Get the SideState for a given market and side."""
+        if market == "break":
+            return self.break_yes_state if side == "YES" else self.break_no_state
+        return self.yes_state if side == "YES" else self.no_state
