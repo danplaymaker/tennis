@@ -1,0 +1,446 @@
+<!-- ============================================================
+  SECTION 01 — HERO  (Figma: 01 Homepage 523:3, y 0–1905 @1920)
+  Client-First V2 · Vanilla HTML/CSS/JS · GSAP + ScrollTrigger
+  Font: "Euclid Circular A" (Regular 400 / SemiBold 600) — upload to Webflow
+============================================================ -->
+<section class="section_hero">
+  <div class="hero_background"></div>
+
+  <div class="padding-global">
+
+    <!-- NAV (Figma 523:177) — sits on the 7.5rem gutter, outside container-large -->
+    <nav class="navbar_component" aria-label="Primary">
+      <a href="/" class="navbar_logo-link" data-hero="nav-item" aria-label="Playmaker home">
+        <!-- Figma asset: "Logo" (523:178) — export as SVG, 175 × 27.5 -->
+        <img class="navbar_logo" src="https://placehold.co/175x28/101010/ffffff?text=Playmaker" alt="Playmaker">
+      </a>
+
+      <p class="navbar_tagline text-size-small" data-hero="nav-item">Branding, Creative Direction<br>and Web Design Studio</p>
+
+      <div class="navbar_contact" data-hero="nav-item">
+        <a href="mailto:hello@playmaker.studio" class="navbar_contact-link text-size-small">hello@playmaker.studio</a>
+        <a href="tel:+441512720152" class="navbar_contact-link text-size-small">0151 272 0152</a>
+      </div>
+
+      <button type="button" class="navbar_menu-button" data-hero="nav-item" data-hero-menu aria-label="Open menu" aria-expanded="false">
+        <span class="navbar_menu-line" data-hero="menu-line"></span>
+        <span class="navbar_menu-line" data-hero="menu-line"></span>
+        <span class="navbar_menu-line" data-hero="menu-line"></span>
+      </button>
+    </nav>
+
+    <div class="container-large">
+      <div class="padding-section-large">
+        <div class="hero_component">
+
+          <!-- "/ EST 2018 /" (Figma 523:10) — 31/29 SemiBold, white @15% -->
+          <p class="hero_est-label" data-hero="label">/ EST<br>&nbsp;2018 /</p>
+
+          <!-- Vertical social links (Figma "DEETS" 523:175/176) -->
+          <ul class="hero_social-list" data-hero="label" role="list">
+            <li class="hero_social-item">
+              <a href="https://instagram.com/" target="_blank" rel="noopener" class="hero_social-link text-size-small" data-hero="roll-link">
+                <span class="hero_social-link-inner" data-hero="roll-inner">
+                  <span class="hero_social-link-text">Insta.</span>
+                  <span class="hero_social-link-text" aria-hidden="true">Insta.</span>
+                </span>
+              </a>
+            </li>
+            <li class="hero_social-item">
+              <a href="https://linkedin.com/" target="_blank" rel="noopener" class="hero_social-link text-size-small" data-hero="roll-link">
+                <span class="hero_social-link-inner" data-hero="roll-inner">
+                  <span class="hero_social-link-text">LinkedIn.</span>
+                  <span class="hero_social-link-text" aria-hidden="true">LinkedIn.</span>
+                </span>
+              </a>
+            </li>
+            <li class="hero_social-item">
+              <a href="https://open.spotify.com/" target="_blank" rel="noopener" class="hero_social-link text-size-small" data-hero="roll-link">
+                <span class="hero_social-link-inner" data-hero="roll-inner">
+                  <span class="hero_social-link-text">Spotify.</span>
+                  <span class="hero_social-link-text" aria-hidden="true">Spotify.</span>
+                </span>
+              </a>
+            </li>
+          </ul>
+
+          <!-- Wordmark (Figma "Group 8410" 523:66) — 968 × 567.3, two SVG layers -->
+          <h1 class="hero_wordmark">
+            <span class="hero_wordmark-layer is-letters">
+              <!-- Figma asset: "Layer_1 / Group" (523:69) — PLAYMAKER letterforms SVG, 968 × 363.53 -->
+              <img class="hero_wordmark-image" data-hero="wordmark-layer" src="https://placehold.co/968x364/202020/ffffff?text=PLAYMAKER" alt="Playmaker">
+            </span>
+            <span class="hero_wordmark-layer is-mark">
+              <!-- Figma asset: "Layer_2" (523:78) — brand mark SVG, 588.62 × 264.81 -->
+              <img class="hero_wordmark-image" data-hero="wordmark-layer" src="https://placehold.co/589x265/202020/ffff1f?text=mark" alt="">
+            </span>
+          </h1>
+
+          <!-- Play cue (Figma "Group 4" 523:6) — 70 × 70 -->
+          <a href="#showreel" class="hero_play-button" aria-label="Play showreel 2025">
+            <!-- Figma asset: "Group 4" (523:6) — play button SVG, 70 × 70 -->
+            <img class="hero_play-icon" data-hero="play" src="https://placehold.co/70x70/101010/ffffff?text=%E2%96%B6" alt="">
+          </a>
+
+          <!-- Showreel (Figma "2025_Playmaker 100% 1" 523:5) — 1536 × 864, overlaps gradient by ~2.4rem -->
+          <div class="hero_showreel-wrapper" id="showreel">
+            <p class="hero_showreel-label text-size-small" data-hero="label">Showreel 2025</p>
+            <div class="hero_showreel" data-hero="showreel">
+              <!-- Figma asset: "2025_Playmaker 100% 1" (523:5) — showreel poster, 1536 × 864 (16:9) -->
+              <img class="hero_showreel-image" data-hero="showreel-image" src="https://placehold.co/1536x864/1a1a1a/333333?text=Showreel+2025" alt="Playmaker showreel 2025 poster frame">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+/* ---------- Global / Client-First structure ---------- */
+.section_hero {
+  position: relative;
+  overflow: hidden;
+  background-color: #101010;
+  color: #ffffff;
+  font-family: "Euclid Circular A", "Helvetica Neue", Arial, sans-serif;
+}
+.hero_background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;               /* Figma "Grad" 523:4 = 1920 × 1080 = viewport height */
+  background-image: linear-gradient(211.87deg, #202020 0.14%, #101010 76.65%);
+  pointer-events: none;
+}
+.padding-global {
+  position: relative;
+  z-index: 1;
+  padding-left: 7.5rem;        /* 120px gutter @1920 */
+  padding-right: 7.5rem;
+}
+.container-large {
+  width: 100%;
+  max-width: 96rem;            /* 1536px content width → x 192–1728 @1920 */
+  margin-left: auto;
+  margin-right: auto;
+}
+.padding-section-large {
+  padding-top: 10rem;          /* nav bottom (124) → wordmark top (284) = 160 */
+  padding-bottom: 10rem;       /* showreel bottom (1905) → next section (2065) = 160 */
+}
+
+/* ---------- Global text classes ---------- */
+.text-size-small {
+  font-size: 0.875rem;         /* 14 */
+  line-height: 1.375rem;       /* 22 */
+  letter-spacing: -0.02em;     /* -0.28px */
+  font-weight: 400;
+}
+
+/* ---------- Navbar ---------- */
+.navbar_component {
+  display: grid;
+  grid-template-columns: 35.8125rem 17.9375rem 1fr auto; /* logo→tagline 573 | tagline+gap 181+106 | contact | menu */
+  align-items: center;
+  height: 2.75rem;             /* 44 */
+  margin-top: 5rem;            /* nav top = 80 */
+}
+.navbar_logo-link {
+  display: block;
+  width: 10.9375rem;           /* 175 */
+  height: 1.71875rem;          /* 27.5 */
+}
+.navbar_logo {
+  display: block;
+  width: 10.9375rem;
+  height: 1.71875rem;
+  object-fit: contain;
+}
+.navbar_tagline {
+  margin: 0;
+  color: #ffffff;
+  white-space: nowrap;
+}
+.navbar_contact {
+  display: flex;
+  flex-direction: column;
+  justify-self: start;
+}
+.navbar_contact-link {
+  color: #ffffff;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.navbar_contact-link:hover { opacity: 0.6; }
+.navbar_menu-button {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;               /* line y 89 / 101 / 113 → 10px gap */
+  width: 2.5rem;               /* 40 */
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  justify-self: end;
+}
+.navbar_menu-line {
+  display: block;
+  width: 2.5rem;               /* 40 */
+  height: 0.125rem;            /* 2 */
+  background-color: #ffff1f;
+}
+
+/* ---------- Hero component ---------- */
+.hero_component {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* "/ EST 2018 /" — Figma x119 y413 → 73px left of container, 129px below wordmark top */
+.hero_est-label {
+  position: absolute;
+  left: -4.5625rem;
+  top: 8.0625rem;
+  margin: 0;
+  font-size: 1.9375rem;        /* 31 */
+  line-height: 1.8125rem;      /* 29 */
+  font-weight: 600;
+  letter-spacing: -0.02em;     /* -0.62px */
+  color: rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+}
+
+/* Vertical social links — Figma x1783–1805 y373, rotated 90° (reads top→bottom) */
+.hero_social-list {
+  position: absolute;
+  right: -4.8125rem;           /* right edge 1805 = container edge 1728 + 77 */
+  top: 5.5625rem;              /* 373 − 284 */
+  display: flex;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transform-origin: top right;
+  transform: rotate(90deg);
+  white-space: nowrap;
+}
+.hero_social-item { display: block; }
+.hero_social-link {
+  display: block;
+  height: 1.375rem;            /* one line — mask for the roll */
+  overflow: hidden;
+  color: #ffffff;
+  text-decoration: none;
+}
+.hero_social-link-inner {
+  display: flex;
+  flex-direction: column;
+}
+.hero_social-link-text {
+  display: block;
+  height: 1.375rem;
+}
+
+/* Wordmark — 968 × 567.3 centred */
+.hero_wordmark {
+  position: relative;
+  width: 60.5rem;              /* 968 */
+  max-width: 100%;
+  aspect-ratio: 968 / 567.3025;
+  margin: 0;
+}
+.hero_wordmark-layer {
+  position: absolute;
+  display: block;
+  overflow: hidden;            /* mask for the line reveal */
+}
+.hero_wordmark-layer.is-letters {
+  left: 0;
+  top: 0;
+  width: 100%;                 /* 968 */
+  height: 64.08%;              /* 363.53 */
+}
+.hero_wordmark-layer.is-mark {
+  left: 19.607%;               /* 189.8 */
+  top: 53.322%;                /* 302.49 */
+  width: 60.808%;              /* 588.62 */
+  height: 46.679%;             /* 264.81 */
+}
+.hero_wordmark-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Play cue — 70 × 70, 40 below wordmark */
+.hero_play-button {
+  display: block;
+  width: 4.375rem;
+  height: 4.375rem;
+  margin-top: 2.5rem;
+  border-radius: 50%;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hero_play-button:hover { transform: scale(1.08); }
+.hero_play-icon {
+  display: block;
+  width: 4.375rem;
+  height: 4.375rem;
+}
+
+/* Showreel — 1536 × 864 (16:9), 80 below play cue */
+.hero_showreel-wrapper {
+  position: relative;
+  width: 100%;
+  margin-top: 5rem;
+}
+.hero_showreel-label {
+  position: absolute;
+  left: -3.5rem;               /* label x136 = container x192 − 56 */
+  top: 0;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+  transform-origin: top left;
+  transform: rotate(90deg) translateY(-100%);
+}
+.hero_showreel {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background-color: #1a1a1a;
+}
+.hero_showreel-image {
+  position: absolute;
+  left: 0;
+  top: -8%;                    /* 16% overscan → parallax headroom */
+  width: 100%;
+  height: 116%;
+  object-fit: cover;
+}
+
+/* ---------- Tablet ---------- */
+@media screen and (max-width: 991px) {
+  .padding-global { padding-left: 2.5rem; padding-right: 2.5rem; }
+  .padding-section-large { padding-top: 6rem; padding-bottom: 6rem; }
+  .navbar_component { display: flex; gap: 2.5rem; }
+  .navbar_menu-button { margin-left: auto; }
+  .hero_component { align-items: flex-start; }
+  .hero_est-label { position: static; margin-bottom: 2rem; }
+  .hero_social-list { display: none; }
+  .hero_wordmark { width: 100%; align-self: center; }
+  .hero_play-button { align-self: center; }
+  .hero_showreel-label { position: static; transform: none; margin-bottom: 1rem; }
+}
+
+/* ---------- Mobile landscape ---------- */
+@media screen and (max-width: 767px) {
+  .padding-section-large { padding-top: 4rem; padding-bottom: 4rem; }
+  .navbar_component { margin-top: 2.5rem; }
+  .navbar_tagline { display: none; }
+  .navbar_contact { display: none; }
+  .hero_background { height: 100%; }
+  .hero_showreel-wrapper { margin-top: 3rem; }
+}
+
+/* ---------- Mobile portrait ---------- */
+@media screen and (max-width: 479px) {
+  .padding-global { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .hero_est-label { font-size: 1.5rem; line-height: 1.5rem; }
+  .hero_play-button { width: 3.5rem; height: 3.5rem; margin-top: 1.5rem; }
+  .hero_play-icon { width: 3.5rem; height: 3.5rem; }
+  .hero_showreel-wrapper { margin-top: 2rem; }
+}
+</style>
+
+<!-- GSAP + ScrollTrigger — add ONCE site-wide (Project settings → Custom code → before </body>) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script>
+(function () {
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion || !window.gsap) return;               /* content stays fully visible */
+
+  var gsap = window.gsap;
+  var hasScrollTrigger = !!window.ScrollTrigger;
+  if (hasScrollTrigger) gsap.registerPlugin(window.ScrollTrigger);
+
+  var EASE = 'expo.out';                                    /* cubic-bezier(0.16, 1, 0.3, 1) */
+  var section = document.querySelector('.section_hero');
+  if (!section) return;
+
+  var navItems       = section.querySelectorAll('[data-hero="nav-item"]');
+  var wordmarkLayers = section.querySelectorAll('[data-hero="wordmark-layer"]');
+  var labels         = section.querySelectorAll('[data-hero="label"]');
+  var playIcon       = section.querySelector('[data-hero="play"]');
+  var showreel       = section.querySelector('[data-hero="showreel"]');
+  var showreelImage  = section.querySelector('[data-hero="showreel-image"]');
+
+  /* =====================================================
+     PART A — LOAD ENTRANCE (simple tweens; Flowboard-convertible)
+     ===================================================== */
+  gsap.set(navItems,       { y: 12, opacity: 0 });
+  gsap.set(wordmarkLayers, { yPercent: 40, opacity: 0 });
+  gsap.set(labels,         { opacity: 0 });
+  gsap.set(playIcon,       { scale: 0.6, opacity: 0 });
+
+  gsap.timeline({ defaults: { ease: EASE } })
+    .to(wordmarkLayers, { yPercent: 0, opacity: 1, duration: 1.2, stagger: 0.1 }, 0.1)
+    .to(navItems,       { y: 0, opacity: 1, duration: 0.6, stagger: 0.08 }, 0.3)
+    .to(labels,         { opacity: 1, duration: 0.6, stagger: 0.08 }, 0.7)
+    .to(playIcon,       { scale: 1, opacity: 1, duration: 0.6 }, 0.9);
+
+  /* =====================================================
+     PART B — SCROLL WORK (ScrollTrigger; keep as custom code)
+     ===================================================== */
+  if (hasScrollTrigger && showreel && showreelImage) {
+    /* Mask reveal: clip opens upward while the image settles from 1.15 → 1 */
+    gsap.set(showreel,      { clipPath: 'inset(100% 0% 0% 0%)' });
+    gsap.set(showreelImage, { scale: 1.15 });
+
+    gsap.timeline({
+      defaults: { ease: EASE },
+      scrollTrigger: { trigger: showreel, start: 'top 85%', once: true }
+    })
+      .to(showreel,      { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2 }, 0)
+      .to(showreelImage, { scale: 1, duration: 1.4 }, 0);
+
+    /* Parallax: ±7% of the (116%-tall) image ≈ 8% of the frame */
+    gsap.fromTo(showreelImage, { yPercent: -7 }, {
+      yPercent: 7,
+      ease: 'none',
+      scrollTrigger: { trigger: showreel, start: 'top bottom', end: 'bottom top', scrub: true }
+    });
+  }
+
+  /* =====================================================
+     PART C — HOVER MICRO-INTERACTIONS (JS, child-targeting; custom code)
+     ===================================================== */
+  /* Text roll on the vertical social links */
+  var rollLinks = section.querySelectorAll('[data-hero="roll-link"]');
+  Array.prototype.forEach.call(rollLinks, function (link) {
+    var inner = link.querySelector('[data-hero="roll-inner"]');
+    if (!inner) return;
+    link.addEventListener('mouseenter', function () { gsap.to(inner, { yPercent: -50, duration: 0.5, ease: EASE }); });
+    link.addEventListener('mouseleave', function () { gsap.to(inner, { yPercent: 0,   duration: 0.5, ease: EASE }); });
+  });
+
+  /* Menu button: lines nudge left in sequence */
+  var menuButton = section.querySelector('[data-hero-menu]');
+  if (menuButton) {
+    var lines = menuButton.querySelectorAll('[data-hero="menu-line"]');
+    menuButton.addEventListener('mouseenter', function () { gsap.to(lines, { x: -6, duration: 0.5, ease: EASE, stagger: 0.06 }); });
+    menuButton.addEventListener('mouseleave', function () { gsap.to(lines, { x: 0,  duration: 0.5, ease: EASE, stagger: 0.06 }); });
+  }
+})();
+</script>
