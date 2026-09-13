@@ -1,0 +1,1567 @@
+<title>Playmaker 2026 Homepage</title>
+<meta name="description" content="Static preview of the Figma → Webflow build. Placeholder art; swap for exported assets.">
+<style>
+  body { margin: 0; background: #101010; color: #fff; }
+  .preview_note { position: fixed; right: 1rem; bottom: 1rem; z-index: 50; padding: 0.5rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; background: rgba(16,16,16,0.85); color: rgba(255,255,255,0.6); font: 12px/1.4 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.02em; backdrop-filter: blur(6px); }
+</style>
+<div class="page-wrapper">
+<!-- ===== 00-global.html ===== -->
+<!-- ============================================================
+  00 — GLOBAL  (add ONCE per site)
+  · <style>  → Webflow global classes (Client-First V2)
+  · GSAP + ScrollTrigger + the PM motion helpers
+    → Project settings → Custom code → before </body>
+  Font: "Euclid Circular A" (Regular 400 / SemiBold 600) — upload to Webflow
+  Every page: <body class="page-wrapper"> … sections … </body>
+============================================================ -->
+
+<style>
+/* ---------- Page ---------- */
+.page-wrapper {
+  background-color: #101010;
+  color: #ffffff;
+  font-family: "Euclid Circular A", "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Structure ---------- */
+.padding-global {
+  position: relative;
+  padding-left: 7.5rem;        /* 120px gutter @1920 (nav + vertical labels sit on it) */
+  padding-right: 7.5rem;
+}
+.container-large {
+  position: relative;
+  width: 100%;
+  max-width: 96rem;            /* 1536px content column → x 192–1728 @1920 */
+  margin-left: auto;
+  margin-right: auto;
+}
+.padding-section-large  { padding-top: 7.5rem; padding-bottom: 7.5rem; }   /* 120 + 120 = 240 rhythm */
+.padding-section-medium { padding-top: 5rem;   padding-bottom: 5rem; }     /*  80 +  80 = 160 rhythm */
+.padding-section-medium.is-bottom-large { padding-bottom: 7.5rem; }
+.padding-section-large.is-bottom-medium { padding-bottom: 5rem; }
+
+/* ---------- Type (Figma text styles) ---------- */
+.heading-style-h2 {                 /* "Large": 59 / 71 SemiBold −2% */
+  margin: 0;
+  font-size: 3.6875rem;
+  line-height: 4.4375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.text-size-medium {                 /* "Medium": 22 / 29 −2% */
+  font-size: 1.375rem;
+  line-height: 1.8125rem;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+}
+.text-size-small {                  /* "Small": 14 / 22 −2% */
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+}
+.text-weight-semibold { font-weight: 600; }
+.text-color-yellow    { color: #ffff1f; }
+.text-color-muted     { color: rgba(255, 255, 255, 0.15); }
+
+/* ---------- Vertical section label (x136 @1920 = container − 56) ---------- */
+.section-label {
+  position: absolute;
+  left: -3.5rem;
+  top: 0;
+  margin: 0;
+  white-space: nowrap;
+  transform-origin: top left;
+  transform: rotate(90deg) translateY(-100%);   /* reads top → bottom, matches Figma rotate 90 */
+}
+
+/* ---------- Heading icon trio (Figma "Group 7159": 65.69 × 25) ---------- */
+.heading-icon_wrapper {
+  position: relative;
+  display: inline-block;
+  width: 4.1063rem;
+  height: 1.5625rem;
+  margin-right: 2.3125rem;     /* ≈ the 7-space indent in Figma minus the icon width */
+  vertical-align: middle;
+}
+.heading-icon_image {
+  position: absolute;
+  top: 0;
+  width: 1.415rem;             /* 22.64 */
+  height: 1.5625rem;           /* 25 */
+}
+.heading-icon_image.is-1 { left: 0; }
+.heading-icon_image.is-2 { left: 1.2763rem; }                    /* 20.42 */
+.heading-icon_image.is-3 { left: 2.5519rem; width: 1.5538rem; }  /* 40.83 / 24.86 */
+
+/* ---------- Button (Figma "Explore more": 250 × 74, 3px border, r55) ---------- */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.875rem;               /* text → arrow 14 */
+  height: 4.625rem;            /* 74 */
+  padding: 0 2.0625rem 0 2.5rem; /* 33 right / 40 left */
+  border: 0.1875rem solid #ffffff;
+  border-radius: 3.4375rem;
+  background-color: transparent;
+  color: #ffffff;
+  text-decoration: none;
+  transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.button:hover { background-color: #ffffff; color: #101010; }
+.button_text {
+  font-size: 1.375rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.button_arrow {
+  display: block;
+  width: 1.875rem;             /* 30 */
+  height: 0.9375rem;           /* ~14.7 */
+}
+
+/* ---------- Roll link (text swaps vertically on hover; driven by PM.roll) ---------- */
+.roll-link {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+}
+.roll-link_text { display: block; }
+.roll-link_text.is-clone {
+  position: absolute;
+  top: 100%;
+  left: 0;
+}
+
+/* ---------- Line reveal (markup generated by PM.revealLines) ---------- */
+.line-reveal_mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.1em;       /* keep descenders inside the mask */
+  margin-bottom: -0.1em;
+}
+.line-reveal_inner { display: block; }
+
+/* ---------- Tablet ---------- */
+@media screen and (max-width: 991px) {
+  .padding-global { padding-left: 2.5rem; padding-right: 2.5rem; }
+  .padding-section-large  { padding-top: 6rem; padding-bottom: 6rem; }
+  .padding-section-medium { padding-top: 4rem; padding-bottom: 4rem; }
+  .padding-section-medium.is-bottom-large { padding-bottom: 6rem; }
+  .padding-section-large.is-bottom-medium { padding-bottom: 4rem; }
+  .heading-style-h2 { font-size: 2.75rem; line-height: 3.375rem; }
+  .section-label { position: static; transform: none; margin-bottom: 1.5rem; }
+  .heading-icon_wrapper { margin-right: 1.5rem; }
+}
+
+/* ---------- Mobile landscape ---------- */
+@media screen and (max-width: 767px) {
+  .padding-section-large  { padding-top: 4rem; padding-bottom: 4rem; }
+  .padding-section-medium { padding-top: 3rem; padding-bottom: 3rem; }
+  .padding-section-medium.is-bottom-large { padding-bottom: 4rem; }
+  .padding-section-large.is-bottom-medium { padding-bottom: 3rem; }
+  .heading-style-h2 { font-size: 2.25rem; line-height: 2.75rem; }
+  .text-size-medium { font-size: 1.125rem; line-height: 1.5rem; }
+  .button { height: 3.75rem; padding: 0 1.5rem 0 1.75rem; }
+  .button_text { font-size: 1.125rem; }
+}
+
+/* ---------- Mobile portrait ---------- */
+@media screen and (max-width: 479px) {
+  .padding-global { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .heading-style-h2 { font-size: 1.875rem; line-height: 2.25rem; }
+  .heading-icon_wrapper { width: 3rem; height: 1.125rem; margin-right: 1rem; }
+  .heading-icon_image { width: 1rem; height: 1.125rem; }
+  .heading-icon_image.is-2 { left: 0.9rem; }
+  .heading-icon_image.is-3 { left: 1.8rem; width: 1.1rem; }
+}
+</style>
+
+<!-- GSAP + ScrollTrigger (site-wide, before </body>) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script>
+/* ============================================================
+   PM — shared motion helpers. One easing language: expo.out.
+   Every helper no-ops when GSAP is missing or the visitor
+   prefers reduced motion, so content is always visible.
+   ============================================================ */
+window.PM = (function () {
+  var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var hasGsap = !!window.gsap;
+  var hasST = hasGsap && !!window.ScrollTrigger;
+  var ready = hasGsap && !reduce;
+  if (hasST) window.gsap.registerPlugin(window.ScrollTrigger);
+
+  var EASE = 'expo.out';                       /* cubic-bezier(0.16, 1, 0.3, 1) */
+  var splitRegistry = [];
+
+  function toArray(x) {
+    if (!x) return [];
+    if (x.nodeType) return [x];
+    return Array.prototype.slice.call(x);
+  }
+  function st(el, start) {
+    return hasST ? { trigger: el, start: start || 'top 85%', once: true } : undefined;
+  }
+
+  /* Run after DOM + web fonts are ready (line splitting needs final metrics) */
+  function onReady(fn) {
+    var run = function () {
+      if (document.fonts && document.fonts.ready) { document.fonts.ready.then(fn); } else { fn(); }
+    };
+    if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', run); } else { run(); }
+  }
+
+  /* ---- Split an element into visual lines: .line-reveal_mask > .line-reveal_inner ---- */
+  function splitLines(el) {
+    var original = el.innerHTML;
+    var nodes = toArray(el.childNodes);
+    var frag = document.createDocumentFragment();
+    var units = [];
+    var forceBreak = false;
+
+    nodes.forEach(function (node) {
+      if (node.nodeType === 3) {
+        node.nodeValue.split(/(\s+)/).forEach(function (part) {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+          var span = document.createElement('span');
+          span.className = 'line-reveal_word';
+          span.textContent = part;
+          span.__pmBreak = forceBreak; forceBreak = false;
+          frag.appendChild(span); units.push(span);
+        });
+      } else if (node.nodeType === 1) {
+        if (node.tagName === 'BR') { forceBreak = true; return; }
+        node.__pmBreak = forceBreak; forceBreak = false;
+        frag.appendChild(node); units.push(node);
+      }
+    });
+
+    el.innerHTML = '';
+    el.appendChild(frag);
+
+    var lineHeight = parseFloat(window.getComputedStyle(el).lineHeight) || 24;
+    var lines = [], current = null, lastTop = null;
+    units.forEach(function (u) {
+      var top = u.getBoundingClientRect().top;
+      if (current === null || u.__pmBreak || Math.abs(top - lastTop) > lineHeight * 0.5) {
+        current = []; lines.push(current); lastTop = top;
+      }
+      current.push(u);
+    });
+
+    el.innerHTML = '';
+    var inners = [];
+    lines.forEach(function (line) {
+      var mask = document.createElement('span');  mask.className = 'line-reveal_mask';
+      var inner = document.createElement('span'); inner.className = 'line-reveal_inner';
+      line.forEach(function (u, i) {
+        if (i > 0) inner.appendChild(document.createTextNode(' '));
+        inner.appendChild(u);
+      });
+      mask.appendChild(inner);
+      el.appendChild(mask);
+      inners.push(inner);
+    });
+    return { inners: inners, original: original };
+  }
+
+  /* Un-split everything on a real width change (final state stays visible) */
+  var lastWidth = window.innerWidth, resizeTimer;
+  window.addEventListener('resize', function () {
+    if (window.innerWidth === lastWidth) return;
+    lastWidth = window.innerWidth;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      splitRegistry.forEach(function (item) {
+        if (item.tween && item.tween.scrollTrigger) item.tween.scrollTrigger.kill();
+        if (item.tween) item.tween.kill();
+        item.el.innerHTML = item.original;
+      });
+      splitRegistry = [];
+      if (hasST) window.ScrollTrigger.refresh();
+    }, 200);
+  });
+
+  var api = { reduce: reduce, ready: ready, EASE: EASE, onReady: onReady };
+
+  /* Heading: line-based mask reveal (1s, 0.08 stagger) */
+  api.revealLines = function (els, opts) {
+    if (!ready) return;
+    opts = opts || {};
+    toArray(els).forEach(function (el) {
+      var split = splitLines(el);
+      window.gsap.set(split.inners, { yPercent: 100 });
+      var tween = window.gsap.to(split.inners, {
+        yPercent: 0, duration: 1, ease: EASE, stagger: 0.08, delay: opts.delay || 0,
+        scrollTrigger: st(el, opts.start)
+      });
+      splitRegistry.push({ el: el, tween: tween, original: split.original });
+    });
+  };
+
+  /* Media: clip-path opens upward while the image settles 1.15 → 1.
+     Pass a NodeList of [data-mask] wrappers, each holding a [data-mask-image].
+     opts.group = true → one timeline, staggered, triggered by opts.trigger. */
+  api.maskReveal = function (wrappers, opts) {
+    if (!ready) return;
+    opts = opts || {};
+    var list = toArray(wrappers);
+    if (!list.length) return;
+    var build = function (tl, wrapper, at) {
+      var img = wrapper.querySelector('[data-mask-image]');
+      window.gsap.set(wrapper, { clipPath: 'inset(100% 0% 0% 0%)' });
+      if (img) window.gsap.set(img, { scale: 1.15 });
+      tl.to(wrapper, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2 }, at);
+      if (img) tl.to(img, { scale: 1, duration: 1.4 }, at);
+    };
+    if (opts.group) {
+      var tl = window.gsap.timeline({ defaults: { ease: EASE }, scrollTrigger: st(opts.trigger || list[0], opts.start) });
+      list.forEach(function (w, i) { build(tl, w, i * (opts.stagger || 0.1)); });
+    } else {
+      list.forEach(function (w) {
+        var tl = window.gsap.timeline({ defaults: { ease: EASE }, scrollTrigger: st(w, opts.start) });
+        build(tl, w, 0);
+      });
+    }
+  };
+
+  /* Scrub parallax on an over-sized image inside an overflow-hidden wrapper */
+  api.parallax = function (img, wrapper, percent) {
+    if (!ready || !hasST || !img) return;
+    var p = percent || 7;
+    window.gsap.fromTo(img, { yPercent: -p }, {
+      yPercent: p, ease: 'none',
+      scrollTrigger: { trigger: wrapper || img, start: 'top bottom', end: 'bottom top', scrub: true }
+    });
+  };
+
+  /* Card hover: image zoom inside its mask + arrow nudge */
+  api.hoverZoom = function (link) {
+    if (!ready || !link) return;
+    var img = link.querySelector('[data-hover-image]');
+    var arrow = link.querySelector('[data-hover-arrow]');
+    link.addEventListener('mouseenter', function () {
+      if (img) window.gsap.to(img, { scale: 1.05, duration: 0.8, ease: EASE, overwrite: 'auto' });
+      if (arrow) window.gsap.to(arrow, { x: 8, duration: 0.5, ease: EASE, overwrite: 'auto' });
+    });
+    link.addEventListener('mouseleave', function () {
+      if (img) window.gsap.to(img, { scale: 1, duration: 0.8, ease: EASE, overwrite: 'auto' });
+      if (arrow) window.gsap.to(arrow, { x: 0, duration: 0.5, ease: EASE, overwrite: 'auto' });
+    });
+  };
+
+  /* Text roll: .roll-link with two [data-roll-text] children (second is the clone) */
+  api.roll = function (link) {
+    if (!ready || !link) return;
+    var texts = link.querySelectorAll('[data-roll-text]');
+    if (!texts.length) return;
+    link.addEventListener('mouseenter', function () { window.gsap.to(texts, { yPercent: -100, duration: 0.5, ease: EASE, overwrite: 'auto' }); });
+    link.addEventListener('mouseleave', function () { window.gsap.to(texts, { yPercent: 0,    duration: 0.5, ease: EASE, overwrite: 'auto' }); });
+  };
+
+  /* Button: arrow nudge (the fill/colour swap is CSS :hover) */
+  api.buttonHover = function (btn) {
+    if (!ready || !btn) return;
+    var arrow = btn.querySelector('[data-button-arrow]');
+    if (!arrow) return;
+    btn.addEventListener('mouseenter', function () { window.gsap.to(arrow, { x: 6, duration: 0.5, ease: EASE, overwrite: 'auto' }); });
+    btn.addEventListener('mouseleave', function () { window.gsap.to(arrow, { x: 0, duration: 0.5, ease: EASE, overwrite: 'auto' }); });
+  };
+
+  return api;
+})();
+</script>
+
+<!-- ===== 01-hero.html ===== -->
+<!-- ============================================================
+  SECTION 01 — HERO  (Figma: 01 Homepage 523:3, y 0–1905 @1920)
+  Requires 00-global.html (structure/text classes + PM helpers)
+============================================================ -->
+<section class="section_hero">
+  <div class="hero_background"></div>
+
+  <div class="padding-global">
+
+    <!-- NAV (Figma 523:177) — sits on the 7.5rem gutter, outside container-large -->
+    <nav class="navbar_component" aria-label="Primary">
+      <a href="/" class="navbar_logo-link" data-hero="nav-item" aria-label="Playmaker home">
+        <!-- Figma asset: "Logo" (523:178) — SVG, 175 × 27.5 -->
+        <img class="navbar_logo" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='175' height='28' viewBox='0 0 175 28'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='174' height='27' fill='none' stroke='%23ffffff' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffffff' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3EPlaymaker%3C/text%3E%3C/svg%3E" alt="Playmaker">
+      </a>
+
+      <p class="navbar_tagline text-size-small" data-hero="nav-item">Branding, Creative Direction<br>and Web Design Studio</p>
+
+      <div class="navbar_contact" data-hero="nav-item">
+        <a href="mailto:hello@playmaker.studio" class="navbar_contact-link text-size-small">hello@playmaker.studio</a>
+        <a href="tel:+441512720152" class="navbar_contact-link text-size-small">0151 272 0152</a>
+      </div>
+
+      <button type="button" class="navbar_menu-button" data-hero="nav-item" data-hero-menu aria-label="Open menu" aria-expanded="false">
+        <span class="navbar_menu-line" data-hero="menu-line"></span>
+        <span class="navbar_menu-line" data-hero="menu-line"></span>
+        <span class="navbar_menu-line" data-hero="menu-line"></span>
+      </button>
+    </nav>
+
+    <div class="container-large">
+      <div class="padding-section-medium">
+        <div class="hero_component">
+
+          <!-- "/ EST 2018 /" (Figma 523:10) — 31/29 SemiBold, white @15% -->
+          <p class="hero_est-label" data-hero="label">/ EST<br>&nbsp;2018 /</p>
+
+          <!-- Vertical social links (Figma "DEETS" 523:175/176) -->
+          <ul class="hero_social-list" data-hero="label" role="list">
+            <li class="hero_social-item">
+              <a href="https://instagram.com/" target="_blank" rel="noopener" class="hero_social-link roll-link text-size-small" data-roll>
+                <span class="roll-link_text" data-roll-text>Insta.</span>
+                <span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Insta.</span>
+              </a>
+            </li>
+            <li class="hero_social-item">
+              <a href="https://linkedin.com/" target="_blank" rel="noopener" class="hero_social-link roll-link text-size-small" data-roll>
+                <span class="roll-link_text" data-roll-text>LinkedIn.</span>
+                <span class="roll-link_text is-clone" data-roll-text aria-hidden="true">LinkedIn.</span>
+              </a>
+            </li>
+            <li class="hero_social-item">
+              <a href="https://open.spotify.com/" target="_blank" rel="noopener" class="hero_social-link roll-link text-size-small" data-roll>
+                <span class="roll-link_text" data-roll-text>Spotify.</span>
+                <span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Spotify.</span>
+              </a>
+            </li>
+          </ul>
+
+          <!-- Wordmark (Figma "Group 8410" 523:66) — 968 × 567.3, two SVG layers -->
+          <h1 class="hero_wordmark">
+            <span class="hero_wordmark-layer is-letters">
+              <!-- Figma asset: "Layer_1 / Group" (523:69) — PLAYMAKER letterforms SVG, 968 × 363.53 -->
+              <img class="hero_wordmark-image" data-hero="wordmark-layer" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='968' height='364' viewBox='0 0 968 364'%3E%3Crect width='100%25' height='100%25' fill='%23202020'/%3E%3Crect x='0.5' y='0.5' width='967' height='363' fill='none' stroke='%23ffffff' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffffff' font-family='Helvetica,Arial,sans-serif' font-size='60' text-anchor='middle' dominant-baseline='middle'%3EPLAYMAKER%3C/text%3E%3C/svg%3E" alt="Playmaker">
+            </span>
+            <span class="hero_wordmark-layer is-mark">
+              <!-- Figma asset: "Layer_2" (523:78) — brand mark SVG, 588.62 × 264.81 -->
+              <img class="hero_wordmark-image" data-hero="wordmark-layer" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='589' height='265' viewBox='0 0 589 265'%3E%3Crect width='100%25' height='100%25' fill='%23202020'/%3E%3Crect x='0.5' y='0.5' width='588' height='264' fill='none' stroke='%23ffff1f' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffff1f' font-family='Helvetica,Arial,sans-serif' font-size='44' text-anchor='middle' dominant-baseline='middle'%3Emark%3C/text%3E%3C/svg%3E" alt="">
+            </span>
+          </h1>
+
+          <!-- Play cue (Figma "Group 4" 523:6) — 70 × 70 -->
+          <a href="#showreel" class="hero_play-button" aria-label="Play showreel 2025">
+            <!-- Figma asset: "Group 4" (523:6) — play button SVG, 70 × 70 -->
+            <img class="hero_play-icon" data-hero="play" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='69' height='69' fill='none' stroke='%23ffffff' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffffff' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%E2%96%B6%3C/text%3E%3C/svg%3E" alt="">
+          </a>
+
+          <!-- Showreel (Figma "2025_Playmaker 100% 1" 523:5) — 1536 × 864, overlaps gradient by ~2.4rem -->
+          <div class="hero_showreel-wrapper" id="showreel">
+            <p class="hero_showreel-label text-size-small text-color-muted" data-hero="label">Showreel 2025</p>
+            <div class="hero_showreel" data-mask>
+              <!-- Figma asset: "2025_Playmaker 100% 1" (523:5) — showreel poster, 1536 × 864 (16:9) -->
+              <img class="hero_showreel-image" data-mask-image src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1536' height='864' viewBox='0 0 1536 864'%3E%3Crect width='100%25' height='100%25' fill='%231a1a1a'/%3E%3Crect x='0.5' y='0.5' width='1535' height='863' fill='none' stroke='%23333333' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23333333' font-family='Helvetica,Arial,sans-serif' font-size='144' text-anchor='middle' dominant-baseline='middle'%3EShowreel 2025%3C/text%3E%3C/svg%3E" alt="Playmaker showreel 2025 poster frame">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.section_hero {
+  position: relative;
+  overflow: hidden;
+  background-color: #101010;
+}
+.hero_background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;               /* Figma "Grad" 523:4 = 1920 × 1080 = viewport height */
+  background-image: linear-gradient(211.87deg, #202020 0.14%, #101010 76.65%);
+  pointer-events: none;
+}
+
+/* ---------- Navbar ---------- */
+.navbar_component {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 35.8125rem 17.9375rem 1fr auto; /* logo→tagline 573 | tagline 181 + gap 106 | contact | menu */
+  align-items: center;
+  height: 2.75rem;             /* 44 */
+  margin-top: 5rem;            /* nav top = 80 */
+}
+.navbar_logo-link {
+  display: block;
+  width: 10.9375rem;           /* 175 */
+  height: 1.71875rem;          /* 27.5 */
+}
+.navbar_logo {
+  display: block;
+  width: 10.9375rem;
+  height: 1.71875rem;
+  object-fit: contain;
+}
+.navbar_tagline {
+  margin: 0;
+  color: #ffffff;
+  white-space: nowrap;
+}
+.navbar_contact {
+  display: flex;
+  flex-direction: column;
+  justify-self: start;
+}
+.navbar_contact-link {
+  color: #ffffff;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.navbar_contact-link:hover { opacity: 0.6; }
+.navbar_menu-button {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;               /* line y 89 / 101 / 113 → 10px gap */
+  width: 2.5rem;               /* 40 */
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  justify-self: end;
+}
+.navbar_menu-line {
+  display: block;
+  width: 2.5rem;               /* 40 */
+  height: 0.125rem;            /* 2 */
+  background-color: #ffff1f;
+}
+
+/* ---------- Hero component ---------- */
+.hero_component {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 5rem;           /* + section 5rem = 160 from nav bottom (124) to wordmark (284) */
+}
+
+/* "/ EST 2018 /" — Figma x119 y413 → 73px left of container, 129px below wordmark top */
+.hero_est-label {
+  position: absolute;
+  left: -4.5625rem;
+  top: 13.0625rem;             /* 5rem component padding + 8.0625rem */
+  margin: 0;
+  font-size: 1.9375rem;        /* 31 */
+  line-height: 1.8125rem;      /* 29 */
+  font-weight: 600;
+  letter-spacing: -0.02em;     /* -0.62px */
+  color: rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+}
+
+/* Vertical social links — Figma x1783–1805 y373, rotated 90° (reads top→bottom) */
+.hero_social-list {
+  position: absolute;
+  right: -4.8125rem;           /* right edge 1805 = container edge 1728 + 77 */
+  top: 10.5625rem;             /* 5rem component padding + (373 − 284) */
+  display: flex;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transform-origin: top right;
+  transform: rotate(90deg);
+  white-space: nowrap;
+}
+.hero_social-item { display: block; }
+.hero_social-link { color: #ffffff; }
+
+/* Wordmark — 968 × 567.3 centred */
+.hero_wordmark {
+  position: relative;
+  width: 60.5rem;              /* 968 */
+  max-width: 100%;
+  aspect-ratio: 968 / 567.3025;
+  margin: 0;
+}
+.hero_wordmark-layer {
+  position: absolute;
+  display: block;
+  overflow: hidden;            /* mask for the line reveal */
+}
+.hero_wordmark-layer.is-letters {
+  left: 0;
+  top: 0;
+  width: 100%;                 /* 968 */
+  height: 64.08%;              /* 363.53 */
+}
+.hero_wordmark-layer.is-mark {
+  left: 19.607%;               /* 189.8 */
+  top: 53.322%;                /* 302.49 */
+  width: 60.808%;              /* 588.62 */
+  height: 46.679%;             /* 264.81 */
+}
+.hero_wordmark-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Play cue — 70 × 70, 40 below wordmark */
+.hero_play-button {
+  display: block;
+  width: 4.375rem;
+  height: 4.375rem;
+  margin-top: 2.5rem;
+  border-radius: 50%;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hero_play-button:hover { transform: scale(1.08); }
+.hero_play-icon {
+  display: block;
+  width: 4.375rem;
+  height: 4.375rem;
+}
+
+/* Showreel — 1536 × 864 (16:9), 80 below play cue */
+.hero_showreel-wrapper {
+  position: relative;
+  width: 100%;
+  margin-top: 5rem;
+}
+.hero_showreel-label {
+  position: absolute;
+  left: -3.5rem;               /* label x136 = container x192 − 56 */
+  top: 0;
+  margin: 0;
+  white-space: nowrap;
+  transform-origin: top left;
+  transform: rotate(90deg) translateY(-100%);
+}
+.hero_showreel {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background-color: #1a1a1a;
+}
+.hero_showreel-image {
+  position: absolute;
+  left: 0;
+  top: -8%;                    /* 16% overscan → parallax headroom */
+  width: 100%;
+  height: 116%;
+  object-fit: cover;
+}
+
+/* ---------- Tablet ---------- */
+@media screen and (max-width: 991px) {
+  .navbar_component { display: flex; gap: 2.5rem; }
+  .navbar_menu-button { margin-left: auto; }
+  .hero_component { align-items: flex-start; padding-top: 2rem; }
+  .hero_est-label { position: static; margin-bottom: 2rem; }
+  .hero_social-list { display: none; }
+  .hero_wordmark { width: 100%; align-self: center; }
+  .hero_play-button { align-self: center; }
+  .hero_showreel-label { position: static; transform: none; margin-bottom: 1rem; }
+}
+
+/* ---------- Mobile landscape ---------- */
+@media screen and (max-width: 767px) {
+  .navbar_component { margin-top: 2.5rem; }
+  .navbar_tagline { display: none; }
+  .navbar_contact { display: none; }
+  .hero_background { height: 100%; }
+  .hero_showreel-wrapper { margin-top: 3rem; }
+}
+
+/* ---------- Mobile portrait ---------- */
+@media screen and (max-width: 479px) {
+  .hero_est-label { font-size: 1.5rem; line-height: 1.5rem; }
+  .hero_play-button { width: 3.5rem; height: 3.5rem; margin-top: 1.5rem; }
+  .hero_play-icon { width: 3.5rem; height: 3.5rem; }
+  .hero_showreel-wrapper { margin-top: 2rem; }
+}
+</style>
+
+<script>
+(function () {
+  function init() {
+    if (!window.PM) return;
+    window.PM.onReady(function () {
+      var section = document.querySelector('.section_hero');
+      if (!section || !window.PM.ready) return;
+      var gsap = window.gsap, EASE = window.PM.EASE;
+
+      /* ---- PART A — load entrance (plain tweens; Flowboard-convertible) ---- */
+      var navItems       = section.querySelectorAll('[data-hero="nav-item"]');
+      var wordmarkLayers = section.querySelectorAll('[data-hero="wordmark-layer"]');
+      var labels         = section.querySelectorAll('[data-hero="label"]');
+      var playIcon       = section.querySelector('[data-hero="play"]');
+
+      gsap.set(navItems,       { y: 12, opacity: 0 });
+      gsap.set(wordmarkLayers, { yPercent: 40, opacity: 0 });
+      gsap.set(labels,         { opacity: 0 });
+      gsap.set(playIcon,       { scale: 0.6, opacity: 0 });
+
+      gsap.timeline({ defaults: { ease: EASE } })
+        .to(wordmarkLayers, { yPercent: 0, opacity: 1, duration: 1.2, stagger: 0.1 }, 0.1)
+        .to(navItems,       { y: 0, opacity: 1, duration: 0.6, stagger: 0.08 }, 0.3)
+        .to(labels,         { opacity: 1, duration: 0.6, stagger: 0.08 }, 0.7)
+        .to(playIcon,       { scale: 1, opacity: 1, duration: 0.6 }, 0.9);
+
+      /* ---- PART B — scroll + hover (PM helpers; custom code) ---- */
+      window.PM.maskReveal(section.querySelectorAll('[data-mask]'));
+      window.PM.parallax(section.querySelector('[data-mask-image]'), section.querySelector('[data-mask]'), 7);
+      Array.prototype.forEach.call(section.querySelectorAll('[data-roll]'), window.PM.roll);
+
+      var menuButton = section.querySelector('[data-hero-menu]');
+      if (menuButton) {
+        var lines = menuButton.querySelectorAll('[data-hero="menu-line"]');
+        menuButton.addEventListener('mouseenter', function () { gsap.to(lines, { x: -6, duration: 0.5, ease: EASE, stagger: 0.06 }); });
+        menuButton.addEventListener('mouseleave', function () { gsap.to(lines, { x: 0,  duration: 0.5, ease: EASE, stagger: 0.06 }); });
+      }
+    });
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>
+
+<!-- ===== 02-statement.html ===== -->
+<!-- ============================================================
+  SECTION 02 — STATEMENT  (Figma "Group 8505" 523:82, y 2065–2207 @1920)
+  Requires 00-global.html
+============================================================ -->
+<section class="section_statement">
+  <div class="padding-global">
+    <div class="container-large">
+      <div class="padding-section-medium">
+        <div class="statement_component">
+
+          <!-- 59/71 SemiBold, 1107 wide (523:86) with the icon trio (523:87) inline on line 1 -->
+          <h2 class="statement_heading heading-style-h2" data-reveal-lines>
+            <span class="heading-icon_wrapper" aria-hidden="true">
+              <!-- Figma asset: "Group 1777" (523:90) — SVG 22.64 × 25 -->
+              <img class="heading-icon_image is-1" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='23' height='25' viewBox='0 0 23 25'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='22' height='24' fill='none' stroke='%23ffff1f' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffff1f' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%3C/text%3E%3C/svg%3E" alt="">
+              <!-- Figma asset: "Group 1780" (523:95) — SVG 22.64 × 25 -->
+              <img class="heading-icon_image is-2" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='23' height='25' viewBox='0 0 23 25'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='22' height='24' fill='none' stroke='%23ffff1f' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffff1f' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%3C/text%3E%3C/svg%3E" alt="">
+              <!-- Figma asset: "Path 261" (523:98) — SVG 24.86 × 25 -->
+              <img class="heading-icon_image is-3" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 25 25'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='24' height='24' fill='none' stroke='%23ffff1f' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffff1f' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%3C/text%3E%3C/svg%3E" alt="">
+            </span>We exist to be <span class="statement_highlight">Creative Allies</span> to our clients and the local community.
+          </h2>
+
+          <!-- 22/29 Regular, 391 wide, right-aligned to the container (523:84) -->
+          <p class="statement_text text-size-medium" data-reveal-fade>We cut through the buzzwords and bloating to deliver clarity, strategy and tools to shape your identity and build momentum.</p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.section_statement {
+  position: relative;
+  background-color: #101010;
+}
+.statement_component {
+  display: grid;
+  grid-template-columns: 69.1875rem 24.4375rem;   /* 1107 | 391 */
+  justify-content: space-between;
+  column-gap: 2.5rem;                             /* 1298 → 1338 = 40 */
+  align-items: start;
+}
+.statement_heading {
+  max-width: 69.1875rem;
+}
+.statement_highlight {
+  display: inline;                                /* separate span in Figma — same colour, kept for styling hook */
+}
+.statement_text {
+  margin: 0;
+  padding-top: 0.6875rem;                         /* 2076 − 2065 = 11 */
+}
+
+@media screen and (max-width: 991px) {
+  .statement_component { grid-template-columns: 1fr; row-gap: 2.5rem; }
+  .statement_heading { max-width: 100%; }
+  .statement_text { max-width: 30rem; padding-top: 0; }
+}
+</style>
+
+<script>
+(function () {
+  function init() {
+    if (!window.PM) return;
+    window.PM.onReady(function () {
+      var section = document.querySelector('.section_statement');
+      if (!section || !window.PM.ready) return;
+      var gsap = window.gsap, EASE = window.PM.EASE;
+
+      /* ---- PART A — scroll-in fade (plain tween; Flowboard-convertible) ---- */
+      var fade = section.querySelectorAll('[data-reveal-fade]');
+      gsap.set(fade, { y: 24, opacity: 0 });
+      gsap.to(fade, {
+        y: 0, opacity: 1, duration: 0.8, ease: EASE, delay: 0.3,
+        scrollTrigger: window.ScrollTrigger ? { trigger: section, start: 'top 80%', once: true } : undefined
+      });
+
+      /* ---- PART B — line mask reveal (PM helper; custom code) ---- */
+      window.PM.revealLines(section.querySelectorAll('[data-reveal-lines]'));
+    });
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>
+
+<!-- ===== 03-work.html ===== -->
+<!-- ============================================================
+  SECTION 03 — FEATURED WORK  (Figma nodes 523:11 – 523:53, y 2367–6262 @1920)
+  Requires 00-global.html
+============================================================ -->
+<section class="section_work">
+  <div class="padding-global">
+    <div class="container-large">
+      <div class="padding-section-medium is-bottom-large">
+        <div class="work_component">
+
+          <p class="section-label text-size-small text-color-muted">Featured work</p>
+
+          <div class="work_grid">
+
+            <!-- 1 · Distilled — poster card 749 × 1123 (Figma "Group 8554" 523:12 + caption 523:99) -->
+            <a href="#" class="work_item" data-work-item>
+              <div class="work_image-wrapper is-poster" data-mask>
+                <!-- Figma asset: "Poster 1 1" (523:17) — 1104.65 × 965.76, offset −66 / +157 inside the #d1cdc7 card -->
+                <img class="work_image is-poster" data-mask-image data-hover-image src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1105' height='966' viewBox='0 0 1105 966'%3E%3Crect width='100%25' height='100%25' fill='%23b8b3ac'/%3E%3Crect x='0.5' y='0.5' width='1104' height='965' fill='none' stroke='%23101010' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23101010' font-family='Helvetica,Arial,sans-serif' font-size='161' text-anchor='middle' dominant-baseline='middle'%3EPoster 1%3C/text%3E%3C/svg%3E" alt="Distilled brand poster">
+              </div>
+              <div class="work_caption-wrapper" data-reveal-fade>
+                <p class="work_caption"><span class="work_caption-title">Distilled</span><br>Positioning Ireland’s three most loved internet brands</p>
+                <!-- Figma asset: "Arrow 2" (523:102) — SVG 30 × ~14.7 -->
+                <img class="work_arrow" data-hover-arrow src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='15' viewBox='0 0 30 15'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='29' height='14' fill='none' stroke='%23ffffff' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffffff' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%E2%86%92%3C/text%3E%3C/svg%3E" alt="">
+              </div>
+            </a>
+
+            <!-- 2 · Eureka! — square 747 × 747 (Figma "Group 29" 523:18) -->
+            <a href="#" class="work_item" data-work-item>
+              <div class="work_image-wrapper is-square" data-mask>
+                <!-- Figma asset: "Playmaker_Eureka_1edit 1" (523:26) — 1493 × 840, offset −177 / −46 -->
+                <img class="work_image is-eureka" data-mask-image data-hover-image src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1493' height='840' viewBox='0 0 1493 840'%3E%3Crect width='100%25' height='100%25' fill='%232a2a2a'/%3E%3Crect x='0.5' y='0.5' width='1492' height='839' fill='none' stroke='%23555555' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23555555' font-family='Helvetica,Arial,sans-serif' font-size='140' text-anchor='middle' dominant-baseline='middle'%3EEureka%3C/text%3E%3C/svg%3E" alt="Eureka! science centre branding">
+              </div>
+              <div class="work_caption-wrapper" data-reveal-fade>
+                <p class="work_caption"><span class="work_caption-title">Eureka!</span><br>Encouraging the How, Why and What if? on the banks of the Mersey</p>
+                <!-- Figma asset: "Arrow 2" (523:22) -->
+                <img class="work_arrow" data-hover-arrow src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='15' viewBox='0 0 30 15'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='29' height='14' fill='none' stroke='%23ffffff' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffffff' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%E2%86%92%3C/text%3E%3C/svg%3E" alt="">
+              </div>
+            </a>
+
+            <!-- 3 · NCRQ — wide device card 1246 × 831, right-aligned (Figma "Group 8555" 523:103 + caption 523:108) -->
+            <a href="#" class="work_item is-wide" data-work-item>
+              <div class="work_image-wrapper is-devices" data-mask>
+                <div class="work_device-row" data-mask-image data-hover-image>
+                  <!-- Figma asset: "IPAD vWeb 1 1" (523:105) — 381 × 503 -->
+                  <img class="work_device is-tablet-1" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='381' height='503' viewBox='0 0 381 503'%3E%3Crect width='100%25' height='100%25' fill='%231a1a1a'/%3E%3Crect x='0.5' y='0.5' width='380' height='502' fill='none' stroke='%23555555' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23555555' font-family='Helvetica,Arial,sans-serif' font-size='63' text-anchor='middle' dominant-baseline='middle'%3EiPad%3C/text%3E%3C/svg%3E" alt="NCRQ website on a tablet">
+                  <!-- Figma asset: "Mobile web 1 1" (523:107) — 255 × 494 -->
+                  <img class="work_device is-phone" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='255' height='494' viewBox='0 0 255 494'%3E%3Crect width='100%25' height='100%25' fill='%231a1a1a'/%3E%3Crect x='0.5' y='0.5' width='254' height='493' fill='none' stroke='%23555555' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23555555' font-family='Helvetica,Arial,sans-serif' font-size='42' text-anchor='middle' dominant-baseline='middle'%3EMobile%3C/text%3E%3C/svg%3E" alt="NCRQ website on a phone">
+                  <!-- Figma asset: "IPAD vWeb 2 1" (523:106) — 381 × 494 -->
+                  <img class="work_device is-tablet-2" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='381' height='494' viewBox='0 0 381 494'%3E%3Crect width='100%25' height='100%25' fill='%231a1a1a'/%3E%3Crect x='0.5' y='0.5' width='380' height='493' fill='none' stroke='%23555555' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23555555' font-family='Helvetica,Arial,sans-serif' font-size='63' text-anchor='middle' dominant-baseline='middle'%3EiPad%3C/text%3E%3C/svg%3E" alt="NCRQ website on a second tablet">
+                </div>
+              </div>
+              <div class="work_caption-wrapper" data-reveal-fade>
+                <p class="work_caption is-wide"><span class="work_caption-title">NCRQ</span><br>Reimagining health and safety accreditation</p>
+                <!-- Figma asset: "Arrow 2" (523:112) -->
+                <img class="work_arrow" data-hover-arrow src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='15' viewBox='0 0 30 15'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='29' height='14' fill='none' stroke='%23ffffff' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffffff' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%E2%86%92%3C/text%3E%3C/svg%3E" alt="">
+              </div>
+            </a>
+
+            <!-- 4 · Leonard Curtis — square 747 × 747 (Figma "Group 32" 523:28) -->
+            <a href="#" class="work_item" data-work-item>
+              <div class="work_image-wrapper is-square" data-mask>
+                <!-- Figma asset: "Playmaker_LeonardCurtis_1 2" (523:40) — 1395.14 × 785.09, offset −378 / −18.5 -->
+                <img class="work_image is-leonard" data-mask-image data-hover-image src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1395' height='785' viewBox='0 0 1395 785'%3E%3Crect width='100%25' height='100%25' fill='%232a2a2a'/%3E%3Crect x='0.5' y='0.5' width='1394' height='784' fill='none' stroke='%23555555' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23555555' font-family='Helvetica,Arial,sans-serif' font-size='130' text-anchor='middle' dominant-baseline='middle'%3ELeonard Curtis%3C/text%3E%3C/svg%3E" alt="Leonard Curtis brand campaign">
+              </div>
+              <div class="work_caption-wrapper" data-reveal-fade>
+                <p class="work_caption"><span class="work_caption-title">Leonard Curtis</span><br>Moving forward with purpose</p>
+                <!-- Figma asset: "Arrow 2" (523:34) -->
+                <img class="work_arrow" data-hover-arrow src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='15' viewBox='0 0 30 15'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='29' height='14' fill='none' stroke='%23ffffff' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffffff' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%E2%86%92%3C/text%3E%3C/svg%3E" alt="">
+              </div>
+            </a>
+
+            <!-- 5 · Hurtigruten — tall 749 × 1123 (Figma "Group 31" 523:41) -->
+            <a href="#" class="work_item" data-work-item>
+              <div class="work_image-wrapper is-tall" data-mask>
+                <!-- Figma asset: "Playmaker_Hurtigruten_Thumb 1" (523:45) — 798.62 × 1207.22, offset −37.85 / −79 -->
+                <img class="work_image is-hurtigruten" data-mask-image data-hover-image src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='799' height='1207' viewBox='0 0 799 1207'%3E%3Crect width='100%25' height='100%25' fill='%232a2a2a'/%3E%3Crect x='0.5' y='0.5' width='798' height='1206' fill='none' stroke='%23555555' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23555555' font-family='Helvetica,Arial,sans-serif' font-size='133' text-anchor='middle' dominant-baseline='middle'%3EHurtigruten%3C/text%3E%3C/svg%3E" alt="Hurtigruten luxury cruise campaign">
+              </div>
+              <div class="work_caption-wrapper" data-reveal-fade>
+                <p class="work_caption"><span class="work_caption-title">Hurtigruten</span><br>Making tomorrow better through luxury cruise travel</p>
+                <!-- Figma asset: "Group 21" (523:48) — arrow SVG 30.95 × ~14.7 -->
+                <img class="work_arrow" data-hover-arrow src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='15' viewBox='0 0 30 15'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='29' height='14' fill='none' stroke='%23ffffff' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffffff' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%E2%86%92%3C/text%3E%3C/svg%3E" alt="">
+              </div>
+            </a>
+
+          </div>
+
+          <!-- Explore more (Figma "Group 23" 523:50) -->
+          <div class="work_button-wrapper" data-reveal-fade>
+            <a href="#" class="button" data-button>
+              <span class="button_text">Explore more</span>
+              <!-- Figma asset: "Arrow 2" (523:53) -->
+              <img class="button_arrow" data-button-arrow src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='15' viewBox='0 0 30 15'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='29' height='14' fill='none' stroke='%23ffffff' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffffff' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%E2%86%92%3C/text%3E%3C/svg%3E" alt="">
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.section_work {
+  position: relative;
+  background-color: #101010;
+}
+.work_component {
+  position: relative;
+}
+.work_grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;   /* 749 | 747 */
+  column-gap: 2.5rem;               /* 940 → 982 = 42 (approx.) */
+  row-gap: 7.5rem;                  /* 120 between rows */
+  align-items: start;
+}
+.work_item {
+  display: block;
+  color: #ffffff;
+  text-decoration: none;
+}
+.work_item.is-wide {
+  grid-column: 1 / -1;
+  justify-self: end;
+  width: 77.875rem;                 /* 1246 */
+  max-width: 100%;
+}
+
+/* ---- Image treatments ---- */
+.work_image-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background-color: #1a1a1a;
+}
+.work_image-wrapper.is-poster {
+  aspect-ratio: 749 / 1123;
+  background-color: #d1cdc7;
+}
+.work_image-wrapper.is-square { aspect-ratio: 1 / 1; }
+.work_image-wrapper.is-tall   { aspect-ratio: 749 / 1123; }
+.work_image-wrapper.is-devices {
+  aspect-ratio: 1246 / 831;
+  background-color: #d1cdc7;
+}
+.work_image {
+  position: absolute;
+  display: block;
+  object-fit: cover;
+}
+/* Crops reproduce the Figma offsets as % of the card */
+.work_image.is-poster      { left: -8.81%;  top: 13.98%; width: 147.48%; height: 86.0%; }
+.work_image.is-eureka      { left: -23.7%;  top: -6.2%;  width: 199.9%;  height: 112.4%; }
+.work_image.is-leonard     { left: -50.62%; top: -2.48%; width: 186.77%; height: 105.1%; }
+.work_image.is-hurtigruten { left: -5.05%;  top: -7.04%; width: 106.63%; height: 107.5%; }
+
+/* NCRQ devices: 164 top/bottom, 97 left, 18 gaps */
+.work_device-row {
+  position: absolute;
+  left: 7.78%;                      /* 97 / 1246 */
+  top: 19.73%;                      /* 164 / 831 */
+  width: 81.62%;                    /* 1017 / 1246 */
+  display: flex;
+  align-items: flex-start;
+  gap: 1.77%;                       /* 18 / 1017 */
+}
+.work_device {
+  display: block;
+  height: auto;
+}
+.work_device.is-tablet-1 { width: 37.46%; }   /* 381 / 1017 */
+.work_device.is-phone    { width: 25.07%; }   /* 255 / 1017 */
+.work_device.is-tablet-2 { width: 37.46%; }
+
+/* ---- Captions (22 / 28, title SemiBold) ---- */
+.work_caption-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-top: 5rem;                 /* image → caption 80 */
+}
+.work_caption {
+  margin: 0;
+  max-width: 26.75rem;              /* 428 */
+  font-size: 1.375rem;
+  line-height: 1.75rem;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+}
+.work_caption.is-wide { max-width: 36.25rem; }   /* 580 */
+.work_caption-title { font-weight: 600; }
+.work_arrow {
+  display: block;
+  flex: none;
+  width: 1.875rem;
+  height: 0.9375rem;
+  margin-top: 0.625rem;             /* centre on the first line (y +17) */
+}
+.work_button-wrapper {
+  margin-top: 2.5rem;               /* caption bottom 6148 → button 6188 */
+}
+
+/* ---------- Tablet ---------- */
+@media screen and (max-width: 991px) {
+  .work_grid { grid-template-columns: 1fr; row-gap: 4rem; }
+  .work_item.is-wide { width: 100%; }
+  .work_caption-wrapper { margin-top: 2rem; }
+  .work_caption { max-width: 100%; }
+}
+
+/* ---------- Mobile landscape ---------- */
+@media screen and (max-width: 767px) {
+  .work_caption { font-size: 1.125rem; line-height: 1.5rem; }
+  .work_arrow { margin-top: 0.3rem; }
+}
+</style>
+
+<script>
+(function () {
+  function init() {
+    if (!window.PM) return;
+    window.PM.onReady(function () {
+      var section = document.querySelector('.section_work');
+      if (!section || !window.PM.ready) return;
+      var gsap = window.gsap, EASE = window.PM.EASE;
+
+      /* ---- PART A — caption + button fade-ups (plain tweens; Flowboard-convertible) ---- */
+      Array.prototype.forEach.call(section.querySelectorAll('[data-reveal-fade]'), function (el) {
+        gsap.set(el, { y: 24, opacity: 0 });
+        gsap.to(el, {
+          y: 0, opacity: 1, duration: 0.8, ease: EASE, delay: 0.4,
+          scrollTrigger: window.ScrollTrigger ? { trigger: el, start: 'top 92%', once: true } : undefined
+        });
+      });
+
+      /* ---- PART B — mask reveals + hover (PM helpers; custom code) ---- */
+      window.PM.maskReveal(section.querySelectorAll('[data-mask]'));
+      Array.prototype.forEach.call(section.querySelectorAll('[data-work-item]'), window.PM.hoverZoom);
+      Array.prototype.forEach.call(section.querySelectorAll('[data-button]'), window.PM.buttonHover);
+    });
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>
+
+<!-- ===== 04-services.html ===== -->
+<!-- ============================================================
+  SECTION 04 — OUR SERVICES  (Figma "Group 7160" 523:54, y 6502–7160 @1920)
+  Requires 00-global.html
+============================================================ -->
+<section class="section_services">
+  <div class="padding-global">
+    <div class="container-large">
+      <div class="padding-section-large">
+        <div class="services_component">
+
+          <p class="section-label is-services text-size-small text-color-muted">Our services</p>
+
+          <!-- 59/71 SemiBold, 1230 wide; separators are #ffff1f (523:58) -->
+          <p class="services_list heading-style-h2" data-reveal-lines>
+            <span class="services_item">Brand Strategy</span><span class="services_dot"> . </span>
+            <span class="services_item">Brand Identity</span><span class="services_dot"> . </span>
+            <span class="services_item">Event Branding</span><span class="services_dot"> . </span>
+            <span class="services_item">Employer Brand</span><span class="services_dot"> . </span>
+            <span class="services_item">Creative Direction</span><span class="services_dot"> . </span>
+            <span class="services_item">Campaign &amp; Content Creation</span><span class="services_dot"> . </span>
+            <span class="services_item">Video &amp; Animation</span><span class="services_dot"> . </span>
+            <span class="services_item">User Experience Design</span><span class="services_dot"> . </span>
+            <span class="services_item">Web Design</span><span class="services_dot"> . </span>
+            <span class="services_item">Web Development</span><span class="services_dot"> . </span><br>
+            <span class="services_item">Webflow certified expert</span>
+          </p>
+
+          <!-- Partner / platform logos (Figma "Group 34" 523:59) — 6 logos, space-between, vertically centred -->
+          <div class="services_logo-row">
+            <!-- Figma asset: "image 4" (523:60) — 157.61 × 84.18 -->
+            <img class="services_logo is-1" data-reveal-logo src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='158' height='84' viewBox='0 0 158 84'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='157' height='83' fill='none' stroke='%23666666' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23666666' font-family='Helvetica,Arial,sans-serif' font-size='14' text-anchor='middle' dominant-baseline='middle'%3ELogo 1%3C/text%3E%3C/svg%3E" alt="Partner logo">
+            <!-- Figma asset: "image 10" (523:65) — 199.69 × 49.25 -->
+            <img class="services_logo is-2" data-reveal-logo src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='49' viewBox='0 0 200 49'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='199' height='48' fill='none' stroke='%23666666' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23666666' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3ELogo 2%3C/text%3E%3C/svg%3E" alt="Partner logo">
+            <!-- Figma asset: "image 6" (523:61) — 222.98 × 65.37 -->
+            <img class="services_logo is-3" data-reveal-logo src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='223' height='65' viewBox='0 0 223 65'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='222' height='64' fill='none' stroke='%23666666' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23666666' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3ELogo 3%3C/text%3E%3C/svg%3E" alt="Partner logo">
+            <!-- Figma asset: "image 8" (523:62) — 61.79 × 106.56 -->
+            <img class="services_logo is-4" data-reveal-logo src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='107' viewBox='0 0 62 107'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='61' height='106' fill='none' stroke='%23666666' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23666666' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E4%3C/text%3E%3C/svg%3E" alt="Partner logo">
+            <!-- Figma asset: "image 9" (523:63) — 196.11 × 30.45 -->
+            <img class="services_logo is-5" data-reveal-logo src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='196' height='30' viewBox='0 0 196 30'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='195' height='29' fill='none' stroke='%23666666' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23666666' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3ELogo 5%3C/text%3E%3C/svg%3E" alt="Partner logo">
+            <!-- Figma asset: "image 7" (523:64) — 206.86 × 36.71 -->
+            <img class="services_logo is-6" data-reveal-logo src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='207' height='37' viewBox='0 0 207 37'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='206' height='36' fill='none' stroke='%23666666' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23666666' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3ELogo 6%3C/text%3E%3C/svg%3E" alt="Webflow certified partner">
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.section_services {
+  position: relative;
+  background-color: #101010;
+}
+.services_component {
+  position: relative;
+}
+.section-label.is-services { top: 0.875rem; }   /* label y 6516 vs text 6502 */
+.services_list {
+  max-width: 76.875rem;             /* 1230 */
+}
+.services_item { display: inline; }
+.services_dot  { display: inline; color: #ffff1f; }
+
+.services_logo-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 7.875rem;             /* list bottom 6928 → logos 7054 = 126 */
+  min-height: 6.66rem;              /* 106.56 */
+}
+.services_logo {
+  display: block;
+  flex: none;
+  object-fit: contain;
+}
+.services_logo.is-1 { width: 9.8503rem;  height: 5.261rem; }
+.services_logo.is-2 { width: 12.4808rem; height: 3.0782rem; }
+.services_logo.is-3 { width: 13.936rem;  height: 4.0856rem; }
+.services_logo.is-4 { width: 3.8618rem;  height: 6.6602rem; }
+.services_logo.is-5 { width: 12.257rem;  height: 1.9029rem; }
+.services_logo.is-6 { width: 12.9286rem; height: 2.2947rem; }
+
+/* ---------- Tablet ---------- */
+@media screen and (max-width: 991px) {
+  .services_list { max-width: 100%; }
+  .services_logo-row { flex-wrap: wrap; justify-content: flex-start; gap: 2.5rem 3rem; margin-top: 4rem; }
+}
+
+/* ---------- Mobile landscape ---------- */
+@media screen and (max-width: 767px) {
+  .services_logo-row { gap: 2rem 2.5rem; }
+  .services_logo { transform-origin: left center; }
+  .services_logo.is-1 { width: 7.4rem;  height: 3.95rem; }
+  .services_logo.is-2 { width: 9.4rem;  height: 2.3rem; }
+  .services_logo.is-3 { width: 10.5rem; height: 3.1rem; }
+  .services_logo.is-4 { width: 2.9rem;  height: 5rem; }
+  .services_logo.is-5 { width: 9.2rem;  height: 1.45rem; }
+  .services_logo.is-6 { width: 9.7rem;  height: 1.75rem; }
+}
+</style>
+
+<script>
+(function () {
+  function init() {
+    if (!window.PM) return;
+    window.PM.onReady(function () {
+      var section = document.querySelector('.section_services');
+      if (!section || !window.PM.ready) return;
+      var gsap = window.gsap, EASE = window.PM.EASE;
+
+      /* ---- PART A — logo stagger (plain tween; Flowboard-convertible) ---- */
+      var logos = section.querySelectorAll('[data-reveal-logo]');
+      gsap.set(logos, { y: 16, opacity: 0 });
+      gsap.to(logos, {
+        y: 0, opacity: 1, duration: 0.6, ease: EASE, stagger: 0.06,
+        scrollTrigger: window.ScrollTrigger ? { trigger: section.querySelector('.services_logo-row'), start: 'top 90%', once: true } : undefined
+      });
+
+      /* ---- PART B — line mask reveal on the services list (PM helper; custom code) ---- */
+      window.PM.revealLines(section.querySelectorAll('[data-reveal-lines]'));
+    });
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>
+
+<!-- ===== 05-studio.html ===== -->
+<!-- ============================================================
+  SECTION 05 — OUR STUDIO SPACE  (Figma "Group 8509" 523:130, y 7400–8313 @1920)
+  Requires 00-global.html
+============================================================ -->
+<section class="section_studio">
+  <div class="padding-global">
+    <div class="container-large">
+      <div class="padding-section-large is-bottom-medium">
+        <div class="studio_component">
+
+          <p class="section-label is-studio text-size-small text-color-muted">Our studio space</p>
+
+          <!-- 59/71 SemiBold, 1107 wide (523:149) with icon trio (523:150) -->
+          <h2 class="studio_heading heading-style-h2" data-reveal-lines>
+            <span class="heading-icon_wrapper" aria-hidden="true">
+              <!-- Figma asset: "Group 1777" (523:153) — SVG 22.64 × 25 -->
+              <img class="heading-icon_image is-1" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='23' height='25' viewBox='0 0 23 25'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='22' height='24' fill='none' stroke='%23ffff1f' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffff1f' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%3C/text%3E%3C/svg%3E" alt="">
+              <!-- Figma asset: "Group 1780" (523:158) — SVG 22.64 × 25 -->
+              <img class="heading-icon_image is-2" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='23' height='25' viewBox='0 0 23 25'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='22' height='24' fill='none' stroke='%23ffff1f' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffff1f' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%3C/text%3E%3C/svg%3E" alt="">
+              <!-- Figma asset: "Path 261" (523:161) — SVG 24.86 × 25 -->
+              <img class="heading-icon_image is-3" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 25 25'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='24' height='24' fill='none' stroke='%23ffff1f' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffff1f' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%3C/text%3E%3C/svg%3E" alt="">
+            </span>Designing a <span class="studio_highlight">creative studio</span> to share with the community
+          </h2>
+
+          <!-- 4 × 358 × 537 (Figma "Group 8507" 523:131) -->
+          <div class="studio_grid">
+            <div class="studio_image-wrapper" data-mask>
+              <!-- Figma asset: "image 16" (523:140) — 411.27 × 548.36, offset −14.5 / −1.5 -->
+              <img class="studio_image is-1" data-mask-image src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='411' height='548' viewBox='0 0 411 548'%3E%3Crect width='100%25' height='100%25' fill='%232a2a2a'/%3E%3Crect x='0.5' y='0.5' width='410' height='547' fill='none' stroke='%23555555' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23555555' font-family='Helvetica,Arial,sans-serif' font-size='68' text-anchor='middle' dominant-baseline='middle'%3EStudio 1%3C/text%3E%3C/svg%3E" alt="Playmaker studio interior">
+            </div>
+            <div class="studio_image-wrapper" data-mask>
+              <!-- Figma asset: "Studio_Playmaker 5 1" (523:134) — 403.39 × 537.85, offset −30.6 / 0 -->
+              <img class="studio_image is-2" data-mask-image src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='403' height='538' viewBox='0 0 403 538'%3E%3Crect width='100%25' height='100%25' fill='%232a2a2a'/%3E%3Crect x='0.5' y='0.5' width='402' height='537' fill='none' stroke='%23555555' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23555555' font-family='Helvetica,Arial,sans-serif' font-size='67' text-anchor='middle' dominant-baseline='middle'%3EStudio 2%3C/text%3E%3C/svg%3E" alt="Playmaker studio workspace">
+            </div>
+            <div class="studio_image-wrapper" data-mask>
+              <!-- Figma asset: "image 17" (523:143) — 431.51 × 575.35, offset −48.1 / −16.8 -->
+              <img class="studio_image is-3" data-mask-image src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='432' height='575' viewBox='0 0 432 575'%3E%3Crect width='100%25' height='100%25' fill='%232a2a2a'/%3E%3Crect x='0.5' y='0.5' width='431' height='574' fill='none' stroke='%23555555' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23555555' font-family='Helvetica,Arial,sans-serif' font-size='72' text-anchor='middle' dominant-baseline='middle'%3EStudio 3%3C/text%3E%3C/svg%3E" alt="Playmaker studio event space">
+            </div>
+            <div class="studio_image-wrapper" data-mask>
+              <!-- Figma asset: "IMG_1147 1" (523:137) — 449.32 × 599.57, offset −17.4 / +1.1 -->
+              <img class="studio_image is-4" data-mask-image src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='449' height='600' viewBox='0 0 449 600'%3E%3Crect width='100%25' height='100%25' fill='%232a2a2a'/%3E%3Crect x='0.5' y='0.5' width='448' height='599' fill='none' stroke='%23555555' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23555555' font-family='Helvetica,Arial,sans-serif' font-size='74' text-anchor='middle' dominant-baseline='middle'%3EStudio 4%3C/text%3E%3C/svg%3E" alt="Playmaker studio exterior on Norfolk Street">
+            </div>
+          </div>
+
+          <!-- Explore more (Figma "Group 8508" 523:144) -->
+          <div class="studio_button-wrapper" data-reveal-fade>
+            <a href="#" class="button" data-button>
+              <span class="button_text">Explore more</span>
+              <!-- Figma asset: "Arrow 2" (523:147) -->
+              <img class="button_arrow" data-button-arrow src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='15' viewBox='0 0 30 15'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='29' height='14' fill='none' stroke='%23ffffff' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23ffffff' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3E%E2%86%92%3C/text%3E%3C/svg%3E" alt="">
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.section_studio {
+  position: relative;
+  background-color: #101010;
+}
+.studio_component {
+  position: relative;
+}
+.section-label.is-studio { top: 1.0625rem; }    /* label y 7417 vs heading 7400 */
+.studio_heading {
+  max-width: 69.1875rem;            /* 1107 */
+}
+.studio_highlight { display: inline; }
+
+.studio_grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;                        /* Figma gaps are 32 / 40 / 32 — approximated to 32 */
+  margin-top: 5rem;                 /* heading bottom 7542 → images 7622 = 80 */
+}
+.studio_image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 358 / 537;
+  overflow: hidden;
+  background-color: #1a1a1a;
+}
+.studio_image {
+  position: absolute;
+  display: block;
+  object-fit: cover;
+}
+.studio_image.is-1 { left: -4.05%;  top: -0.28%; width: 114.88%; height: 102.12%; }
+.studio_image.is-2 { left: -8.54%;  top: 0;      width: 112.68%; height: 100.16%; }
+.studio_image.is-3 { left: -13.43%; top: -3.12%; width: 120.53%; height: 107.14%; }
+.studio_image.is-4 { left: -4.85%;  top: 0.2%;   width: 125.51%; height: 111.65%; }
+
+.studio_button-wrapper {
+  margin-top: 5rem;                 /* images bottom 8159 → button 8239 = 80 */
+}
+
+/* ---------- Tablet ---------- */
+@media screen and (max-width: 991px) {
+  .studio_heading { max-width: 100%; }
+  .studio_grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 3rem; }
+  .studio_button-wrapper { margin-top: 3rem; }
+}
+
+/* ---------- Mobile portrait ---------- */
+@media screen and (max-width: 479px) {
+  .studio_grid { grid-template-columns: 1fr; gap: 1rem; }
+}
+</style>
+
+<script>
+(function () {
+  function init() {
+    if (!window.PM) return;
+    window.PM.onReady(function () {
+      var section = document.querySelector('.section_studio');
+      if (!section || !window.PM.ready) return;
+      var gsap = window.gsap, EASE = window.PM.EASE;
+
+      /* ---- PART A — button fade-up (plain tween; Flowboard-convertible) ---- */
+      var fade = section.querySelectorAll('[data-reveal-fade]');
+      gsap.set(fade, { y: 24, opacity: 0 });
+      gsap.to(fade, {
+        y: 0, opacity: 1, duration: 0.8, ease: EASE,
+        scrollTrigger: window.ScrollTrigger ? { trigger: fade[0], start: 'top 92%', once: true } : undefined
+      });
+
+      /* ---- PART B — heading lines + staggered image masks + hover (PM; custom code) ---- */
+      window.PM.revealLines(section.querySelectorAll('[data-reveal-lines]'));
+      window.PM.maskReveal(section.querySelectorAll('[data-mask]'), {
+        group: true, stagger: 0.1, trigger: section.querySelector('.studio_grid')
+      });
+      Array.prototype.forEach.call(section.querySelectorAll('[data-button]'), window.PM.buttonHover);
+
+      /* Image hover: zoom inside the mask (wrappers are not links, so hover directly) */
+      Array.prototype.forEach.call(section.querySelectorAll('[data-mask]'), function (wrapper) {
+        var img = wrapper.querySelector('[data-mask-image]');
+        wrapper.addEventListener('mouseenter', function () { gsap.to(img, { scale: 1.05, duration: 0.8, ease: EASE, overwrite: 'auto' }); });
+        wrapper.addEventListener('mouseleave', function () { gsap.to(img, { scale: 1,    duration: 0.8, ease: EASE, overwrite: 'auto' }); });
+      });
+    });
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>
+
+<!-- ===== 06-footer.html ===== -->
+<!-- ============================================================
+  SECTION 06 — FOOTER  (Figma "FOOTER" 523:113, y 8473–9428 @1920)
+  Requires 00-global.html
+============================================================ -->
+<footer class="section_footer">
+  <div class="padding-global">
+    <div class="container-large">
+      <div class="footer_component">
+
+        <p class="section-label is-footer text-size-small text-color-muted">Contact us</p>
+
+        <!-- 59/71 SemiBold (523:124) — two lines, each a link -->
+        <div class="footer_contact" data-reveal-lines-group>
+          <a href="mailto:hello@playmaker.studio" class="footer_contact-link roll-link heading-style-h2" data-roll data-reveal-item>
+            <span class="roll-link_text" data-roll-text>hello@playmaker.studio</span>
+            <span class="roll-link_text is-clone" data-roll-text aria-hidden="true">hello@playmaker.studio</span>
+          </a>
+          <a href="tel:+441512720152" class="footer_contact-link roll-link heading-style-h2" data-roll data-reveal-item>
+            <span class="roll-link_text" data-roll-text>0151 272 0152</span>
+            <span class="roll-link_text is-clone" data-roll-text aria-hidden="true">0151 272 0152</span>
+          </a>
+        </div>
+
+        <!-- Link columns, 22/29 (523:126) -->
+        <div class="footer_links-grid">
+          <ul class="footer_link-list" role="list" data-reveal-fade>
+            <li class="footer_link-item"><a href="/about" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>About</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">About</span></a></li>
+            <li class="footer_link-item"><a href="/work" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>Work</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Work</span></a></li>
+            <li class="footer_link-item"><a href="/studio" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>Studio</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Studio</span></a></li>
+            <li class="footer_link-item"><a href="/contact" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>Contact</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Contact</span></a></li>
+          </ul>
+          <ul class="footer_link-list" role="list" data-reveal-fade>
+            <li class="footer_link-item"><a href="https://instagram.com/" target="_blank" rel="noopener" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>Instagram</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Instagram</span></a></li>
+            <li class="footer_link-item"><a href="https://linkedin.com/" target="_blank" rel="noopener" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>Linkedin</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Linkedin</span></a></li>
+            <li class="footer_link-item"><a href="https://open.spotify.com/" target="_blank" rel="noopener" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>Spotify</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Spotify</span></a></li>
+          </ul>
+          <address class="footer_address text-size-medium" data-reveal-fade>21 Norfolk Street,<br>Unit 2, Liverpool<br>L1 0BE</address>
+        </div>
+
+        <!-- Accreditation logos (Figma "Group 39" 523:118) — opacity 0.9 -->
+        <div class="footer_logo-row">
+          <!-- Figma asset: "image 11" (523:119) — 132.81 × 89.76 -->
+          <img class="footer_logo is-1" data-reveal-logo src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='133' height='90' viewBox='0 0 133 90'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='132' height='89' fill='none' stroke='%23666666' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23666666' font-family='Helvetica,Arial,sans-serif' font-size='15' text-anchor='middle' dominant-baseline='middle'%3ELogo A%3C/text%3E%3C/svg%3E" alt="Accreditation logo">
+          <!-- Figma asset: "image 12" (523:120) — 253.71 × 89.76 -->
+          <img class="footer_logo is-2" data-reveal-logo src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='254' height='90' viewBox='0 0 254 90'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='253' height='89' fill='none' stroke='%23666666' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23666666' font-family='Helvetica,Arial,sans-serif' font-size='15' text-anchor='middle' dominant-baseline='middle'%3ELogo B%3C/text%3E%3C/svg%3E" alt="Accreditation logo">
+          <!-- Figma asset: "image 13" (523:121) — 311.41 × 72.36 -->
+          <img class="footer_logo is-3" data-reveal-logo src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='311' height='72' viewBox='0 0 311 72'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='310' height='71' fill='none' stroke='%23666666' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23666666' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3ELogo C%3C/text%3E%3C/svg%3E" alt="Accreditation logo">
+          <!-- Figma asset: "image 14" (523:122) — 166.70 × 73.27 -->
+          <img class="footer_logo is-4" data-reveal-logo src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='167' height='73' viewBox='0 0 167 73'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='166' height='72' fill='none' stroke='%23666666' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23666666' font-family='Helvetica,Arial,sans-serif' font-size='12' text-anchor='middle' dominant-baseline='middle'%3ELogo D%3C/text%3E%3C/svg%3E" alt="Accreditation logo">
+          <!-- Figma asset: "oc 1" (523:123) — 143.80 × 97.09 -->
+          <img class="footer_logo is-5" data-reveal-logo src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='144' height='97' viewBox='0 0 144 97'%3E%3Crect width='100%25' height='100%25' fill='%23101010'/%3E%3Crect x='0.5' y='0.5' width='143' height='96' fill='none' stroke='%23666666' stroke-opacity='0.35'/%3E%3Ctext x='50%25' y='50%25' fill='%23666666' font-family='Helvetica,Arial,sans-serif' font-size='16' text-anchor='middle' dominant-baseline='middle'%3EOC%3C/text%3E%3C/svg%3E" alt="Accreditation logo">
+        </div>
+
+        <!-- Legal (Figma "Group 19" 523:115) -->
+        <div class="footer_legal">
+          <p class="footer_legal-text text-size-small">Company registered in England &amp; Wales number OC421606</p>
+          <p class="footer_legal-text text-size-small">© 2018—2025 Playmaker Creative Studio LLP</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+.section_footer {
+  position: relative;
+  background-color: #101010;
+}
+.footer_component {
+  position: relative;
+  padding-top: 11.5rem;             /* studio section bottom (80) + 184 = 264 to contact text */
+  padding-bottom: 5.6875rem;        /* legal bottom 9337 → frame end 9428 = 91 */
+}
+.section-label.is-footer { top: 0.9375rem; }    /* label y 8592 vs text 8577 */
+
+.footer_contact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.footer_contact-link {
+  color: #ffffff;
+}
+
+.footer_links-grid {
+  display: grid;
+  grid-template-columns: 13.375rem 13.375rem auto;   /* columns start 191 / 405 / 619 → 214 pitch */
+  justify-content: start;
+  margin-top: 7.625rem;             /* contact bottom 8719 → links 8841 = 122 */
+}
+.footer_link-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.footer_link-item { display: block; }
+.footer_link { color: #ffffff; }
+.footer_address {
+  margin: 0;
+  font-style: normal;
+  max-width: 10.6875rem;            /* 171 */
+}
+
+.footer_logo-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 8.6875rem;            /* links bottom 8937 → logos 9076 = 139 */
+  min-height: 6.0625rem;            /* 97.09 */
+}
+.footer_logo {
+  display: block;
+  flex: none;
+  opacity: 0.9;
+  object-fit: contain;
+}
+.footer_logo.is-1 { width: 8.3005rem;  height: 5.61rem; }
+.footer_logo.is-2 { width: 15.8569rem; height: 5.61rem; }
+.footer_logo.is-3 { width: 19.4633rem; height: 4.5224rem; }
+.footer_logo.is-4 { width: 10.4186rem; height: 4.5796rem; }
+.footer_logo.is-5 { width: 8.9875rem;  height: 6.068rem; }
+
+.footer_legal {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-top: 8.75rem;              /* logos bottom 9174 → legal 9313 = 140 */
+}
+.footer_legal-text {
+  margin: 0;
+  color: #ffffff;
+}
+
+/* ---------- Tablet ---------- */
+@media screen and (max-width: 991px) {
+  .footer_component { padding-top: 6rem; padding-bottom: 3rem; }
+  .footer_links-grid { grid-template-columns: repeat(3, auto); column-gap: 3rem; margin-top: 4rem; }
+  .footer_logo-row { flex-wrap: wrap; justify-content: flex-start; gap: 2rem 3rem; margin-top: 4rem; }
+  .footer_legal { margin-top: 4rem; }
+}
+
+/* ---------- Mobile landscape ---------- */
+@media screen and (max-width: 767px) {
+  .footer_links-grid { grid-template-columns: 1fr 1fr; row-gap: 2rem; }
+  .footer_address { grid-column: 1 / -1; }
+  .footer_legal { flex-direction: column; gap: 0.5rem; }
+  .footer_logo.is-1 { width: 6.2rem;  height: 4.2rem; }
+  .footer_logo.is-2 { width: 11.9rem; height: 4.2rem; }
+  .footer_logo.is-3 { width: 14.6rem; height: 3.4rem; }
+  .footer_logo.is-4 { width: 7.8rem;  height: 3.4rem; }
+  .footer_logo.is-5 { width: 6.7rem;  height: 4.55rem; }
+}
+
+/* ---------- Mobile portrait ---------- */
+@media screen and (max-width: 479px) {
+  .footer_contact-link { font-size: 1.5rem; line-height: 1.9rem; }
+  .footer_links-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<script>
+(function () {
+  function init() {
+    if (!window.PM) return;
+    window.PM.onReady(function () {
+      var section = document.querySelector('.section_footer');
+      if (!section || !window.PM.ready) return;
+      var gsap = window.gsap, EASE = window.PM.EASE;
+      var hasST = !!window.ScrollTrigger;
+
+      /* ---- PART A — staggered fade-ups (plain tweens; Flowboard-convertible) ---- */
+      var contact = section.querySelectorAll('[data-reveal-item]');
+      gsap.set(contact, { y: 40, opacity: 0 });
+      gsap.to(contact, {
+        y: 0, opacity: 1, duration: 1, ease: EASE, stagger: 0.1,
+        scrollTrigger: hasST ? { trigger: section.querySelector('.footer_contact'), start: 'top 85%', once: true } : undefined
+      });
+
+      var columns = section.querySelectorAll('[data-reveal-fade]');
+      gsap.set(columns, { y: 24, opacity: 0 });
+      gsap.to(columns, {
+        y: 0, opacity: 1, duration: 0.8, ease: EASE, stagger: 0.08,
+        scrollTrigger: hasST ? { trigger: section.querySelector('.footer_links-grid'), start: 'top 90%', once: true } : undefined
+      });
+
+      var logos = section.querySelectorAll('[data-reveal-logo]');
+      gsap.set(logos, { y: 16, opacity: 0 });
+      gsap.to(logos, {
+        y: 0, opacity: 0.9, duration: 0.6, ease: EASE, stagger: 0.06,
+        scrollTrigger: hasST ? { trigger: section.querySelector('.footer_logo-row'), start: 'top 92%', once: true } : undefined
+      });
+
+      /* ---- PART B — text rolls (PM helper; custom code) ---- */
+      Array.prototype.forEach.call(section.querySelectorAll('[data-roll]'), window.PM.roll);
+    });
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>
+
+</div>
+<p class="preview_note">Preview · placeholder art · Euclid Circular A falls back to system sans</p>

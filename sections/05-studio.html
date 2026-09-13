@@ -1,0 +1,148 @@
+<!-- ============================================================
+  SECTION 05 — OUR STUDIO SPACE  (Figma "Group 8509" 523:130, y 7400–8313 @1920)
+  Requires 00-global.html
+============================================================ -->
+<section class="section_studio">
+  <div class="padding-global">
+    <div class="container-large">
+      <div class="padding-section-large is-bottom-medium">
+        <div class="studio_component">
+
+          <p class="section-label is-studio text-size-small text-color-muted">Our studio space</p>
+
+          <!-- 59/71 SemiBold, 1107 wide (523:149) with icon trio (523:150) -->
+          <h2 class="studio_heading heading-style-h2" data-reveal-lines>
+            <span class="heading-icon_wrapper" aria-hidden="true">
+              <!-- Figma asset: "Group 1777" (523:153) — SVG 22.64 × 25 -->
+              <img class="heading-icon_image is-1" src="https://placehold.co/23x25/101010/ffff1f?text=" alt="">
+              <!-- Figma asset: "Group 1780" (523:158) — SVG 22.64 × 25 -->
+              <img class="heading-icon_image is-2" src="https://placehold.co/23x25/101010/ffff1f?text=" alt="">
+              <!-- Figma asset: "Path 261" (523:161) — SVG 24.86 × 25 -->
+              <img class="heading-icon_image is-3" src="https://placehold.co/25x25/101010/ffff1f?text=" alt="">
+            </span>Designing a <span class="studio_highlight">creative studio</span> to share with the community
+          </h2>
+
+          <!-- 4 × 358 × 537 (Figma "Group 8507" 523:131) -->
+          <div class="studio_grid">
+            <div class="studio_image-wrapper" data-mask>
+              <!-- Figma asset: "image 16" (523:140) — 411.27 × 548.36, offset −14.5 / −1.5 -->
+              <img class="studio_image is-1" data-mask-image src="https://placehold.co/411x548/2a2a2a/555555?text=Studio+1" alt="Playmaker studio interior">
+            </div>
+            <div class="studio_image-wrapper" data-mask>
+              <!-- Figma asset: "Studio_Playmaker 5 1" (523:134) — 403.39 × 537.85, offset −30.6 / 0 -->
+              <img class="studio_image is-2" data-mask-image src="https://placehold.co/403x538/2a2a2a/555555?text=Studio+2" alt="Playmaker studio workspace">
+            </div>
+            <div class="studio_image-wrapper" data-mask>
+              <!-- Figma asset: "image 17" (523:143) — 431.51 × 575.35, offset −48.1 / −16.8 -->
+              <img class="studio_image is-3" data-mask-image src="https://placehold.co/432x575/2a2a2a/555555?text=Studio+3" alt="Playmaker studio event space">
+            </div>
+            <div class="studio_image-wrapper" data-mask>
+              <!-- Figma asset: "IMG_1147 1" (523:137) — 449.32 × 599.57, offset −17.4 / +1.1 -->
+              <img class="studio_image is-4" data-mask-image src="https://placehold.co/449x600/2a2a2a/555555?text=Studio+4" alt="Playmaker studio exterior on Norfolk Street">
+            </div>
+          </div>
+
+          <!-- Explore more (Figma "Group 8508" 523:144) -->
+          <div class="studio_button-wrapper" data-reveal-fade>
+            <a href="#" class="button" data-button>
+              <span class="button_text">Explore more</span>
+              <!-- Figma asset: "Arrow 2" (523:147) -->
+              <img class="button_arrow" data-button-arrow src="https://placehold.co/30x15/101010/ffffff?text=%E2%86%92" alt="">
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.section_studio {
+  position: relative;
+  background-color: #101010;
+}
+.studio_component {
+  position: relative;
+}
+.section-label.is-studio { top: 1.0625rem; }    /* label y 7417 vs heading 7400 */
+.studio_heading {
+  max-width: 69.1875rem;            /* 1107 */
+}
+.studio_highlight { display: inline; }
+
+.studio_grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;                        /* Figma gaps are 32 / 40 / 32 — approximated to 32 */
+  margin-top: 5rem;                 /* heading bottom 7542 → images 7622 = 80 */
+}
+.studio_image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 358 / 537;
+  overflow: hidden;
+  background-color: #1a1a1a;
+}
+.studio_image {
+  position: absolute;
+  display: block;
+  object-fit: cover;
+}
+.studio_image.is-1 { left: -4.05%;  top: -0.28%; width: 114.88%; height: 102.12%; }
+.studio_image.is-2 { left: -8.54%;  top: 0;      width: 112.68%; height: 100.16%; }
+.studio_image.is-3 { left: -13.43%; top: -3.12%; width: 120.53%; height: 107.14%; }
+.studio_image.is-4 { left: -4.85%;  top: 0.2%;   width: 125.51%; height: 111.65%; }
+
+.studio_button-wrapper {
+  margin-top: 5rem;                 /* images bottom 8159 → button 8239 = 80 */
+}
+
+/* ---------- Tablet ---------- */
+@media screen and (max-width: 991px) {
+  .studio_heading { max-width: 100%; }
+  .studio_grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 3rem; }
+  .studio_button-wrapper { margin-top: 3rem; }
+}
+
+/* ---------- Mobile portrait ---------- */
+@media screen and (max-width: 479px) {
+  .studio_grid { grid-template-columns: 1fr; gap: 1rem; }
+}
+</style>
+
+<script>
+(function () {
+  function init() {
+    if (!window.PM) return;
+    window.PM.onReady(function () {
+      var section = document.querySelector('.section_studio');
+      if (!section || !window.PM.ready) return;
+      var gsap = window.gsap, EASE = window.PM.EASE;
+
+      /* ---- PART A — button fade-up (plain tween; Flowboard-convertible) ---- */
+      var fade = section.querySelectorAll('[data-reveal-fade]');
+      gsap.set(fade, { y: 24, opacity: 0 });
+      gsap.to(fade, {
+        y: 0, opacity: 1, duration: 0.8, ease: EASE,
+        scrollTrigger: window.ScrollTrigger ? { trigger: fade[0], start: 'top 92%', once: true } : undefined
+      });
+
+      /* ---- PART B — heading lines + staggered image masks + hover (PM; custom code) ---- */
+      window.PM.revealLines(section.querySelectorAll('[data-reveal-lines]'));
+      window.PM.maskReveal(section.querySelectorAll('[data-mask]'), {
+        group: true, stagger: 0.1, trigger: section.querySelector('.studio_grid')
+      });
+      Array.prototype.forEach.call(section.querySelectorAll('[data-button]'), window.PM.buttonHover);
+
+      /* Image hover: zoom inside the mask (wrappers are not links, so hover directly) */
+      Array.prototype.forEach.call(section.querySelectorAll('[data-mask]'), function (wrapper) {
+        var img = wrapper.querySelector('[data-mask-image]');
+        wrapper.addEventListener('mouseenter', function () { gsap.to(img, { scale: 1.05, duration: 0.8, ease: EASE, overwrite: 'auto' }); });
+        wrapper.addEventListener('mouseleave', function () { gsap.to(img, { scale: 1,    duration: 0.8, ease: EASE, overwrite: 'auto' }); });
+      });
+    });
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>

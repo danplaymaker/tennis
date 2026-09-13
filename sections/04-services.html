@@ -1,0 +1,127 @@
+<!-- ============================================================
+  SECTION 04 — OUR SERVICES  (Figma "Group 7160" 523:54, y 6502–7160 @1920)
+  Requires 00-global.html
+============================================================ -->
+<section class="section_services">
+  <div class="padding-global">
+    <div class="container-large">
+      <div class="padding-section-large">
+        <div class="services_component">
+
+          <p class="section-label is-services text-size-small text-color-muted">Our services</p>
+
+          <!-- 59/71 SemiBold, 1230 wide; separators are #ffff1f (523:58) -->
+          <p class="services_list heading-style-h2" data-reveal-lines>
+            <span class="services_item">Brand Strategy</span><span class="services_dot"> . </span>
+            <span class="services_item">Brand Identity</span><span class="services_dot"> . </span>
+            <span class="services_item">Event Branding</span><span class="services_dot"> . </span>
+            <span class="services_item">Employer Brand</span><span class="services_dot"> . </span>
+            <span class="services_item">Creative Direction</span><span class="services_dot"> . </span>
+            <span class="services_item">Campaign &amp; Content Creation</span><span class="services_dot"> . </span>
+            <span class="services_item">Video &amp; Animation</span><span class="services_dot"> . </span>
+            <span class="services_item">User Experience Design</span><span class="services_dot"> . </span>
+            <span class="services_item">Web Design</span><span class="services_dot"> . </span>
+            <span class="services_item">Web Development</span><span class="services_dot"> . </span><br>
+            <span class="services_item">Webflow certified expert</span>
+          </p>
+
+          <!-- Partner / platform logos (Figma "Group 34" 523:59) — 6 logos, space-between, vertically centred -->
+          <div class="services_logo-row">
+            <!-- Figma asset: "image 4" (523:60) — 157.61 × 84.18 -->
+            <img class="services_logo is-1" data-reveal-logo src="https://placehold.co/158x84/101010/666666?text=Logo+1" alt="Partner logo">
+            <!-- Figma asset: "image 10" (523:65) — 199.69 × 49.25 -->
+            <img class="services_logo is-2" data-reveal-logo src="https://placehold.co/200x49/101010/666666?text=Logo+2" alt="Partner logo">
+            <!-- Figma asset: "image 6" (523:61) — 222.98 × 65.37 -->
+            <img class="services_logo is-3" data-reveal-logo src="https://placehold.co/223x65/101010/666666?text=Logo+3" alt="Partner logo">
+            <!-- Figma asset: "image 8" (523:62) — 61.79 × 106.56 -->
+            <img class="services_logo is-4" data-reveal-logo src="https://placehold.co/62x107/101010/666666?text=4" alt="Partner logo">
+            <!-- Figma asset: "image 9" (523:63) — 196.11 × 30.45 -->
+            <img class="services_logo is-5" data-reveal-logo src="https://placehold.co/196x30/101010/666666?text=Logo+5" alt="Partner logo">
+            <!-- Figma asset: "image 7" (523:64) — 206.86 × 36.71 -->
+            <img class="services_logo is-6" data-reveal-logo src="https://placehold.co/207x37/101010/666666?text=Logo+6" alt="Webflow certified partner">
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.section_services {
+  position: relative;
+  background-color: #101010;
+}
+.services_component {
+  position: relative;
+}
+.section-label.is-services { top: 0.875rem; }   /* label y 6516 vs text 6502 */
+.services_list {
+  max-width: 76.875rem;             /* 1230 */
+}
+.services_item { display: inline; }
+.services_dot  { display: inline; color: #ffff1f; }
+
+.services_logo-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 7.875rem;             /* list bottom 6928 → logos 7054 = 126 */
+  min-height: 6.66rem;              /* 106.56 */
+}
+.services_logo {
+  display: block;
+  flex: none;
+  object-fit: contain;
+}
+.services_logo.is-1 { width: 9.8503rem;  height: 5.261rem; }
+.services_logo.is-2 { width: 12.4808rem; height: 3.0782rem; }
+.services_logo.is-3 { width: 13.936rem;  height: 4.0856rem; }
+.services_logo.is-4 { width: 3.8618rem;  height: 6.6602rem; }
+.services_logo.is-5 { width: 12.257rem;  height: 1.9029rem; }
+.services_logo.is-6 { width: 12.9286rem; height: 2.2947rem; }
+
+/* ---------- Tablet ---------- */
+@media screen and (max-width: 991px) {
+  .services_list { max-width: 100%; }
+  .services_logo-row { flex-wrap: wrap; justify-content: flex-start; gap: 2.5rem 3rem; margin-top: 4rem; }
+}
+
+/* ---------- Mobile landscape ---------- */
+@media screen and (max-width: 767px) {
+  .services_logo-row { gap: 2rem 2.5rem; }
+  .services_logo { transform-origin: left center; }
+  .services_logo.is-1 { width: 7.4rem;  height: 3.95rem; }
+  .services_logo.is-2 { width: 9.4rem;  height: 2.3rem; }
+  .services_logo.is-3 { width: 10.5rem; height: 3.1rem; }
+  .services_logo.is-4 { width: 2.9rem;  height: 5rem; }
+  .services_logo.is-5 { width: 9.2rem;  height: 1.45rem; }
+  .services_logo.is-6 { width: 9.7rem;  height: 1.75rem; }
+}
+</style>
+
+<script>
+(function () {
+  function init() {
+    if (!window.PM) return;
+    window.PM.onReady(function () {
+      var section = document.querySelector('.section_services');
+      if (!section || !window.PM.ready) return;
+      var gsap = window.gsap, EASE = window.PM.EASE;
+
+      /* ---- PART A — logo stagger (plain tween; Flowboard-convertible) ---- */
+      var logos = section.querySelectorAll('[data-reveal-logo]');
+      gsap.set(logos, { y: 16, opacity: 0 });
+      gsap.to(logos, {
+        y: 0, opacity: 1, duration: 0.6, ease: EASE, stagger: 0.06,
+        scrollTrigger: window.ScrollTrigger ? { trigger: section.querySelector('.services_logo-row'), start: 'top 90%', once: true } : undefined
+      });
+
+      /* ---- PART B — line mask reveal on the services list (PM helper; custom code) ---- */
+      window.PM.revealLines(section.querySelectorAll('[data-reveal-lines]'));
+    });
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>

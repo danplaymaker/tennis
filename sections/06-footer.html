@@ -1,0 +1,205 @@
+<!-- ============================================================
+  SECTION 06 — FOOTER  (Figma "FOOTER" 523:113, y 8473–9428 @1920)
+  Requires 00-global.html
+============================================================ -->
+<footer class="section_footer">
+  <div class="padding-global">
+    <div class="container-large">
+      <div class="footer_component">
+
+        <p class="section-label is-footer text-size-small text-color-muted">Contact us</p>
+
+        <!-- 59/71 SemiBold (523:124) — two lines, each a link -->
+        <div class="footer_contact" data-reveal-lines-group>
+          <a href="mailto:hello@playmaker.studio" class="footer_contact-link roll-link heading-style-h2" data-roll data-reveal-item>
+            <span class="roll-link_text" data-roll-text>hello@playmaker.studio</span>
+            <span class="roll-link_text is-clone" data-roll-text aria-hidden="true">hello@playmaker.studio</span>
+          </a>
+          <a href="tel:+441512720152" class="footer_contact-link roll-link heading-style-h2" data-roll data-reveal-item>
+            <span class="roll-link_text" data-roll-text>0151 272 0152</span>
+            <span class="roll-link_text is-clone" data-roll-text aria-hidden="true">0151 272 0152</span>
+          </a>
+        </div>
+
+        <!-- Link columns, 22/29 (523:126) -->
+        <div class="footer_links-grid">
+          <ul class="footer_link-list" role="list" data-reveal-fade>
+            <li class="footer_link-item"><a href="/about" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>About</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">About</span></a></li>
+            <li class="footer_link-item"><a href="/work" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>Work</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Work</span></a></li>
+            <li class="footer_link-item"><a href="/studio" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>Studio</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Studio</span></a></li>
+            <li class="footer_link-item"><a href="/contact" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>Contact</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Contact</span></a></li>
+          </ul>
+          <ul class="footer_link-list" role="list" data-reveal-fade>
+            <li class="footer_link-item"><a href="https://instagram.com/" target="_blank" rel="noopener" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>Instagram</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Instagram</span></a></li>
+            <li class="footer_link-item"><a href="https://linkedin.com/" target="_blank" rel="noopener" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>Linkedin</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Linkedin</span></a></li>
+            <li class="footer_link-item"><a href="https://open.spotify.com/" target="_blank" rel="noopener" class="footer_link roll-link text-size-medium" data-roll><span class="roll-link_text" data-roll-text>Spotify</span><span class="roll-link_text is-clone" data-roll-text aria-hidden="true">Spotify</span></a></li>
+          </ul>
+          <address class="footer_address text-size-medium" data-reveal-fade>21 Norfolk Street,<br>Unit 2, Liverpool<br>L1 0BE</address>
+        </div>
+
+        <!-- Accreditation logos (Figma "Group 39" 523:118) — opacity 0.9 -->
+        <div class="footer_logo-row">
+          <!-- Figma asset: "image 11" (523:119) — 132.81 × 89.76 -->
+          <img class="footer_logo is-1" data-reveal-logo src="https://placehold.co/133x90/101010/666666?text=Logo+A" alt="Accreditation logo">
+          <!-- Figma asset: "image 12" (523:120) — 253.71 × 89.76 -->
+          <img class="footer_logo is-2" data-reveal-logo src="https://placehold.co/254x90/101010/666666?text=Logo+B" alt="Accreditation logo">
+          <!-- Figma asset: "image 13" (523:121) — 311.41 × 72.36 -->
+          <img class="footer_logo is-3" data-reveal-logo src="https://placehold.co/311x72/101010/666666?text=Logo+C" alt="Accreditation logo">
+          <!-- Figma asset: "image 14" (523:122) — 166.70 × 73.27 -->
+          <img class="footer_logo is-4" data-reveal-logo src="https://placehold.co/167x73/101010/666666?text=Logo+D" alt="Accreditation logo">
+          <!-- Figma asset: "oc 1" (523:123) — 143.80 × 97.09 -->
+          <img class="footer_logo is-5" data-reveal-logo src="https://placehold.co/144x97/101010/666666?text=OC" alt="Accreditation logo">
+        </div>
+
+        <!-- Legal (Figma "Group 19" 523:115) -->
+        <div class="footer_legal">
+          <p class="footer_legal-text text-size-small">Company registered in England &amp; Wales number OC421606</p>
+          <p class="footer_legal-text text-size-small">© 2018—2025 Playmaker Creative Studio LLP</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+.section_footer {
+  position: relative;
+  background-color: #101010;
+}
+.footer_component {
+  position: relative;
+  padding-top: 11.5rem;             /* studio section bottom (80) + 184 = 264 to contact text */
+  padding-bottom: 5.6875rem;        /* legal bottom 9337 → frame end 9428 = 91 */
+}
+.section-label.is-footer { top: 0.9375rem; }    /* label y 8592 vs text 8577 */
+
+.footer_contact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.footer_contact-link {
+  color: #ffffff;
+}
+
+.footer_links-grid {
+  display: grid;
+  grid-template-columns: 13.375rem 13.375rem auto;   /* columns start 191 / 405 / 619 → 214 pitch */
+  justify-content: start;
+  margin-top: 7.625rem;             /* contact bottom 8719 → links 8841 = 122 */
+}
+.footer_link-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.footer_link-item { display: block; }
+.footer_link { color: #ffffff; }
+.footer_address {
+  margin: 0;
+  font-style: normal;
+  max-width: 10.6875rem;            /* 171 */
+}
+
+.footer_logo-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 8.6875rem;            /* links bottom 8937 → logos 9076 = 139 */
+  min-height: 6.0625rem;            /* 97.09 */
+}
+.footer_logo {
+  display: block;
+  flex: none;
+  opacity: 0.9;
+  object-fit: contain;
+}
+.footer_logo.is-1 { width: 8.3005rem;  height: 5.61rem; }
+.footer_logo.is-2 { width: 15.8569rem; height: 5.61rem; }
+.footer_logo.is-3 { width: 19.4633rem; height: 4.5224rem; }
+.footer_logo.is-4 { width: 10.4186rem; height: 4.5796rem; }
+.footer_logo.is-5 { width: 8.9875rem;  height: 6.068rem; }
+
+.footer_legal {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-top: 8.75rem;              /* logos bottom 9174 → legal 9313 = 140 */
+}
+.footer_legal-text {
+  margin: 0;
+  color: #ffffff;
+}
+
+/* ---------- Tablet ---------- */
+@media screen and (max-width: 991px) {
+  .footer_component { padding-top: 6rem; padding-bottom: 3rem; }
+  .footer_links-grid { grid-template-columns: repeat(3, auto); column-gap: 3rem; margin-top: 4rem; }
+  .footer_logo-row { flex-wrap: wrap; justify-content: flex-start; gap: 2rem 3rem; margin-top: 4rem; }
+  .footer_legal { margin-top: 4rem; }
+}
+
+/* ---------- Mobile landscape ---------- */
+@media screen and (max-width: 767px) {
+  .footer_links-grid { grid-template-columns: 1fr 1fr; row-gap: 2rem; }
+  .footer_address { grid-column: 1 / -1; }
+  .footer_legal { flex-direction: column; gap: 0.5rem; }
+  .footer_logo.is-1 { width: 6.2rem;  height: 4.2rem; }
+  .footer_logo.is-2 { width: 11.9rem; height: 4.2rem; }
+  .footer_logo.is-3 { width: 14.6rem; height: 3.4rem; }
+  .footer_logo.is-4 { width: 7.8rem;  height: 3.4rem; }
+  .footer_logo.is-5 { width: 6.7rem;  height: 4.55rem; }
+}
+
+/* ---------- Mobile portrait ---------- */
+@media screen and (max-width: 479px) {
+  .footer_contact-link { font-size: 1.5rem; line-height: 1.9rem; }
+  .footer_links-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<script>
+(function () {
+  function init() {
+    if (!window.PM) return;
+    window.PM.onReady(function () {
+      var section = document.querySelector('.section_footer');
+      if (!section || !window.PM.ready) return;
+      var gsap = window.gsap, EASE = window.PM.EASE;
+      var hasST = !!window.ScrollTrigger;
+
+      /* ---- PART A — staggered fade-ups (plain tweens; Flowboard-convertible) ---- */
+      var contact = section.querySelectorAll('[data-reveal-item]');
+      gsap.set(contact, { y: 40, opacity: 0 });
+      gsap.to(contact, {
+        y: 0, opacity: 1, duration: 1, ease: EASE, stagger: 0.1,
+        scrollTrigger: hasST ? { trigger: section.querySelector('.footer_contact'), start: 'top 85%', once: true } : undefined
+      });
+
+      var columns = section.querySelectorAll('[data-reveal-fade]');
+      gsap.set(columns, { y: 24, opacity: 0 });
+      gsap.to(columns, {
+        y: 0, opacity: 1, duration: 0.8, ease: EASE, stagger: 0.08,
+        scrollTrigger: hasST ? { trigger: section.querySelector('.footer_links-grid'), start: 'top 90%', once: true } : undefined
+      });
+
+      var logos = section.querySelectorAll('[data-reveal-logo]');
+      gsap.set(logos, { y: 16, opacity: 0 });
+      gsap.to(logos, {
+        y: 0, opacity: 0.9, duration: 0.6, ease: EASE, stagger: 0.06,
+        scrollTrigger: hasST ? { trigger: section.querySelector('.footer_logo-row'), start: 'top 92%', once: true } : undefined
+      });
+
+      /* ---- PART B — text rolls (PM helper; custom code) ---- */
+      Array.prototype.forEach.call(section.querySelectorAll('[data-roll]'), window.PM.roll);
+    });
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>

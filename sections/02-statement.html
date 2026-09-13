@@ -1,0 +1,85 @@
+<!-- ============================================================
+  SECTION 02 — STATEMENT  (Figma "Group 8505" 523:82, y 2065–2207 @1920)
+  Requires 00-global.html
+============================================================ -->
+<section class="section_statement">
+  <div class="padding-global">
+    <div class="container-large">
+      <div class="padding-section-medium">
+        <div class="statement_component">
+
+          <!-- 59/71 SemiBold, 1107 wide (523:86) with the icon trio (523:87) inline on line 1 -->
+          <h2 class="statement_heading heading-style-h2" data-reveal-lines>
+            <span class="heading-icon_wrapper" aria-hidden="true">
+              <!-- Figma asset: "Group 1777" (523:90) — SVG 22.64 × 25 -->
+              <img class="heading-icon_image is-1" src="https://placehold.co/23x25/101010/ffff1f?text=" alt="">
+              <!-- Figma asset: "Group 1780" (523:95) — SVG 22.64 × 25 -->
+              <img class="heading-icon_image is-2" src="https://placehold.co/23x25/101010/ffff1f?text=" alt="">
+              <!-- Figma asset: "Path 261" (523:98) — SVG 24.86 × 25 -->
+              <img class="heading-icon_image is-3" src="https://placehold.co/25x25/101010/ffff1f?text=" alt="">
+            </span>We exist to be <span class="statement_highlight">Creative Allies</span> to our clients and the local community.
+          </h2>
+
+          <!-- 22/29 Regular, 391 wide, right-aligned to the container (523:84) -->
+          <p class="statement_text text-size-medium" data-reveal-fade>We cut through the buzzwords and bloating to deliver clarity, strategy and tools to shape your identity and build momentum.</p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.section_statement {
+  position: relative;
+  background-color: #101010;
+}
+.statement_component {
+  display: grid;
+  grid-template-columns: 69.1875rem 24.4375rem;   /* 1107 | 391 */
+  justify-content: space-between;
+  column-gap: 2.5rem;                             /* 1298 → 1338 = 40 */
+  align-items: start;
+}
+.statement_heading {
+  max-width: 69.1875rem;
+}
+.statement_highlight {
+  display: inline;                                /* separate span in Figma — same colour, kept for styling hook */
+}
+.statement_text {
+  margin: 0;
+  padding-top: 0.6875rem;                         /* 2076 − 2065 = 11 */
+}
+
+@media screen and (max-width: 991px) {
+  .statement_component { grid-template-columns: 1fr; row-gap: 2.5rem; }
+  .statement_heading { max-width: 100%; }
+  .statement_text { max-width: 30rem; padding-top: 0; }
+}
+</style>
+
+<script>
+(function () {
+  function init() {
+    if (!window.PM) return;
+    window.PM.onReady(function () {
+      var section = document.querySelector('.section_statement');
+      if (!section || !window.PM.ready) return;
+      var gsap = window.gsap, EASE = window.PM.EASE;
+
+      /* ---- PART A — scroll-in fade (plain tween; Flowboard-convertible) ---- */
+      var fade = section.querySelectorAll('[data-reveal-fade]');
+      gsap.set(fade, { y: 24, opacity: 0 });
+      gsap.to(fade, {
+        y: 0, opacity: 1, duration: 0.8, ease: EASE, delay: 0.3,
+        scrollTrigger: window.ScrollTrigger ? { trigger: section, start: 'top 80%', once: true } : undefined
+      });
+
+      /* ---- PART B — line mask reveal (PM helper; custom code) ---- */
+      window.PM.revealLines(section.querySelectorAll('[data-reveal-lines]'));
+    });
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>
