@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eskimo Software — Features: Lead Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ==========================================================================
+     ESKIMO SOFTWARE — 02 FEATURES / LEAD MANAGEMENT
+     (Figma "02 Features e.g Lead Management" · node 38:938)
+
+     Sections: NAV · HERO · HIGHLIGHTS (2x2) · TOOLS (+ IN ACTION panel) ·
+               INTEGRATIONS · CUSTOMER STORIES · FOOTER
+
+     NAV, INTEGRATIONS, CUSTOMER STORIES and FOOTER reuse the components
+     built for page 01 — verified against this frame's instances.
+     ========================================================================== -->
+
+<div class="page-wrapper">
+
+  <!-- =====================================================================
+       01 · NAV   (Figma 175:16208 — same component as page 01)
+       ===================================================================== -->
+  <section class="section_nav">
+    <div class="padding-global">
+      <div class="container-large">
+        <div class="nav_component">
+
+          <a href="#" class="nav_brand">
+            <!-- Figma asset: Eskimo mark, SVG 23.98 x 27 -->
+            <img class="nav_brand-mark" src="images/eskimo-mark.svg" alt="">
+            <!-- Figma asset: Eskimo wordmark, SVG 84.84 x 19.61 -->
+            <img class="nav_brand-wordmark" src="images/eskimo-wordmark-white.svg" alt="Eskimo">
+          </a>
+
+          <button class="nav_menu-button" type="button" aria-label="Open menu" aria-expanded="false" data-nav-toggle>
+            <span class="nav_menu-bar"></span>
+            <span class="nav_menu-bar"></span>
+            <span class="nav_menu-bar"></span>
+          </button>
+
+          <nav class="nav_menu" data-nav-menu>
+            <ul class="nav_list">
+              <li class="nav_item">
+                <a href="#" class="nav_link">Features</a>
+                <img class="nav_caret" src="images/caret-down-white.svg" alt="">
+              </li>
+              <li class="nav_item">
+                <a href="#" class="nav_link">Customers</a>
+                <img class="nav_caret" src="images/caret-down-white.svg" alt="">
+              </li>
+              <li class="nav_item"><a href="#" class="nav_link">Integrations</a></li>
+              <li class="nav_item"><a href="#" class="nav_link">AI Capabilities</a></li>
+              <li class="nav_item">
+                <a href="#" class="nav_link">Resources</a>
+                <img class="nav_caret" src="images/caret-down-white.svg" alt="">
+              </li>
+            </ul>
+
+            <div class="nav_actions">
+              <a href="#" class="nav_login">Login</a>
+              <a href="#" class="button">Book a demo</a>
+            </div>
+          </nav>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =====================================================================
+       02 · HERO   (Figma 119:12540, 137:14684, 137:14678-83, 175:16095)
+       Note: no glow ellipse on this page — gradient only.
+       ===================================================================== -->
+  <section class="section_hero">
+
+    <div class="hero_background">
+      <div class="hero_gradient"></div>
+    </div>
+
+    <div class="padding-global">
+      <div class="container-large">
+        <div class="padding-section-large is-hero-sub">
+          <div class="hero_component">
+
+            <div class="hero_content is-sub">
+
+              <div class="tag is-hero">
+                <!-- Figma asset: "layer1" (175:16750) — people icon, SVG 15 x 11.597 -->
+                <img class="tag_icon is-people" src="images/icon-people-tint.svg" alt="">
+                <div class="text-size-tiny text-color-tint tag_text">Lead management</div>
+              </div>
+
+              <div class="hero_heading-wrapper is-sub">
+                <h1 class="heading-style-h2 text-color-white text-align-center hero_heading">Know where your enquiries are,<br class="hero_heading-break"> wherever they came from.</h1>
+              </div>
+
+              <div class="hero_subheading-wrapper is-sub">
+                <p class="text-size-large text-weight-medium text-color-tint text-align-center hero_subheading">Bring every enquiry into one place, so your team can see what needs attention and keep every opportunity moving.</p>
+              </div>
+
+              <div class="hero_button-wrapper">
+                <a href="#" class="button is-secondary">Book a demo</a>
+              </div>
+
+            </div>
+
+            <!-- Product collage (Figma "GRAPHIC" 175:16095) -->
+            <div class="hero_visual is-sub">
+              <!-- Figma asset: "DASH" (175:15868) — PNG @2x, 626 x 426 -->
+              <img class="collage_item is-lm-dash" src="images/collage-dash.png" alt="Eskimo desktop dashboard showing sales performance over six months">
+              <!-- Figma asset: "AUTOTRADER" (175:15822) — PNG @2x, 220 x 80 -->
+              <img class="collage_item is-lm-autotrader" src="images/collage-autotrader.png" alt="Notification card reading New vehicle enquiry from Autotrader">
+              <!-- Figma asset: "MESSENGER" (175:15841) — PNG @2x, 75.748 x 75 -->
+              <img class="collage_item is-lm-messenger" src="images/collage-messenger.png" alt="Facebook Messenger tile with two unread notifications">
+              <!-- Figma asset: "WHATSAPP" (175:15852) — PNG @2x, 220 x 80 -->
+              <img class="collage_item is-lm-whatsapp" src="images/collage-whatsapp.png" alt="Notification card reading New customer message on WhatsApp">
+              <!-- Figma asset: "CALLS" (175:16085) — PNG @2x, 75.748 x 75 -->
+              <img class="collage_item is-lm-calls" src="images/collage-calls.png" alt="Phone calls tile with two missed calls">
+              <!-- Figma asset: "RECORD" (175:16097) — PNG @2x, 384 x 206.349 -->
+              <img class="collage_item is-lm-record" src="images/collage-record.png" alt="Customer record for Adam Davidson listing vehicles of interest: Audi A3, Tesla Model 3 and VW Golf">
+              <!-- Figma asset: "CUSTOMERS 2" (175:17460) — PNG @2x, 220 x 80 -->
+              <img class="collage_item is-lm-customers-2" src="images/collage-customer-inprogress.png" alt="Notification card reading In progress, Julia Hughes">
+              <!-- Figma asset: "CUSTOMERS" (175:17477) — PNG @2x, 220 x 80 -->
+              <img class="collage_item is-lm-customers" src="images/collage-customer-newlead.png" alt="Notification card reading New lead, Craig Simonson">
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =====================================================================
+       03 · HIGHLIGHTS — 2x2 benefit cards
+       (Figma "Group 8885" 127:13709 + "Group 8884" 127:13708)
+       ===================================================================== -->
+  <section class="section_highlights">
+    <div class="padding-global">
+      <div class="container-large">
+        <div class="padding-section-large is-highlights">
+          <div class="highlights_grid">
+
+            <article class="highlights_card" data-reveal>
+              <h2 class="heading-style-h4 text-color-dark highlights_card-title">Fewer missed opportunities</h2>
+              <p class="text-size-regular text-weight-medium text-color-body highlights_card-text">Bring enquiries from every channel into one place, so nothing gets overlooked or left behind.</p>
+              <!-- Figma asset: "MOBILE" (175:16650) — PNG @2x, 273 x 426. Bleeds past the card's bottom edge; the card clips it. -->
+              <img class="highlights_card-screen" src="images/collage-mobile.png" alt="Eskimo mobile app showing a London sales leads list">
+              <!-- Figma asset: "CUSTOMERS" (175:17494) — PNG @2x, 220 x 80 -->
+              <img class="highlights_card-badge" src="images/collage-customer-newlead.png" alt="Notification card reading New lead, Craig Simonson">
+            </article>
+
+            <article class="highlights_card" data-reveal>
+              <h2 class="heading-style-h4 text-color-dark highlights_card-title">Less admin</h2>
+              <p class="text-size-regular text-weight-medium text-color-body highlights_card-text">Keep customer details, conversations and activity together without constantly switching between systems.</p>
+              <img class="highlights_card-screen" src="images/collage-mobile.png" alt="Eskimo mobile app showing a London sales leads list">
+              <img class="highlights_card-badge" src="images/collage-customer-newlead.png" alt="Notification card reading New lead, Craig Simonson">
+            </article>
+
+            <article class="highlights_card" data-reveal>
+              <h2 class="heading-style-h4 text-color-dark highlights_card-title">Clearer priorities</h2>
+              <p class="text-size-regular text-weight-medium text-color-body highlights_card-text">See which leads need attention, what&rsquo;s already been actioned and where to focus next.</p>
+              <img class="highlights_card-screen" src="images/collage-mobile.png" alt="Eskimo mobile app showing a London sales leads list">
+              <img class="highlights_card-badge" src="images/collage-customer-newlead.png" alt="Notification card reading New lead, Craig Simonson">
+            </article>
+
+            <article class="highlights_card" data-reveal>
+              <h2 class="heading-style-h4 text-color-dark highlights_card-title">Better visibility</h2>
+              <p class="text-size-regular text-weight-medium text-color-body highlights_card-text">Give your team a clearer view of every opportunity, from first enquiry through to sale.</p>
+              <img class="highlights_card-screen" src="images/collage-mobile.png" alt="Eskimo mobile app showing a London sales leads list">
+              <img class="highlights_card-badge" src="images/collage-customer-newlead.png" alt="Notification card reading New lead, Craig Simonson">
+            </article>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =====================================================================
+       04 · TOOLS   (Figma "FEATURES" 125:13626)
+       Six-up benefit grid, then the white "In action" panel.
+       ===================================================================== -->
+  <section class="section_features">
+    <div class="padding-global">
+      <div class="container-large">
+        <div class="padding-section-large is-tools">
+          <div class="features_component">
+
+            <div class="features_header">
+              <div class="tag is-blue" data-reveal>
+                <!-- Figma asset: "Group 8845" (125:13636) — sparkle, SVG 11.301 x 11.301 -->
+                <img class="tag_icon is-square" src="images/icon-sparkle-blue.svg" alt="">
+                <div class="text-size-tiny text-color-blue tag_text">How Eskimo helps</div>
+              </div>
+
+              <div class="features_heading-wrapper" data-reveal>
+                <h2 class="heading-style-h2 text-color-dark text-align-center features_heading">Tools to keep<br class="features_heading-break"> opportunities moving</h2>
+              </div>
+            </div>
+
+            <!-- Six-up grid (Figma "Group 8972" 175:16271) -->
+            <div class="features_grid">
+
+              <div class="features_grid-item" data-reveal>
+                <div class="features_item-header">
+                  <!-- Figma asset: "Group 8964" (175:16288) — SVG 25 x 25 -->
+                  <img class="features_item-icon" src="images/icon-feature-call.svg" alt="">
+                  <h3 class="text-size-large text-weight-bold text-color-dark features_item-title">Call Tracking</h3>
+                </div>
+                <p class="text-size-regular text-weight-medium text-color-body features_item-text">Connect incoming calls to the right customer and lead, giving your team a clearer picture of every conversation.</p>
+              </div>
+
+              <div class="features_grid-item" data-reveal>
+                <div class="features_item-header">
+                  <img class="features_item-icon" src="images/icon-feature-call.svg" alt="">
+                  <h3 class="text-size-large text-weight-bold text-color-dark features_item-title">Whatsapp</h3>
+                </div>
+                <p class="text-size-regular text-weight-medium text-color-body features_item-text">Keep customer conversations connected to the sales process, so messages don&rsquo;t disappear into individual phones.</p>
+              </div>
+
+              <div class="features_grid-item" data-reveal>
+                <div class="features_item-header">
+                  <img class="features_item-icon" src="images/icon-feature-call.svg" alt="">
+                  <h3 class="text-size-large text-weight-bold text-color-dark features_item-title">Marketing Attribution</h3>
+                </div>
+                <p class="text-size-regular text-weight-medium text-color-body features_item-text">See which channels and campaigns are generating enquiries and understand where your opportunities originate.</p>
+              </div>
+
+              <div class="features_grid-item" data-reveal>
+                <div class="features_item-header">
+                  <img class="features_item-icon" src="images/icon-feature-call.svg" alt="">
+                  <h3 class="text-size-large text-weight-bold text-color-dark features_item-title">Automated Responses</h3>
+                </div>
+                <p class="text-size-regular text-weight-medium text-color-body features_item-text">Respond to new enquiries quickly, even when your team can&rsquo;t get to them straight away.</p>
+              </div>
+
+              <div class="features_grid-item" data-reveal>
+                <div class="features_item-header">
+                  <img class="features_item-icon" src="images/icon-feature-call.svg" alt="">
+                  <h3 class="text-size-large text-weight-bold text-color-dark features_item-title">Follow-up Reminders</h3>
+                </div>
+                <p class="text-size-regular text-weight-medium text-color-body features_item-text">Prompt salespeople when it&rsquo;s time to follow up, helping prevent promising opportunities from going quiet.</p>
+              </div>
+
+              <div class="features_grid-item" data-reveal>
+                <div class="features_item-header">
+                  <img class="features_item-icon" src="images/icon-feature-call.svg" alt="">
+                  <h3 class="text-size-large text-weight-bold text-color-dark features_item-title">Lead Source Tracking</h3>
+                </div>
+                <p class="text-size-regular text-weight-medium text-color-body features_item-text">See where every enquiry came from and build a clearer picture of the channels driving results.</p>
+              </div>
+
+            </div>
+
+            <!-- "In action" panel (Figma "IN ACTION" 164:8612) -->
+            <div class="inaction_panel" data-reveal>
+
+              <div class="tag is-blue inaction_tag">
+                <!-- Figma asset: "Group 8979" (175:16846) — play-in-box icon, SVG 10.79 x 10.88 -->
+                <img class="tag_icon is-play" src="images/icon-play-blue.svg" alt="">
+                <div class="text-size-tiny text-color-blue tag_text">In action</div>
+              </div>
+
+              <div class="inaction_heading-wrapper">
+                <h2 class="heading-style-h2 text-color-dark text-align-center inaction_heading">See how Eskimo keeps<br class="inaction_heading-break"> every lead moving.</h2>
+              </div>
+
+              <!-- No video source is defined in the Figma frame — wire this to
+                   your player or lightbox. -->
+              <button class="inaction_play" type="button" aria-label="Play product overview video">
+                <!-- Figma asset: "Group 8800" (38:1038) — lime play button, SVG 50 x 50 -->
+                <img class="inaction_play-icon" src="images/icon-play-lime.svg" alt="">
+              </button>
+
+              <div class="inaction_screens">
+                <!-- Figma asset: "DASH" (164:8042) — PNG @2x, 626 x 426. Clipped by the panel's bottom edge. -->
+                <img class="inaction_screen is-desktop" src="images/collage-dash.png" alt="Eskimo desktop dashboard showing sales performance over six months">
+                <!-- Figma asset: "MOBILE" (164:8043) — PNG @2x, 273 x 426 -->
+                <img class="inaction_screen is-handset" src="images/collage-mobile.png" alt="Eskimo mobile app showing a London sales leads list with status labels">
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =====================================================================
+       05 · INTEGRATIONS   (Figma 164:9472 — same component as page 01)
+       ===================================================================== -->
+  <section class="section_integrations">
+    <div class="padding-global">
+      <div class="container-large">
+        <div class="padding-section-large is-integrations-tall">
+          <div class="integrations_component">
+
+            <img class="integrations_float is-left" src="images/collage-calls.png" alt="">
+            <img class="integrations_float is-right" src="images/collage-messenger.png" alt="">
+
+            <div class="tag is-blue" data-reveal>
+              <img class="tag_icon is-stack" src="images/icon-stack-blue.svg" alt="">
+              <div class="text-size-tiny text-color-blue tag_text">Integrations</div>
+            </div>
+
+            <div class="integrations_heading-wrapper" data-reveal>
+              <h2 class="heading-style-h2 text-color-dark text-align-center integrations_heading">Connect the systems your<br class="integrations_heading-break"> dealership already uses.</h2>
+            </div>
+
+            <div class="integrations_paragraph-wrapper" data-reveal>
+              <p class="text-size-regular text-weight-medium text-color-body text-align-center integrations_paragraph">Bring your lead sources, communications and dealer systems together with Eskimo, so your team can work from one connected view.</p>
+            </div>
+
+            <div class="integrations_grid" data-reveal>
+              <div class="integrations_cell"><img class="integrations_logo is-autotrader" src="images/logo-autotrader.svg" alt="AutoTrader"></div>
+              <div class="integrations_cell"><img class="integrations_logo is-facebook" src="images/logo-facebook.svg" alt="Facebook"></div>
+              <div class="integrations_cell"><img class="integrations_logo is-whatsapp" src="images/logo-whatsapp.svg" alt="WhatsApp"></div>
+              <div class="integrations_cell"><img class="integrations_logo is-autotrader" src="images/logo-autotrader.svg" alt="AutoTrader"></div>
+              <div class="integrations_cell is-col-end"><img class="integrations_logo is-facebook" src="images/logo-facebook.svg" alt="Facebook"></div>
+
+              <div class="integrations_cell is-row-end"><img class="integrations_logo is-autotrader" src="images/logo-autotrader.svg" alt="AutoTrader"></div>
+              <div class="integrations_cell is-row-end"><img class="integrations_logo is-facebook" src="images/logo-facebook.svg" alt="Facebook"></div>
+              <div class="integrations_cell is-row-end"><img class="integrations_logo is-whatsapp" src="images/logo-whatsapp.svg" alt="WhatsApp"></div>
+              <div class="integrations_cell is-row-end"><img class="integrations_logo is-autotrader" src="images/logo-autotrader.svg" alt="AutoTrader"></div>
+              <div class="integrations_cell is-col-end is-row-end"><img class="integrations_logo is-facebook" src="images/logo-facebook.svg" alt="Facebook"></div>
+            </div>
+
+            <div class="integrations_link-wrapper" data-reveal>
+              <a href="#" class="link-read-more">
+                <span class="link-read-more_label">Explore Integrations</span>
+                <img class="link-read-more_icon" src="images/chevron-right-blue.svg" alt="">
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =====================================================================
+       06 · CUSTOMER STORIES   (Figma "STORIES 2" 164:9640)
+       Trimmed variant of the page-01 section: quote and attribution only.
+       ===================================================================== -->
+  <section class="section_stories">
+    <div class="padding-global">
+      <div class="container-large">
+        <div class="padding-section-large is-stories-compact">
+          <div class="stories_component">
+
+            <div class="tag is-round is-ghost" data-reveal>
+              <img class="tag_icon is-quote" src="images/icon-quote-tint.svg" alt="">
+              <div class="text-size-tiny text-color-tint tag_text">Customer Stories</div>
+            </div>
+
+            <div class="stories_quote-wrapper" data-reveal>
+              <blockquote class="heading-style-h3 text-color-white text-align-center stories_quote">&ldquo;The team at Eskimo have been fantastic in providing training while also undertaking developments within their existing platform to help us achieve our goals as a brand&rdquo;</blockquote>
+            </div>
+
+            <div class="stories_attribution-wrapper" data-reveal>
+              <p class="text-size-regular text-weight-medium text-color-tint text-align-center stories_attribution"><span class="stories_attribution-name">Michael Coghlan,</span> Managing Director V12 Group</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =====================================================================
+       07 · FOOTER   (Figma 149:3213 — same component as page 01)
+       ===================================================================== -->
+  <footer class="section_footer">
+    <div class="padding-global">
+      <div class="container-large">
+        <div class="padding-section-large is-footer">
+          <div class="footer_component">
+
+            <div class="footer_cta" data-reveal>
+              <div class="footer_cta-text-wrapper">
+                <p class="text-size-large text-weight-medium text-color-white footer_cta-text">Product updates, practical guides and industry insights from Eskimo &mdash; straight to your inbox.</p>
+              </div>
+              <form class="footer_form" data-footer-form>
+                <input class="footer_input" type="email" name="email" placeholder="Your email address" aria-label="Your email address" required>
+                <button class="button footer_submit" type="submit">Submit</button>
+              </form>
+            </div>
+
+            <div class="footer_closing" data-reveal>
+              <div class="footer_closing-heading-wrapper">
+                <h2 class="heading-style-h2 text-color-white text-align-center footer_closing-heading">Ready to spend less time<br class="footer_closing-break"> managing leads?</h2>
+              </div>
+              <div class="footer_buttons">
+                <a href="#" class="button">Book a demo</a>
+                <a href="#" class="button is-secondary">Contact us</a>
+              </div>
+            </div>
+
+            <div class="footer_top" data-reveal>
+              <a href="#" class="footer_brand">
+                <img class="footer_logo" src="images/eskimo-logo-white.svg" alt="Eskimo">
+              </a>
+
+              <div class="footer_nav">
+                <div class="footer_column">
+                  <div class="text-size-small text-color-white footer_column-title">Features</div>
+                  <ul class="footer_link-list">
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">Lead Management</a></li>
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">Reporting &amp; Insights</a></li>
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">Customer Comms</a></li>
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">Automation</a></li>
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">Management</a></li>
+                  </ul>
+                </div>
+
+                <div class="footer_column">
+                  <div class="text-size-small text-color-white footer_column-title">Explore</div>
+                  <ul class="footer_link-list">
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">Integrations</a></li>
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">AI Capabilities</a></li>
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">Customers</a></li>
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">Guides</a></li>
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">Customer Stories</a></li>
+                  </ul>
+                </div>
+
+                <div class="footer_column">
+                  <div class="text-size-small text-color-white footer_column-title">Eskimo</div>
+                  <ul class="footer_link-list">
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">About</a></li>
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">Careers</a></li>
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">Contact</a></li>
+                    <li class="footer_link-item"><a href="#" class="text-size-small footer_link">Login</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="footer_bottom" data-reveal>
+              <div class="text-size-small footer_copyright">&copy; 2026 Eskimo software. All rights reserved.</div>
+              <ul class="footer_legal-list">
+                <li class="footer_legal-item"><a href="#" class="text-size-small footer_legal-link">Careers</a></li>
+                <li class="footer_legal-item"><a href="#" class="text-size-small footer_legal-link">Contact</a></li>
+                <li class="footer_legal-item"><a href="#" class="text-size-small footer_legal-link">Privacy Policy</a></li>
+                <li class="footer_legal-item"><a href="#" class="text-size-small footer_legal-link">Terms and Conditions</a></li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<style>
+/* ==========================================================================
+   PREVIEW RESET — delete this block when importing into Webflow.
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; }
+
+/* ==========================================================================
+   SHARED — these classes already exist in your Webflow project from page 01.
+   Included here so this file renders standalone; safe to skip on import.
+   ========================================================================== */
+.page-wrapper {
+  position: relative;
+  overflow-x: hidden;
+  background-color: #FFFFFF;
+}
+.padding-global {
+  padding-left: 3.378rem;    /* 54.043px */
+  padding-right: 3.378rem;
+}
+.container-large {
+  width: 100%;
+  max-width: 71.37rem;       /* 1141.914px */
+  margin-left: auto;
+  margin-right: auto;
+}
+.padding-section-large {
+  padding-top: 7.5rem;       /* 120px */
+  padding-bottom: 7.5rem;
+}
+.padding-section-large.is-footer { padding-top: 7.5rem;    padding-bottom: 2.1813rem; }
+.heading-style-h1 {
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+  font-size: 4rem;           /* 64px */
+  line-height: 4.25rem;      /* 68px */
+  letter-spacing: -0.04em;   /* -2.56px */
+  font-weight: 700;
+  margin: 0;
+}
+.heading-style-h2 {
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+  font-size: 2.75rem;        /* 44px */
+  line-height: 3rem;         /* 48px */
+  letter-spacing: -0.04em;   /* -1.76px */
+  font-weight: 700;
+  margin: 0;
+}
+.heading-style-h3 {
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+  font-size: 2rem;           /* 32px */
+  line-height: 2.25rem;      /* 36px */
+  letter-spacing: -0.03em;   /* -0.96px */
+  font-weight: 700;
+  margin: 0;
+}
+.heading-style-h4 {
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+  font-size: 1.5rem;         /* 24px */
+  line-height: 1.75rem;      /* 28px */
+  letter-spacing: -0.03em;   /* -0.72px */
+  font-weight: 700;
+  margin: 0;
+}
+.text-size-large {
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+  font-size: 1.25rem;        /* 20px */
+  line-height: 1.625rem;     /* 26px */
+  letter-spacing: -0.01em;   /* -0.2px */
+}
+.text-size-regular {
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;           /* 16px */
+  line-height: 1.5rem;       /* 24px */
+  letter-spacing: -0.01em;   /* -0.16px */
+}
+.text-size-small {
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.875rem;       /* 14px */
+  line-height: 0.875rem;     /* 14px */
+  letter-spacing: -0.02em;   /* -0.28px */
+}
+.text-size-tiny {
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.75rem;        /* 12px */
+  line-height: 1rem;         /* 16px */
+  letter-spacing: 0;
+}
+.text-weight-medium { font-weight: 500; }
+.text-weight-bold { font-weight: 700; }
+.text-color-white { color: #FFFFFF; }
+.text-color-dark { color: #111313; }
+.text-color-blue { color: #0875E1; }
+.text-color-body { color: #4F5863; }
+.text-color-tint { color: #DDEEFF; }
+.text-align-center { text-align: center; }
+.button {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.8125rem;         /* 45px */
+  padding-left: 0.828rem;    /* 13.25px */
+  padding-right: 0.828rem;
+  border: 1px solid #C7FF3D;
+  border-radius: 1.5625rem;  /* 25px */
+  background-color: #C7FF3D;
+  color: #111313;
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.875rem;
+  line-height: 0.875rem;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.button.is-secondary {
+  background-color: transparent;
+  border-color: #FFFFFF;
+  color: #FFFFFF;
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.1875rem;         /* 35px */
+  padding-left: 1.0625rem;   /* 17px */
+  padding-right: 1.0625rem;
+  gap: 0.3125rem;            /* 5px */
+  border: 1px solid rgba(8, 117, 225, 0.2);
+  border-radius: 0.3125rem;  /* 5px */
+  background-color: rgba(221, 238, 255, 0.2);
+}
+.tag.is-round { border-radius: 0.625rem; }
+.tag.is-blue { border-color: rgba(8, 117, 225, 0.2); background-color: rgba(221, 238, 255, 0.2); }
+.tag.is-ghost { border-color: rgba(17, 19, 19, 0.1); background-color: rgba(255, 255, 255, 0.1); }
+.tag.is-hero { border-color: rgba(17, 19, 19, 0.1); background-color: rgba(255, 255, 255, 0.1); gap: 0.4039rem; }
+.tag_text {
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tag_icon { display: block; flex: none; }
+.tag_icon.is-hero { width: 1.0268rem;  height: 0.6333rem; }
+.tag_icon.is-square { width: 0.7063rem;  height: 0.7063rem; }
+.tag_icon.is-stack { width: 0.5319rem;  height: 0.7038rem; }
+.tag_icon.is-person { width: 0.6989rem;  height: 0.6657rem; }
+.tag_icon.is-quote { width: 0.75rem;    height: 0.5994rem; }
+.link-read-more {
+  transition: color 0.2s ease, border-color 0.2s ease, gap 0.2s ease, transform 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4894rem;            /* 7.83px */
+  padding-bottom: 0.2644rem; /* 4.23px */
+  border-bottom: 1px solid #111313;
+  text-decoration: none;
+  color: #111313;
+}
+.link-read-more.is-light {
+  border-bottom-color: #FFFFFF;
+  color: #FFFFFF;
+}
+.link-read-more_label {
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.875rem;
+  line-height: 0.875rem;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: inherit;
+}
+.link-read-more_icon {
+  display: block;
+  flex: none;
+  width: 0.1292rem;          /* 2.067px */
+  height: 0.2907rem;         /* 4.65px */
+}
+.collage_item {
+  position: absolute;
+  display: block;
+  height: auto;
+  filter: drop-shadow(0 0.3125rem 0.9375rem rgba(106, 114, 130, 0.2));
+}
+.section_nav {
+  position: absolute;
+  top: 1.875rem;             /* 30px */
+  left: 0;
+  right: 0;
+  z-index: 20;
+}
+.nav_component {
+  display: flex;
+  align-items: center;
+  height: 2.5rem;            /* 40px */
+}
+.nav_brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6925rem;            /* 11.08px */
+  margin-right: 11.4194rem;  /* 182.71px */
+  text-decoration: none;
+  flex: none;
+}
+.nav_brand-mark { display: block; width: 1.4988rem; height: 1.6875rem; }
+.nav_brand-wordmark { display: block; width: 5.3025rem; height: 1.2256rem; }
+.nav_menu {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+.nav_list {
+  display: flex;
+  align-items: center;
+  gap: 1.875rem;             /* 30px */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav_item {
+  display: flex;
+  align-items: center;
+  gap: 0.3938rem;            /* 6.3px */
+}
+.nav_link {
+  transition: color 0.2s ease;
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.875rem;
+  line-height: 0.875rem;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: #FFFFFF;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav_caret {
+  display: block;
+  flex: none;
+  width: 0.2813rem;          /* 4.5px */
+  height: 0.125rem;          /* 2px */
+}
+.nav_actions {
+  display: flex;
+  align-items: center;
+  gap: 0.605rem;             /* 9.68px */
+  margin-left: auto;
+}
+.nav_login {
+  transition: color 0.2s ease;
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.875rem;
+  line-height: 0.875rem;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: #FFFFFF;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav_menu-button {
+  transition: opacity 0.2s ease;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  cursor: pointer;
+}
+.nav_menu-bar {
+  display: block;
+  width: 1.5rem;
+  height: 0.125rem;
+  background-color: #FFFFFF;
+}
+.section_hero {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  background-color: #FFFFFF;
+}
+.hero_background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero_gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 56.25rem;          /* 900px */
+  background-image: linear-gradient(to top, #FFFFFF 0%, #0875E1 89.904%);
+}
+.hero_component { position: relative; z-index: 1; }
+.hero_content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.875rem;             /* 30px */
+}
+.hero_heading-wrapper { width: 100%; max-width: 51.632rem; }
+.hero_heading { color: #FFFFFF; }
+.hero_heading-break { display: inline; }
+.hero_subheading-wrapper { width: 100%; max-width: 34.375rem; }
+.hero_subheading { margin: 0; }
+.hero_visual {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  aspect-ratio: 1142.35 / 676.07;
+  margin-top: -7.34375rem;   /* -117.5px — collage overlaps the sub-head */
+}
+.section_features {
+  position: relative;
+  z-index: 2;
+  margin-top: -1.25rem;      /* rounded top overlaps the hero by 20px */
+  border-radius: 1.25rem 1.25rem 0 0;
+  background-color: #F8FCFF;
+}
+.features_component { position: relative; }
+.features_header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.875rem;             /* 30px */
+}
+.features_heading-wrapper { width: 100%; max-width: 58.167rem; }
+.features_heading { margin: 0; }
+.features_heading-break { display: inline; }
+.section_integrations {
+  position: relative;
+  z-index: 3;
+  margin-top: -1.25rem;
+  border-radius: 1.25rem 1.25rem 0 0;
+  background-color: #FFFFFF;
+}
+.integrations_component {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.integrations_float {
+  position: absolute;
+  display: block;
+  width: 4.7343rem;          /* 75.748px */
+  height: auto;
+  aspect-ratio: 75.748 / 75;
+  filter: drop-shadow(0 0.3125rem 0.9375rem rgba(106, 114, 130, 0.2));
+}
+.integrations_float.is-left { left: 0;  top: 1.9606rem; }
+.integrations_float.is-right { right: 0; top: 12.4288rem; }
+.integrations_heading-wrapper { width: 100%; max-width: 58.2544rem; margin-top: 1.875rem; }
+.integrations_heading { margin: 0; }
+.integrations_heading-break { display: inline; }
+.integrations_paragraph-wrapper { width: 100%; max-width: 45.0044rem; margin-top: 1.875rem; }
+.integrations_paragraph { margin: 0; }
+.integrations_grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  width: 100%;
+  max-width: 51.5044rem;     /* 824.07px */
+  margin-top: 3.98rem;       /* 63.68px */
+}
+.integrations_cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 3.4781rem;         /* 55.65px */
+  border-right: 1px solid #D8DDE2;
+  border-bottom: 1px solid #D8DDE2;
+}
+.integrations_cell.is-col-end { border-right: 0; }
+.integrations_cell.is-row-end { border-bottom: 0; }
+.integrations_logo { display: block; }
+.integrations_logo.is-autotrader { width: 6.07rem;    height: 1.3438rem; }
+.integrations_logo.is-facebook { width: 5.0938rem;  height: 0.9869rem; }
+.integrations_logo.is-whatsapp { width: 5.7956rem;  height: 1.7113rem; }
+.integrations_link-wrapper { margin-top: 2.9456rem; }
+.section_stories {
+  position: relative;
+  z-index: 5;
+  margin-top: -1.25rem;
+  border-radius: 1.25rem 1.25rem 0 0;
+  background-color: #0875E1;
+}
+.stories_component {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.stories_quote-wrapper { width: 100%; max-width: 57.9531rem; margin-top: 1.875rem; }
+.stories_quote { margin: 0; }
+.stories_attribution-wrapper { margin-top: 1.875rem; }
+.stories_attribution { margin: 0; }
+.stories_attribution-name { font-weight: 700; color: #FFFFFF; }
+.section_footer {
+  position: relative;
+  z-index: 7;
+  margin-top: -1.25rem;
+  border-radius: 1.25rem 1.25rem 0 0;
+  background-color: #111313;
+}
+.footer_component { position: relative; }
+.footer_cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  width: 100%;
+  max-width: 68.75rem;       /* 1100px */
+  min-height: 12.5rem;       /* 200px */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 4.2113rem;   /* 67.38px */
+  padding-right: 3.5625rem;  /* 57px */
+  border-radius: 1.25rem;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.footer_cta-text-wrapper { max-width: 28.5rem; }
+.footer_cta-text { margin: 0; }
+.footer_form {
+  display: flex;
+  align-items: center;
+  gap: 0.4606rem;            /* 7.37px */
+}
+.footer_input {
+  transition: border-color 0.2s ease;
+  width: 22.8281rem;         /* 365.25px */
+  height: 2.8125rem;         /* 45px */
+  padding-left: 1.8825rem;   /* 30.12px */
+  padding-right: 1.8825rem;
+  border: 1px solid #4F5863;
+  border-radius: 2.3832rem;  /* 38.131px */
+  background-color: #FFFFFF;
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.875rem;
+  line-height: 0.875rem;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: #111313;
+}
+.footer_submit { width: 6rem; }
+.footer_closing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 7.4819rem;     /* 119.71px */
+}
+.footer_closing-heading-wrapper { width: 100%; max-width: 71.5625rem; }
+.footer_closing-heading { margin: 0; }
+.footer_closing-break { display: inline; }
+.footer_buttons {
+  display: flex;
+  align-items: center;
+  gap: 1.3438rem;            /* 21.5px */
+  margin-top: 1.8738rem;     /* 29.98px */
+}
+.footer_top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-top: 10.1325rem;    /* 162.12px */
+}
+.footer_brand { display: block; padding-top: 0.5688rem; text-decoration: none; }
+.footer_logo { display: block; width: 17.875rem; height: 4.0219rem; }
+.footer_nav {
+  display: flex;
+  gap: 5.8438rem;            /* 93.5px */
+  margin-right: 4.1875rem;   /* 67px */
+}
+.footer_column { min-width: 0; }
+.footer_column-title { font-weight: 700; line-height: 1.3125rem; }
+.footer_link-list { list-style: none; margin: 0; padding: 0; }
+.footer_link-item { display: block; }
+.footer_link {
+  transition: color 0.2s ease;
+  display: block;
+  font-weight: 700;
+  line-height: 1.3125rem;    /* 21px */
+  color: #4F5863;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.footer_bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 7.7031rem;     /* 123.25px */
+}
+.footer_copyright { font-weight: 700; color: #4F5863; }
+.footer_legal-list {
+  display: flex;
+  align-items: center;
+  gap: 2.25rem;              /* 36px */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.footer_legal-item { display: block; }
+.footer_legal-link {
+  transition: color 0.2s ease;
+  display: block;
+  font-weight: 700;
+  color: #4F5863;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.button:hover { background-color: #B9F52B; border-color: #B9F52B; }
+.button:active { background-color: #ACEA1C; border-color: #ACEA1C; transform: translateY(0.0625rem) scale(0.985); }
+.button:focus-visible { outline: 2px solid #0875E1; outline-offset: 0.125rem; }
+.button.is-secondary:hover { background-color: rgba(255, 255, 255, 0.12); border-color: #FFFFFF; }
+.button.is-secondary:active { background-color: rgba(255, 255, 255, 0.2); transform: translateY(0.0625rem) scale(0.985); }
+.button.is-secondary:focus-visible { outline-color: #FFFFFF; }
+.nav_link:hover { color: #DDEEFF; }
+.nav_link:active { color: #B9D8FA; }
+.nav_link:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 0.25rem; }
+.nav_login:hover { color: #DDEEFF; }
+.nav_login:active { color: #B9D8FA; }
+.nav_login:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 0.25rem; }
+.nav_menu-button:hover { opacity: 0.7; }
+.nav_menu-button:active { opacity: 0.5; }
+.nav_menu-button:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 0.125rem; }
+.link-read-more:hover { gap: 0.75rem; color: #0875E1; border-bottom-color: #0875E1; }
+.link-read-more:active { transform: translateY(0.0625rem); }
+.link-read-more:focus-visible { outline: 2px solid #0875E1; outline-offset: 0.25rem; }
+.link-read-more.is-light:hover { color: #DDEEFF; border-bottom-color: #DDEEFF; }
+.link-read-more.is-light:focus-visible { outline-color: #FFFFFF; }
+.footer_link:hover { color: #FFFFFF; }
+.footer_link:focus-visible { outline: 2px solid #C7FF3D; outline-offset: 0.25rem; }
+.footer_legal-link:hover { color: #FFFFFF; }
+.footer_legal-link:focus-visible { outline: 2px solid #C7FF3D; outline-offset: 0.25rem; }
+.footer_input:focus { border-color: #0875E1; outline: none; }
+
+@media screen and (max-width: 991px) {
+  .padding-global { padding-left: 2.5rem; padding-right: 2.5rem; }
+  .padding-section-large { padding-top: 5.5rem; padding-bottom: 5.5rem; }
+  .padding-section-large.is-footer { padding-top: 5.5rem; padding-bottom: 2.1813rem; }
+  .heading-style-h1 { font-size: 3.25rem; line-height: 3.5rem; }
+  .heading-style-h2 { font-size: 2.25rem; line-height: 2.5rem; }
+  .heading-style-h3 { font-size: 1.75rem; line-height: 2rem; }
+  .text-size-large { font-size: 1.125rem; line-height: 1.625rem; }
+  .nav_brand { margin-right: 2rem; }
+  .nav_menu-button { display: flex; }
+  .nav_menu {
+    display: none;
+    position: absolute;
+    top: 3.5rem;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border-radius: 0.625rem;
+    background-color: #111313;
+  }
+  .nav_menu.is-open { display: flex; }
+  .nav_list { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
+  .nav_actions { margin-left: 0; gap: 1rem; }
+  .hero_gradient { height: 72%; }
+  .hero_heading-wrapper { max-width: 40rem; }
+  .hero_visual { margin-top: -4rem; }
+  .integrations_float.is-left { top: 0; }
+  .integrations_float.is-right { top: 9rem; }
+  .integrations_grid { margin-top: 3rem; }
+  .footer_cta { padding-left: 2.5rem; padding-right: 2.5rem; gap: 1.5rem; }
+  .footer_input { width: 15rem; }
+  .footer_closing { margin-top: 5rem; }
+  .footer_top { margin-top: 5rem; }
+  .footer_nav { gap: 3rem; margin-right: 0; }
+  .footer_logo { width: 13rem; height: 2.9251rem; }
+  .footer_bottom { margin-top: 4rem; }
+  .footer_legal-list { gap: 1.5rem; }
+}
+
+@media screen and (max-width: 767px) {
+  .padding-global { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .padding-section-large { padding-top: 4.5rem; padding-bottom: 4.5rem; }
+  .padding-section-large.is-footer { padding-top: 4.5rem; padding-bottom: 2.1813rem; }
+  .heading-style-h1 { font-size: 2.5rem;   line-height: 2.75rem; }
+  .heading-style-h2 { font-size: 2rem;     line-height: 2.25rem; }
+  .heading-style-h3 { font-size: 1.5rem;   line-height: 1.75rem; }
+  .heading-style-h4 { font-size: 1.375rem; line-height: 1.625rem; }
+  .text-size-large { font-size: 1.0625rem; line-height: 1.5rem; }
+  .hero_gradient { height: 68%; }
+  .hero_content { gap: 1.5rem; }
+  .hero_heading-break { display: none; }
+  .hero_visual { margin-top: -1.5rem; }
+  .features_heading-break { display: none; }
+  .integrations_heading-break { display: none; }
+  .integrations_float.is-left { width: 3.5rem; }
+  .integrations_float.is-right { width: 3.5rem; top: 7rem; }
+  .integrations_grid { grid-template-columns: repeat(3, 1fr); max-width: 100%; }
+  .integrations_cell { height: 4.5rem; border-bottom: 1px solid #D8DDE2; }
+  .integrations_cell.is-col-end { border-right: 1px solid #D8DDE2; }
+  .integrations_cell.is-row-end { border-bottom: 1px solid #D8DDE2; }
+  .footer_cta { flex-direction: column; align-items: flex-start; padding: 2.5rem 1.75rem; min-height: 0; }
+  .footer_form { width: 100%; }
+  .footer_input { flex: 1; width: auto; }
+  .footer_closing-break { display: none; }
+  .footer_top { flex-direction: column; gap: 3rem; }
+  .footer_nav { flex-wrap: wrap; gap: 2rem 3rem; }
+  .footer_bottom { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
+  .footer_legal-list { flex-wrap: wrap; gap: 1rem 1.5rem; }
+}
+
+@media screen and (max-width: 479px) {
+  .padding-global { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .padding-section-large { padding-top: 3.5rem; padding-bottom: 3.5rem; }
+  .padding-section-large.is-footer { padding-top: 3.5rem; padding-bottom: 2.1813rem; }
+  .heading-style-h1 { font-size: 2rem;     line-height: 2.25rem; }
+  .heading-style-h2 { font-size: 1.75rem;  line-height: 2rem; }
+  .heading-style-h3 { font-size: 1.375rem; line-height: 1.625rem; }
+  .heading-style-h4 { font-size: 1.25rem;  line-height: 1.5rem; }
+  .text-size-large { font-size: 1rem;     line-height: 1.5rem; }
+  .tag { height: auto; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+  .tag_text { white-space: normal; }
+  .hero_gradient { height: 64%; }
+  .hero_visual { margin-top: 0; }
+  .integrations_grid { grid-template-columns: repeat(2, 1fr); }
+  .footer_form { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+  .footer_input { width: 100%; }
+  .footer_submit { width: 100%; }
+  .footer_buttons { flex-direction: column; align-items: stretch; width: 100%; }
+  .footer_logo { width: 10rem; height: 2.2501rem; }
+  .footer_nav { flex-direction: column; gap: 2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button:active, .button.is-secondary:active, .link-read-more:active { transform: none; }
+}
+
+/* ==========================================================================
+   PAGE 02 ONLY — new classes and combo modifiers.
+   Everything above already exists in the project from page 01.
+   ========================================================================== */
+
+/* --- section padding modifiers (page-02 values) --- */
+.padding-section-large.is-hero-sub          { padding-top: 8.125rem;  padding-bottom: 6.075rem; }   /* 130 / 97.2 */
+.padding-section-large.is-highlights        { padding-top: 0;         padding-bottom: 6.875rem; }   /* 0 / 90 (+20 overlap) */
+.padding-section-large.is-tools             { padding-top: 6.7838rem; padding-bottom: 6.875rem; }   /* 108.54 / 90 (+20) */
+.padding-section-large.is-integrations-tall { padding-top: 7.5rem;    padding-bottom: 10.9088rem; } /* 120 / 154.54 (+20) */
+.padding-section-large.is-stories-compact   { padding-top: 7.5rem;    padding-bottom: 8.3756rem; }  /* 120 / 114 (+20) */
+
+/* --- hero (sub-page variant) --- */
+.hero_content.is-sub            { gap: 0; }
+.tag_icon.is-people             { width: 0.9375rem; height: 0.7248rem; }  /* 15 x 11.597 */
+.tag_icon.is-play               { width: 0.6744rem; height: 0.68rem; }    /* 10.79 x 10.88 */
+
+.hero_heading-wrapper.is-sub    { max-width: 44.4375rem; margin-top: 0.8681rem; }  /* 711px, 13.89 below the tag */
+.hero_subheading-wrapper.is-sub { max-width: 36.06rem;   margin-top: 1.875rem; }   /* 576.958px */
+.hero_button-wrapper            { margin-top: 1.875rem; }
+
+.hero_visual.is-sub {
+  max-width: 70.6072rem;      /* 1129.715px */
+  margin-left: auto;
+  margin-right: auto;
+  aspect-ratio: 1129.715 / 578.911;
+  margin-top: -4.2238rem;     /* -67.58px — collage rides up behind the CTA */
+}
+
+/* collage items, page-02 hero (Figma "GRAPHIC" 175:16095) */
+.is-lm-dash        { left: 22.534%; top: 26.413%; width: 55.412%; aspect-ratio: 626 / 426;
+                     filter: drop-shadow(0 0.3125rem 1.875rem rgba(106, 114, 130, 0.2)); }
+.is-lm-autotrader  { left: 0;       top: 1.742%;  width: 19.474%; aspect-ratio: 220 / 80; }
+.is-lm-messenger   { left: 83.558%; top: 21.490%; width: 6.705%;  aspect-ratio: 75.748 / 75; }
+.is-lm-whatsapp    { left: 80.526%; top: 0;       width: 19.474%; aspect-ratio: 220 / 80; }
+.is-lm-calls       { left: 9.164%;  top: 22.268%; width: 6.705%;  aspect-ratio: 75.748 / 75; }
+.is-lm-record      { left: 33.245%; top: 19.294%; width: 33.991%; aspect-ratio: 384 / 206.349; }
+.is-lm-customers-2 { left: 70.789%; top: 69.300%; width: 19.474%; aspect-ratio: 220 / 80; }
+.is-lm-customers   { left: 10.304%; top: 64.740%; width: 19.474%; aspect-ratio: 220 / 80; }
+
+/* --- 03 HIGHLIGHTS — 2x2 cards --- */
+.section_highlights {
+  position: relative;
+  z-index: 1;
+  background-color: #FFFFFF;
+}
+
+.highlights_grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1.2641rem;      /* 20.226px */
+  row-gap: 1.875rem;          /* 30px */
+  width: 100%;
+  max-width: 64.5141rem;      /* 1032.226px */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.highlights_card {
+  position: relative;
+  overflow: hidden;
+  min-height: 25rem;          /* 400px */
+  padding: 3.3388rem 1.9013rem 0 1.9013rem;   /* 53.42 / 30.42 */
+  border-radius: 1.25rem;     /* 20px */
+  background-color: #F8FCFF;
+}
+
+.highlights_card-title { margin: 0; position: relative; z-index: 2; }
+
+.highlights_card-text {
+  margin: 0.9375rem 0 0 0;    /* 15px */
+  max-width: 27.609rem;       /* 441.744px */
+  position: relative;
+  z-index: 2;
+}
+
+/* The phone screen deliberately bleeds past the card's bottom edge. */
+.highlights_card-screen {
+  position: absolute;
+  left: 37.365%;              /* 189.063px of 506 */
+  top: 43.135%;               /* 172.541px of 400 */
+  width: 53.953%;             /* 273px */
+  height: auto;
+  aspect-ratio: 273 / 426;
+  display: block;
+  z-index: 1;
+  filter: drop-shadow(0 0.3125rem 0.9375rem rgba(106, 114, 130, 0.2));
+}
+
+.highlights_card-badge {
+  position: absolute;
+  left: 7.793%;               /* 39.436px of 506 */
+  top: 71.146%;               /* 284.582px of 400 */
+  width: 43.478%;             /* 220px */
+  height: auto;
+  aspect-ratio: 220 / 80;
+  display: block;
+  z-index: 2;
+  filter: drop-shadow(0 0.3125rem 0.9375rem rgba(106, 114, 130, 0.1));
+}
+
+/* --- 04 TOOLS — six-up grid --- */
+.features_grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 3.275rem;       /* 52.4px */
+  row-gap: 3.75rem;           /* 60px */
+  width: 100%;
+  max-width: 66.175rem;       /* 1058.8px */
+  margin: 3.75rem auto 0 auto;/* 60px below the heading */
+}
+
+.features_grid-item { min-width: 0; }
+
+.features_item-header {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;              /* 10px */
+}
+
+.features_item-icon {
+  display: block;
+  flex: none;
+  width: 1.5625rem;           /* 25px */
+  height: 1.5625rem;
+}
+
+.features_item-title { margin: 0; }
+.features_item-text  { margin: 0.9375rem 0 0 0; }   /* 15px */
+
+/* --- 04b IN ACTION panel --- */
+.inaction_panel {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 39.0625rem;         /* 625px */
+  margin-top: 9.2906rem;      /* 148.65px */
+  border-radius: 1.25rem;
+  background-color: #FFFFFF;
+  text-align: center;
+}
+
+.inaction_tag { margin-top: 5.625rem; }   /* 90px from the panel's top edge */
+
+.inaction_heading-wrapper {
+  width: 100%;
+  max-width: 52.0356rem;      /* 832.57px */
+  margin: 1.875rem auto 0 auto;
+}
+
+.inaction_heading       { margin: 0; }
+.inaction_heading-break { display: inline; }
+
+.inaction_play {
+  position: absolute;
+  left: 50%;
+  top: 44.96%;                /* 281px of 625 */
+  transform: translateX(-50%);
+  transition: transform 0.2s ease, filter 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.125rem;            /* 50px */
+  height: 3.125rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background-color: transparent;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.inaction_play-icon { display: block; width: 3.125rem; height: 3.125rem; }
+
+.inaction_screens {
+  position: absolute;
+  left: 0;
+  top: 50.13%;                /* 313.31px of 625 */
+  width: 100%;
+  height: 26.625rem;          /* 426px — the panel clips the overflow */
+}
+
+.inaction_screen {
+  position: absolute;
+  top: 0;
+  height: auto;
+  display: block;
+}
+
+.inaction_screen.is-desktop {
+  left: 9.219%;               /* 105.67px of 1146.154 */
+  width: 54.617%;             /* 626px */
+  aspect-ratio: 626 / 426;
+  filter: drop-shadow(0 0.3125rem 1.875rem rgba(106, 114, 130, 0.2));
+}
+
+.inaction_screen.is-handset {
+  left: 66.800%;              /* 765.63px */
+  width: 23.819%;             /* 273px */
+  aspect-ratio: 273 / 426;
+  filter: drop-shadow(0 0.3125rem 0.9375rem rgba(106, 114, 130, 0.2));
+}
+
+/* --- page-02 interaction states --- */
+.highlights_card:hover { box-shadow: 0 0.75rem 2rem rgba(17, 19, 19, 0.06); }
+
+.inaction_play:hover  { transform: translateX(-50%) scale(1.08); filter: brightness(1.05); }
+.inaction_play:active { transform: translateX(-50%) scale(0.96); }
+.inaction_play:focus-visible { outline: 2px solid #0875E1; outline-offset: 0.25rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .highlights_card:hover { box-shadow: none; }
+  .inaction_play:hover,
+  .inaction_play:active  { transform: translateX(-50%); }
+}
+
+/* ==========================================================================
+   PAGE 02 RESPONSIVE — 991px
+   ========================================================================== */
+@media screen and (max-width: 991px) {
+  .padding-section-large.is-hero-sub          { padding-top: 6.5rem; padding-bottom: 4rem; }
+  .padding-section-large.is-highlights        { padding-top: 0;      padding-bottom: 5.25rem; }
+  .padding-section-large.is-tools             { padding-top: 5.5rem; padding-bottom: 5.25rem; }
+  .padding-section-large.is-integrations-tall { padding-top: 5.5rem; padding-bottom: 7rem; }
+  .padding-section-large.is-stories-compact   { padding-top: 5.5rem; padding-bottom: 6rem; }
+
+  .hero_heading-wrapper.is-sub { max-width: 34rem; }
+  .hero_visual.is-sub          { margin-top: -2.5rem; }
+
+  .highlights_grid  { column-gap: 1rem; row-gap: 1rem; }
+  .highlights_card  { min-height: 0; padding: 2.25rem 1.75rem 0 1.75rem; }
+
+  .features_grid    { column-gap: 2.25rem; row-gap: 3rem; margin-top: 3rem; }
+
+  .inaction_panel   { height: auto; margin-top: 5.5rem; padding-bottom: 0; }
+  .inaction_tag     { margin-top: 3.5rem; }
+  .inaction_play    { top: auto; margin-top: 2rem; position: relative; left: auto; transform: none; }
+  .inaction_screens { position: relative; top: auto; height: auto; aspect-ratio: 1146.154 / 320; margin-top: 2.5rem; }
+}
+
+/* ==========================================================================
+   PAGE 02 RESPONSIVE — 767px
+   ========================================================================== */
+@media screen and (max-width: 767px) {
+  .padding-section-large.is-hero-sub          { padding-top: 5.5rem; padding-bottom: 3.25rem; }
+  .padding-section-large.is-highlights        { padding-top: 0;      padding-bottom: 4.25rem; }
+  .padding-section-large.is-tools             { padding-top: 4.5rem; padding-bottom: 4.25rem; }
+  .padding-section-large.is-integrations-tall { padding-top: 4.5rem; padding-bottom: 5.75rem; }
+  .padding-section-large.is-stories-compact   { padding-top: 4.5rem; padding-bottom: 5rem; }
+
+  .hero_heading-break       { display: none; }
+  .hero_visual.is-sub       { margin-top: -1rem; }
+
+  .highlights_grid          { grid-template-columns: 1fr; }
+  .features_grid            { grid-template-columns: 1fr 1fr; column-gap: 2rem; row-gap: 2.5rem; }
+  .features_heading-break   { display: none; }
+  .inaction_heading-break   { display: none; }
+  .inaction_screens         { aspect-ratio: 1146.154 / 260; }
+}
+
+/* ==========================================================================
+   PAGE 02 RESPONSIVE — 479px
+   ========================================================================== */
+@media screen and (max-width: 479px) {
+  .padding-section-large.is-hero-sub          { padding-top: 4.5rem; padding-bottom: 2.5rem; }
+  .padding-section-large.is-highlights        { padding-top: 0;      padding-bottom: 3.5rem; }
+  .padding-section-large.is-tools             { padding-top: 3.5rem; padding-bottom: 3.5rem; }
+  .padding-section-large.is-integrations-tall { padding-top: 3.5rem; padding-bottom: 4.5rem; }
+  .padding-section-large.is-stories-compact   { padding-top: 3.5rem; padding-bottom: 4rem; }
+
+  .hero_visual.is-sub  { margin-top: 0; }
+  .highlights_card     { padding: 1.75rem 1.25rem 0 1.25rem; }
+  .features_grid       { grid-template-columns: 1fr; row-gap: 2rem; }
+  .inaction_screens    { aspect-ratio: 1146.154 / 200; }
+}
+</style>
+
+<!-- GSAP + ScrollTrigger (pinned). In Webflow put these two in Project
+     Settings > Custom Code > Before </body>, above the script below. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script>
+/* ==========================================================================
+   Vanilla JS + GSAP — same setup as page 01, minus the tab and accordion
+   handlers (this page has neither).
+
+   Everything degrades safely: nothing is hidden by CSS, so if GSAP fails to
+   load, or the visitor prefers reduced motion, the page renders fully and
+   the nav still works.
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  var hasGsap = typeof window.gsap !== 'undefined';
+  var hasScrollTrigger = hasGsap && typeof window.ScrollTrigger !== 'undefined';
+  var reduceMotion = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var animate = hasGsap && !reduceMotion;
+
+  if (hasScrollTrigger) { gsap.registerPlugin(ScrollTrigger); }
+
+  /* ======================================================================
+     NAV — mobile menu toggle (not in Figma; added so the nav works below
+     991px, where the five links plus two CTAs cannot fit).
+     ====================================================================== */
+  var navToggle = document.querySelector('[data-nav-toggle]');
+  var navMenu = document.querySelector('[data-nav-menu]');
+
+  if (navToggle && navMenu) {
+    navToggle.addEventListener('click', function () {
+      var isOpen = navMenu.classList.toggle('is-open');
+      navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+      if (animate && isOpen) {
+        gsap.from(navMenu, { y: -8, autoAlpha: 0, duration: 0.3, ease: 'power2.out' });
+      }
+    });
+  }
+
+  /* ======================================================================
+     HERO — load-in timeline.
+     gsap.from() means the finished state is the state already in the DOM,
+     so no flash-of-hidden-content if the script never runs.
+     ====================================================================== */
+  if (animate) {
+    var heroVisual = document.querySelector('.hero_visual');
+    var heroBaseCards = heroVisual
+      ? heroVisual.querySelectorAll('.is-lm-dash, .is-lm-record') : [];
+    var heroFloatCards = heroVisual
+      ? heroVisual.querySelectorAll('.is-lm-autotrader, .is-lm-messenger, .is-lm-whatsapp, .is-lm-calls, .is-lm-customers, .is-lm-customers-2')
+      : [];
+
+    var heroTargets = ['.nav_component', '.section_hero .tag', '.hero_heading-wrapper',
+      '.hero_subheading-wrapper', '.hero_button-wrapper'];
+
+    var tl = gsap.timeline({
+      defaults: { ease: 'power3.out', duration: 0.8 },
+      /* Hand the elements back to CSS so hover/pressed states are not
+         outranked by GSAP's inline transform. */
+      onComplete: function () {
+        gsap.set(heroTargets, { clearProps: 'transform,opacity,visibility' });
+        gsap.set(heroBaseCards, { clearProps: 'transform,opacity,visibility' });
+        gsap.set(heroFloatCards, { clearProps: 'transform,opacity,visibility' });
+      }
+    });
+
+    tl.from('.nav_component', { y: -12, autoAlpha: 0, duration: 0.6 })
+      .from('.section_hero .tag', { y: 14, autoAlpha: 0, duration: 0.6 }, '-=0.30')
+      .from('.hero_heading-wrapper', { y: 24, autoAlpha: 0 }, '-=0.40')
+      .from('.hero_subheading-wrapper', { y: 18, autoAlpha: 0 }, '-=0.62')
+      .from('.hero_button-wrapper', { y: 16, autoAlpha: 0, duration: 0.6 }, '-=0.62')
+      .from(heroBaseCards, { y: 36, autoAlpha: 0, duration: 0.9, stagger: 0.09 }, '-=0.40')
+      .from(heroFloatCards, { y: 18, scale: 0.94, autoAlpha: 0, duration: 0.6, stagger: 0.07 }, '-=0.62');
+  }
+
+  /* ======================================================================
+     SCROLL REVEALS — every [data-reveal] element, batched so items that
+     enter together stagger together. Add the attribute to any new element
+     to opt it in.
+     ====================================================================== */
+  if (animate && hasScrollTrigger) {
+    var revealEls = gsap.utils.toArray('[data-reveal]');
+
+    if (revealEls.length) {
+      gsap.set(revealEls, { autoAlpha: 0, y: 24 });
+
+      ScrollTrigger.batch(revealEls, {
+        start: 'top 88%',
+        once: true,
+        onEnter: function (batch) {
+          gsap.to(batch, {
+            autoAlpha: 1, y: 0,
+            duration: 0.7, ease: 'power2.out', stagger: 0.1, overwrite: true,
+            /* Drop the inline transform once revealed, so the cards' CSS
+               hover states are not outranked by it. */
+            onComplete: function () {
+              gsap.set(batch, { clearProps: 'transform,opacity,visibility' });
+            }
+          });
+        }
+      });
+
+      /* Safety net. An element sitting within ~50px of the document bottom
+         (the footer legal bar) can never reach the 88% trigger line, and a
+         late layout shift can strand others. This sweeps anything that is
+         on screen but still hidden. */
+      var sweepQueued = false;
+
+      function sweep() {
+        sweepQueued = false;
+        var viewportH = window.innerHeight;
+
+        Array.prototype.forEach.call(revealEls, function (el) {
+          if (parseFloat(getComputedStyle(el).opacity) > 0.01) { return; }
+          if (el.getBoundingClientRect().top < viewportH - 8) {
+            gsap.to(el, {
+              autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out', overwrite: true,
+              onComplete: function () {
+                gsap.set(el, { clearProps: 'transform,opacity,visibility' });
+              }
+            });
+          }
+        });
+      }
+
+      function queueSweep() {
+        if (sweepQueued) { return; }
+        sweepQueued = true;
+        window.requestAnimationFrame(sweep);
+      }
+
+      window.addEventListener('scroll', queueSweep, { passive: true });
+      window.addEventListener('resize', queueSweep);
+      window.addEventListener('load', function () {
+        ScrollTrigger.refresh();
+        queueSweep();
+      });
+    }
+  }
+}());
+</script>
+
+</body>
+</html>
