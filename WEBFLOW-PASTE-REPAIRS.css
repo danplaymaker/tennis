@@ -1,0 +1,36 @@
+/* ============================================================
+   FLOWBOARD PASTE REPAIRS — add to the existing w-embed <style>
+   ============================================================ */
+
+/* 1. FONT. Flowboard strips every font-family on cross-site paste, so the
+      Manrope <link> loads but nothing uses it. One declaration on body
+      covers all text; form controls don't inherit, so they're listed. */
+body { font-family: Manrope, "Helvetica Neue", Arial, sans-serif; }
+.button, .features_tab, .faq_question, .nav_menu-button,
+.footer_input, .footer_submit, .eskimo-button, .eskimo-button-outline {
+  font-family: Manrope, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* 2. CARD SHADOWS. drop-shadow() was converted to box-shadow, which draws a
+      hard rectangle behind a transparent PNG with rounded corners. */
+.box-transform { box-shadow: none; }
+.collage_item, .integrations_float, .eskimo-hero_card {
+  box-shadow: none;
+  filter: drop-shadow(0 .3125rem .9375rem rgba(106, 114, 130, .2));
+}
+.is-dash, .eskimo-hero_card-dash {
+  box-shadow: none;
+  filter: drop-shadow(0 .3125rem 1.875rem rgba(106, 114, 130, .2));
+}
+
+/* 3. Webflow's base blockquote padding leaks onto the testimonial. */
+.stories_quote { padding: 0; }
+
+/* 4. Webflow's form wrapper adds 15px inside the footer CTA panel. */
+.w-form { margin: 0; }
+
+/* 5. Flowboard turned each <br> into a block div, so headings now break at
+      the authored point on every screen. Let them reflow on mobile. */
+@media screen and (max-width: 767px) {
+  .section-hero-text, .eskimo-hero-text { display: inline; }
+}

@@ -344,3 +344,21 @@ Regenerate after every build so rule 1 (reuse, don't reinvent) can be checked ag
 | `.nav_menu-button:hover` | — |
 | `.stories_card:hover` | background-color: #2E92F2; transform: translateY(-0.25rem) |
 | `.who_card:hover` | transform: translateY(-0.25rem); box-shadow: 0 0.75rem 2rem rgba(17, 19, 19, 0.08) |
+
+## What the Flowboard → Webflow paste changes
+
+Measured against the exported home page (`eskimo-f95b9c.webflow.css` + `index.html`).
+Cosmetic reformatting — `0.2s ease` → `.2s`, `rgba()` → 8-digit hex, dropped
+redundant shorthand values — is lossless and ignored here.
+
+| What | Behaviour | Handled by |
+|---|---|---|
+| `font-family` | **Stripped from every selector.** The Google Fonts `<link>` survives, so the font loads but nothing uses it. | `WEBFLOW-PASTE-REPAIRS.css` §1 — one `body` rule plus form controls |
+| `filter: drop-shadow()` | Stripped; kept only as an unused `--fb-preserved-filter`. Substituted with `.box-transform { box-shadow }`, which draws a rectangle behind transparent PNGs. | §2 |
+| `aspect-ratio` | Stripped from class styles, re-added automatically in the supplemental embed. No action needed. | — |
+| `list-style` | Same: stripped, re-added in the embed. | — |
+| `<br class="...">` | Rewritten as `<div class="section-hero-text">`, so authored line breaks become permanent at every breakpoint. | §5 |
+| `<button>` | Rewritten as `<a href="#">`. Webflow's own scroll module preventDefaults these, so click handlers still work. Add `role="button"` for a11y. | — |
+| `alt` text | **Stripped from every image.** Must be re-entered in the Designer. | manual |
+| Webflow base styles | `blockquote` keeps `padding: 10px 20px`; `.w-form` adds `margin-bottom: 15px`. | §3, §4 |
+| Tiny icons | 2–4.5px icons were bumped to `0.5rem`. Keep 0.5rem as the floor for chevrons and carets. | adopted going forward |
