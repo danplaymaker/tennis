@@ -362,3 +362,27 @@ redundant shorthand values — is lossless and ignored here.
 | `alt` text | **Stripped from every image.** Must be re-entered in the Designer. | manual |
 | Webflow base styles | `blockquote` keeps `padding: 10px 20px`; `.w-form` adds `margin-bottom: 15px`. | §3, §4 |
 | Tiny icons | 2–4.5px icons were bumped to `0.5rem`. Keep 0.5rem as the floor for chevrons and carets. | adopted going forward |
+
+## Features page — what the paste adds
+
+Rebuilt against the live project rather than against page 01's source, so the
+`eskimo-` namespace is retired: the home-page paste kept every Client-First
+name intact, so those classes now exist in Webflow with these exact values and
+must be reused, not duplicated.
+
+The paste is split into four blocks. Only block D reaches Webflow:
+
+| Block | Contents | On import |
+|---|---|---|
+| A | preview reset + font | delete |
+| B | site-wide repairs (font, drop-shadow, blockquote, `.w-form`, mobile line breaks) | move to Site Settings → Custom Code |
+| C | 190 rules generated from `eskimo-f95b9c.webflow.css`, verified byte-identical | skip |
+| D | 44 new selectors — none of which collide | paste |
+
+New combo modifiers on existing bases: `.padding-section-large` × `is-hero-sub`,
+`is-highlights`, `is-tools`, `is-integrations-tall`, `is-stories-compact`;
+`.hero_content/.hero_heading-wrapper/.hero_subheading-wrapper/.hero_visual` ×
+`is-sub`; `.tag_icon` × `is-people`, `is-play`; `.collage_item` × eight `is-lm-*`.
+
+New component classes: `.section_highlights`, `.highlights_*` (5),
+`.features_grid` + `.features_item-*` (5), `.inaction_*` (8).
