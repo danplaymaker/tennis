@@ -94,3 +94,12 @@ and trigger it from the same click handler. Pixel icons are four stacked inline 
 - **Placeholder images** are `background-color` + a repeating gradient. Swap for real `<img>` elements; the classes stay.
 - **GSAP 3.13** makes every plugin used here free (SplitText, ScrambleText, Flip, Draggable, Inertia, ScrollSmoother).
 - **Reduced motion** is not handled here; wrap the Embed JS in `gsap.matchMedia()` if you ship it.
+
+## homepage/ — single-file composition
+
+`homepage/index.html` composes the six techniques into one page in the studied site's order: preloader → nav pill →
+exclusion-blend hero → featured case rows (Flip + Draggable) → services (light theme, card fade-ins, CSS-hover buttons)
+→ culture gallery (parallax + cursor label, accent theme) → footer (line reveal, contact cards, hover re-scramble).
+GSAP 3.13.0 and its plugins are inlined, so the file has no external requests and works offline (about 260 KB).
+The page JS uses the same `[CONVERTIBLE]` / `[EMBED ONLY]` flags as the per-prototype folders. To swap back to the CDN,
+replace the eight inlined `<script>` blocks with the script tags listed in any `paste.md`.
