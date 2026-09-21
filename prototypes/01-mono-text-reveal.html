@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01 · Mono text reveal (scramble)</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /*
+   * Pattern studied: a mono-spaced label rendered as TWO stacked copies.
+   *   .mono-reveal__anim  — absolutely positioned, this is the copy that gets scrambled
+   *   .mono-reveal__ghost — in normal flow but invisible; it reserves the final width/height
+   * Because the font is monospace and the ghost holds the box, the scramble never reflows layout.
+   */
+  .mono-reveal { position: relative; display: inline-block; font-family: var(--mono); text-transform: uppercase; font-size: 0.78rem; white-space: nowrap; }
+  .mono-reveal__anim { position: absolute; left: 0; right: 0; top: 0; }
+  .mono-reveal__ghost { opacity: 0; }
+
+  .stack { display: flex; flex-direction: column; gap: 20px; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .label { color: var(--fg-dim); }
+  .section { border-top: 1px solid var(--line); }
+  .section h2 { margin-bottom: 32px; }
+  .hover-list a { display: block; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .sticky-msg { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 40;
+    padding: 12px 16px; border-radius: var(--radius); background: rgba(31,31,31,0.7); backdrop-filter: blur(8px); }
+  .diy { font-family: var(--mono); font-size: 1.5rem; }
+  .spacer { height: 60vh; }
+</style>
+</head>
+<body>
+
+<!-- Fixed header pill: its message re-scrambles to a new label whenever a section is entered (data-labels) -->
+<div class="sticky-msg">
+  <span class="mono-reveal" id="headerMsg">
+    <span class="mono-reveal__anim" aria-hidden="true">[ scroll to begin ]</span>
+    <span class="mono-reveal__ghost">[ scroll to begin ]</span>
+  </span>
+</div>
+
+<section class="section section--hero container">
+  <div class="stack">
+    <span class="mono-reveal" data-reveal>
+      <span class="mono-reveal__anim" aria-hidden="true">[ Lorem ipsum studio ]</span>
+      <span class="mono-reveal__ghost">[ Lorem ipsum studio ]</span>
+    </span>
+    <h1 class="h1">Every small label<br>decodes into place.</h1>
+    <p class="body-md" style="max-width: 36ch; color: var(--fg-dim)">Scroll down. Each mono label scrambles from random glyphs to its final text, staggered by a data-delay attribute.</p>
+  </div>
+</section>
+
+<!-- 1. Staggered tag rows: siblings carry data-delay="0.1", "0.2" ... exactly like the studied markup -->
+<section class="section container" data-labels="DECODING TAGS[/split/]SMALL BUT MIGHTY[/split/]TYPE THAT TYPES">
+  <h2 class="h2">1 · Tags with data-delay stagger</h2>
+  <div class="stack">
+    <div class="row">
+      <span class="tag"><span class="mono-reveal" data-reveal><span class="mono-reveal__anim" aria-hidden="true">Branding</span><span class="mono-reveal__ghost">Branding</span></span></span>
+      <span class="tag"><span class="mono-reveal" data-reveal data-delay="0.1"><span class="mono-reveal__anim" aria-hidden="true">Corporate</span><span class="mono-reveal__ghost">Corporate</span></span></span>
+      <span class="tag"><span class="mono-reveal" data-reveal data-delay="0.2"><span class="mono-reveal__anim" aria-hidden="true">Experience</span><span class="mono-reveal__ghost">Experience</span></span></span>
+      <span class="tag"><span class="mono-reveal" data-reveal data-delay="0.3"><span class="mono-reveal__anim" aria-hidden="true">Campaign</span><span class="mono-reveal__ghost">Campaign</span></span></span>
+    </div>
+    <div class="row">
+      <span class="mono-reveal label" data-reveal><span class="mono-reveal__anim" aria-hidden="true">[ 20+ placeholder people ]</span><span class="mono-reveal__ghost">[ 20+ placeholder people ]</span></span>
+      <span class="mono-reveal label" data-reveal data-delay="0.15"><span class="mono-reveal__anim" aria-hidden="true">[ Somewhere based ]</span><span class="mono-reveal__ghost">[ Somewhere based ]</span></span>
+      <span class="mono-reveal label" data-reveal data-delay="0.3"><span class="mono-reveal__anim" aria-hidden="true">[ Est. 20XX ]</span><span class="mono-reveal__ghost">[ Est. 20XX ]</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Hover re-scramble: link labels re-run the scramble on mouseenter -->
+<section class="section container" data-labels="HOVER THE LINKS[/split/]GO ON, TOUCH THEM">
+  <h2 class="h2">2 · Hover re-scramble</h2>
+  <div class="hover-list" style="max-width: 420px">
+    <a href="#" data-reveal-hover><span class="mono-reveal"><span class="mono-reveal__anim" aria-hidden="true">instagram</span><span class="mono-reveal__ghost">instagram</span></span></a>
+    <a href="#" data-reveal-hover><span class="mono-reveal"><span class="mono-reveal__anim" aria-hidden="true">linkedin</span><span class="mono-reveal__ghost">linkedin</span></span></a>
+    <a href="#" data-reveal-hover><span class="mono-reveal"><span class="mono-reveal__anim" aria-hidden="true">newsletter</span><span class="mono-reveal__ghost">newsletter</span></span></a>
+  </div>
+</section>
+
+<!-- 3. Swap text via scramble: the same element decodes from label A to label B (used by the header message above) -->
+<section class="section container" data-labels="TEXT THAT SWAPS[/split/]A TO B VIA NOISE">
+  <h2 class="h2">3 · Swap A → B through noise</h2>
+  <div class="stack">
+    <span class="mono-reveal" id="swapTarget" style="font-size: 1.2rem"><span class="mono-reveal__anim" aria-hidden="true">Follow us</span><span class="mono-reveal__ghost">Stay in the loop</span></span>
+    <button class="tag" id="swapBtn">Swap label</button>
+    <p class="mono label">Note: the ghost copy holds the LONGEST of the two strings so the box never changes size.</p>
+  </div>
+</section>
+
+<!-- 4. DIY version: what the plugin does under the hood, in ~15 lines -->
+<section class="section container" data-labels="NO PLUGIN NEEDED[/split/]THE MANUAL WAY">
+  <h2 class="h2">4 · DIY scramble (no plugin)</h2>
+  <div class="stack">
+    <div class="diy" id="diy">HANDMADE SCRAMBLE</div>
+    <button class="tag" id="diyBtn">Replay</button>
+  </div>
+</section>
+<div class="spacer"></div>
+
+<div class="demo-note"><strong>01 · Mono text reveal.</strong> ScrambleTextPlugin + ScrollTrigger. Two stacked copies keep layout stable while glyphs decode. <a href="index.html">all demos</a></div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrambleTextPlugin.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
+
+// Glyph set used while "decoding". Brackets/slashes read as terminal noise; keep it mono-friendly.
+const NOISE = "[]/\\|<>-_=+*#%&01";
+
+/**
+ * Scramble the animated layer of a .mono-reveal to a target string.
+ * @param {Element} wrap   the .mono-reveal element
+ * @param {string}  text   final text (defaults to the ghost copy's text)
+ * @param {object}  opts   { delay, duration }
+ */
+function scrambleTo(wrap, text, opts = {}) {
+  const anim  = wrap.querySelector(".mono-reveal__anim");
+  const final = text ?? wrap.querySelector(".mono-reveal__ghost").textContent;
+  return gsap.to(anim, {
+    duration: opts.duration ?? 0.8,
+    delay: opts.delay ?? 0,
+    ease: "none",                 // the plugin handles the feel; linear time keeps char reveal even
+    scrambleText: {
+      text: final,
+      chars: NOISE,
+      speed: 0.6,                 // how fast the noise glyphs cycle (1 = every frame)
+      revealDelay: 0.15,          // hold pure noise briefly before letters start locking in
+      tweenLength: false,         // keep the string at its final length from frame one (no width jitter)
+      rightToLeft: false
+    },
+    overwrite: "auto"             // a hover re-trigger kills the previous scramble on the same element
+  });
+}
+
+/* 1. Scroll-in reveal with per-element data-delay.
+ *    Start every animated layer as noise so nothing "pops" before its trigger fires. */
+gsap.utils.toArray("[data-reveal]").forEach(wrap => {
+  const anim = wrap.querySelector(".mono-reveal__anim");
+  const final = anim.textContent;
+  anim.textContent = final.replace(/\S/g, () => NOISE[Math.floor(Math.random() * NOISE.length)]);
+  ScrollTrigger.create({
+    trigger: wrap,
+    start: "top 90%",             // fire when the element's top passes 90% down the viewport
+    once: true,                   // decode only once, like the studied site
+    onEnter: () => scrambleTo(wrap, final, { delay: parseFloat(wrap.dataset.delay || 0) })
+  });
+});
+
+/* 2. Hover: re-scramble on enter. overwrite:"auto" prevents stacking tweens on rapid hovers. */
+gsap.utils.toArray("[data-reveal-hover]").forEach(link => {
+  const wrap = link.querySelector(".mono-reveal");
+  link.addEventListener("mouseenter", () => scrambleTo(wrap, null, { duration: 0.5 }));
+});
+
+/* 3. Swap: alternate between two strings on the same element. */
+const swapWrap = document.getElementById("swapTarget");
+const swapTexts = ["Follow us", "Stay in the loop"];
+let swapIndex = 0;
+document.getElementById("swapBtn").addEventListener("click", () => {
+  swapIndex = 1 - swapIndex;
+  scrambleTo(swapWrap, swapTexts[swapIndex], { duration: 0.7 });
+});
+
+/* Header message: every section with data-labels picks a random label on enter (both directions).
+ * The studied site stores several labels per section separated by "[/split/]". */
+const headerMsg = document.getElementById("headerMsg");
+gsap.utils.toArray("[data-labels]").forEach(section => {
+  const labels = section.dataset.labels.split("[/split/]");
+  const pick = () => scrambleTo(headerMsg, "[ " + gsap.utils.random(labels) + " ]", { duration: 0.6 });
+  ScrollTrigger.create({
+    trigger: section,
+    start: "top 50%",             // section owns the header once it crosses the viewport middle
+    end: "bottom 50%",
+    onEnter: pick,
+    onEnterBack: pick
+  });
+});
+// Ghost must be wide enough for the longest label so the pill doesn't resize
+headerMsg.querySelector(".mono-reveal__ghost").textContent = "[ SMALL BUT MIGHTY ]";
+
+/* 4. DIY: tween a progress number 0→1 and rebuild the string each frame.
+ *    Characters left of the progress point are final; the rest are random noise. */
+const diy = document.getElementById("diy");
+const diyText = diy.textContent;
+function diyScramble() {
+  const proxy = { p: 0 };
+  gsap.fromTo(proxy, { p: 0 }, {
+    p: 1, duration: 1.2, ease: "power2.out",
+    onUpdate() {
+      const lock = Math.floor(proxy.p * diyText.length);
+      diy.textContent = diyText.split("").map((ch, i) =>
+        ch === " " ? " " : (i < lock ? ch : NOISE[Math.floor(Math.random() * NOISE.length)])
+      ).join("");
+    }
+  });
+}
+document.getElementById("diyBtn").addEventListener("click", diyScramble);
+ScrollTrigger.create({ trigger: diy, start: "top 85%", once: true, onEnter: diyScramble });
+</script>
+</body>
+</html>

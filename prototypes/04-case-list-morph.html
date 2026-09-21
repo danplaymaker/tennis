@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 · Case list: filter + expand with Flip</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .filters { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 40px; }
+  .filters .tag { cursor: pointer; opacity: 0.55; }
+  .filters .tag.is-active { opacity: 1; background: var(--fg); color: var(--bg); }
+
+  /* One case row. Collapsed: title, tags, "( View + )", thumbnail strip on the right. */
+  .case { position: relative; width: 100%; text-align: left; border-top: 1px solid var(--line); padding: 24px 0; overflow: hidden; }
+  .case__head { display: grid; grid-template-columns: 2fr 3fr 1fr 6fr; gap: var(--gap); align-items: start; }
+  .case__tags { display: flex; gap: 2px; flex-wrap: wrap; }
+  .case__view { font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase; }
+  .case__view .minus { display: none; }
+  .case.is-open .case__view .plus { display: none; }
+  .case.is-open .case__view .minus { display: inline; }
+
+  /* Thumbnail strip: right-aligned row of small images; z-index descends so the first sits on top when they overlap */
+  .case__thumbs { display: flex; gap: 8px; justify-content: flex-end; height: 120px; }
+  .thumb { flex-shrink: 0; height: 100%; }
+  .thumb.a { width: 96px; }  .thumb.b { width: 180px; }
+
+  /* Expanded slider: a horizontal track that becomes draggable. Starts at 0 height; Flip animates the row's height. */
+  .case__slider { height: 0; overflow: hidden; margin-top: 0; }
+  .case.is-open .case__slider { height: 400px; margin-top: 56px; }
+  .case__track { display: flex; gap: 12px; height: 100%; cursor: grab; width: max-content; }
+  .case__track:active { cursor: grabbing; }
+  .case.is-open .thumb { height: 100%; width: auto; }
+  .case.is-open .thumb.a { width: 320px; } .case.is-open .thumb.b { width: 600px; }
+
+  .case__cta { opacity: 0; pointer-events: none; margin-top: 16px; display: inline-flex; height: 40px; align-items: center; padding: 0 14px; border: 1px solid var(--line); border-radius: var(--radius); font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; }
+  .case.is-open .case__cta { pointer-events: auto; }
+  @media (max-width: 900px) { .case__head { grid-template-columns: 1fr 1fr; } .case__thumbs { grid-column: 1 / -1; justify-content: flex-start; } }
+</style>
+</head>
+<body>
+
+<section class="section container">
+  <p class="mono" style="color:var(--fg-dim);margin-bottom:24px">[ Placeholder work ]</p>
+  <h1 class="h2" style="margin-bottom:40px;max-width:24ch">Click a row to expand its images into a draggable strip. Filter to reflow.</h1>
+
+  <div class="filters" id="filters">
+    <button class="tag is-active" data-filter="all">All</button>
+    <button class="tag" data-filter="branding">Branding</button>
+    <button class="tag" data-filter="web">Web</button>
+    <button class="tag" data-filter="campaign">Campaign</button>
+  </div>
+
+  <div id="cases"></div>
+  <div class="hr"></div>
+</section>
+
+<div class="demo-note"><strong>04 · Case list morph.</strong> Flip.getState → DOM change → Flip.from. Same technique for filtering (rows) and expanding (images move between containers). Draggable + Inertia on the open strip. <a href="index.html">all demos</a></div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Flip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Draggable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/InertiaPlugin.min.js"></script>
+<script>
+gsap.registerPlugin(Flip, Draggable, InertiaPlugin);
+
+/* ---------- Build placeholder rows (own content, no real client names) ---------- */
+const DATA = [
+  { title: "Project Alpha", tags: ["branding", "web"],      imgs: [1, 2, 3, 4, 5] },
+  { title: "Project Beta",  tags: ["campaign"],             imgs: [2, 6, 1, 3] },
+  { title: "Project Gamma", tags: ["web"],                  imgs: [3, 4, 6, 2, 5, 1] },
+  { title: "Project Delta", tags: ["branding", "campaign"], imgs: [4, 1, 6] },
+  { title: "Project Echo",  tags: ["web", "branding"],      imgs: [5, 3, 2, 6] }
+];
+const list = document.getElementById("cases");
+DATA.forEach((d, i) => {
+  const sizes = ["a", "b"];
+  list.insertAdjacentHTML("beforeend", `
+    <div class="case" data-tags="${d.tags.join(" ")}">
+      <div class="case__head">
+        <div><h3 class="h6">${d.title}</h3><a class="case__cta" href="#">View case →</a></div>
+        <div class="case__tags">${d.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+        <div class="case__view">( View <span class="plus">+</span><span class="minus">−</span> )</div>
+        <div class="case__thumbs">
+          ${d.imgs.slice(0, 3).map((n, k) => `<div class="thumb ${sizes[k % 2]} ph ph--${n}" style="z-index:${10 - k}"></div>`).join("")}
+        </div>
+      </div>
+      <div class="case__slider"><div class="case__track">
+        ${d.imgs.slice(3).map((n, k) => `<div class="thumb ${sizes[(k + 1) % 2]} ph ph--${n}"></div>`).join("")}
+      </div></div>
+    </div>`);
+});
+
+/* ---------- 1. Expand / collapse with Flip ----------
+ * Flip works in three steps:
+ *   a) getState(elements)   – record current position/size of everything that will move
+ *   b) change the DOM       – move nodes, toggle classes, whatever
+ *   c) Flip.from(state)     – GSAP measures the new layout and animates FROM the recorded state
+ * The thumbnails physically move from the strip into the slider track; the row's height change is
+ * animated too because the row is included in the state. */
+let openRow = null;
+let drag = null;
+
+function toggleRow(row) {
+  const opening = !row.classList.contains("is-open");
+  const rows = gsap.utils.toArray(".case");
+  const thumbs = row.querySelectorAll(".thumb");
+  const track  = row.querySelector(".case__track");
+  const strip  = row.querySelector(".case__thumbs");
+
+  // a) record: this row's height + every thumb in it, plus the previously open row (it collapses at the same time)
+  const targets = [row, ...thumbs];
+  if (openRow && openRow !== row) targets.push(openRow, ...openRow.querySelectorAll(".thumb"));
+  const state = Flip.getState(targets, { props: "opacity" });
+
+  // b) mutate the DOM
+  if (openRow && openRow !== row) collapseDOM(openRow);
+  if (opening) {
+    row.classList.add("is-open");
+    track.prepend(...Array.from(strip.querySelectorAll(".thumb")));   // move strip images into the slider track
+    openRow = row;
+  } else {
+    collapseDOM(row);
+    openRow = null;
+  }
+  gsap.set(rows.filter(r => r !== row), { clearProps: "height" });   // let other rows return to auto
+
+  // c) animate from the old snapshot to the new layout
+  Flip.from(state, {
+    duration: 0.9,
+    ease: "power3.inOut",
+    absolute: ".thumb",          // thumbs animate as absolutely positioned so they fly freely between containers
+    nested: true,                // the row's own height is animating, so compensate child measurements
+    stagger: 0.03,
+    onComplete: () => {
+      gsap.set(row, { clearProps: "height" });
+      if (opening) makeDraggable(row);
+    }
+  });
+
+  gsap.to(row.querySelector(".case__cta"), { opacity: opening ? 1 : 0, duration: 0.4, delay: opening ? 0.5 : 0 });
+}
+
+function collapseDOM(row) {
+  row.classList.remove("is-open");
+  // put the first three images back in the strip, the rest stay in the track
+  const strip = row.querySelector(".case__thumbs");
+  const thumbs = Array.from(row.querySelectorAll(".thumb"));
+  gsap.set(thumbs, { clearProps: "transform" });        // drop any drag offset
+  strip.append(...thumbs.slice(0, 3));
+  gsap.to(row.querySelector(".case__cta"), { opacity: 0, duration: 0.2 });
+  if (drag) { drag.kill(); drag = null; }
+}
+
+/* ---------- 2. Draggable strip with inertia ---------- */
+function makeDraggable(row) {
+  const track = row.querySelector(".case__track");
+  const slider = row.querySelector(".case__slider");
+  drag = Draggable.create(track, {
+    type: "x",
+    bounds: { minX: Math.min(0, slider.clientWidth - track.scrollWidth), maxX: 0 },  // can't drag past either end
+    inertia: true,               // InertiaPlugin: flick and it glides to a stop inside bounds
+    edgeResistance: 0.85,
+    cursor: "grab"
+  })[0];
+}
+
+/* Hover the collapsed strip: thumbs lift with a tiny stagger (studied site nudges the strip on row hover) */
+gsap.utils.toArray(".case").forEach(row => {
+  row.addEventListener("click", e => {
+    if (e.target.closest(".case__track") && row.classList.contains("is-open")) return;   // ignore clicks while dragging in the strip
+    if (e.target.closest(".case__cta")) return;
+    toggleRow(row);
+  });
+  // The strip is empty while the row is open (its thumbs live in the track), so only tween when there is something to lift
+  const stripThumbs = () => gsap.utils.toArray(row.querySelectorAll(".case__thumbs .thumb"));
+  row.addEventListener("mouseenter", () => { if (!row.classList.contains("is-open")) gsap.to(stripThumbs(), { y: -8, duration: 0.4, stagger: 0.04, ease: "power2.out", overwrite: "auto" }); });
+  row.addEventListener("mouseleave", () => { const t = stripThumbs(); if (t.length) gsap.to(t, { y: 0, duration: 0.4, stagger: 0.04, ease: "power2.out", overwrite: "auto" }); });
+});
+
+/* ---------- 3. Filter with Flip ----------
+ * Same three steps. display:none is toggled on rows that don't match. onEnter/onLeave let hidden→shown
+ * and shown→hidden rows fade while the surviving rows slide into their new spots. */
+document.getElementById("filters").addEventListener("click", e => {
+  const btn = e.target.closest("[data-filter]");
+  if (!btn) return;
+  document.querySelectorAll("#filters .tag").forEach(b => b.classList.toggle("is-active", b === btn));
+  const filter = btn.dataset.filter;
+  const rows = gsap.utils.toArray(".case");
+  if (openRow) toggleRow(openRow);                          // close anything open first so heights are stable
+
+  const state = Flip.getState(rows);
+  rows.forEach(r => r.style.display = (filter === "all" || r.dataset.tags.split(" ").includes(filter)) ? "" : "none");
+  Flip.from(state, {
+    duration: 0.7,
+    ease: "power3.inOut",
+    absolute: true,                                          // rows fly independently while the list re-flows
+    onEnter:  els => gsap.fromTo(els, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, delay: 0.2 }),
+    onLeave:  els => gsap.to(els, { opacity: 0, y: -20, duration: 0.3 })
+  });
+});
+</script>
+</body>
+</html>

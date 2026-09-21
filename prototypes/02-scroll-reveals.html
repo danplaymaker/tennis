@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 · Scroll reveals + section themes</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Text reveal: starts invisible in CSS so there is no flash before JS runs (the studied site has opacity-0 in the class list) */
+  .text-reveal { opacity: 0; }
+  .text-reveal .indent { display: inline-block; width: 2.5em; }        /* data-indent spacer on the first line */
+  .text-reveal__label { display: block; font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase; color: var(--fg-dim); margin-bottom: 1em; }
+
+  /* Media reveal: [data-fade-in] elements sit at opacity 0 until their batch fires */
+  [data-fade-in] { opacity: 0; }
+  .media-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--gap); }
+  .media-grid .ph { aspect-ratio: 4 / 5; }
+
+  /* Section themes: body colours are CSS variables that GSAP tweens between sections */
+  body { transition: none; }
+  .section { border-top: 1px solid var(--line); }
+  .section h2 { margin-bottom: 40px; max-width: 24ch; }
+  .col-a { grid-column: 1 / span 7; }
+  .col-b { grid-column: 9 / span 4; align-self: end; }
+  @media (max-width: 800px) { .col-a, .col-b { grid-column: 1 / -1; } }
+
+  .header-pill { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 40; display: flex; gap: 16px; align-items: center;
+    padding: 10px 14px; border-radius: var(--radius); background: color-mix(in srgb, var(--bg2) 70%, transparent); backdrop-filter: blur(8px); }
+  .header-pill .dot { width: 10px; height: 10px; border-radius: 2px; background: var(--fg); }
+  .header-pill .msg { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; min-width: 22ch; }
+  .spacer { height: 40vh; }
+</style>
+</head>
+<body>
+
+<div class="header-pill"><span class="dot"></span><span class="msg" id="headerMsg">[ scroll ]</span></div>
+
+<section class="section section--hero container" data-theme="dark" data-labels="YOU MADE IT[/split/]NICE ENTRANCE[/split/]LOOKING SHARP">
+  <div class="grid" style="width:100%">
+    <div class="col-a">
+      <h1 class="h1 text-reveal" data-label="[ Placeholder studio ]">A heading that arrives one line at a time.</h1>
+    </div>
+    <p class="body-md text-reveal col-b">Lines are split with SplitText, masked, and slid up with a stagger. Labels decode with a scramble first, then the lines follow.</p>
+  </div>
+</section>
+
+<section class="section container" data-theme="light" data-labels="PROOF OF WORK[/split/]THE HITS[/split/]LOOK AT THESE">
+  <h2 class="h2 text-reveal" data-label="Not just pretty" data-indent="true">The section theme flips to light as this block takes over the viewport, driven by a data-theme attribute.</h2>
+  <div class="media-grid">
+    <div class="ph ph--1" style="grid-column: 1 / span 3" data-fade-in></div>
+    <div class="ph ph--2" style="grid-column: 4 / span 3" data-fade-in data-delay="0.1"></div>
+    <div class="ph ph--3" style="grid-column: 7 / span 3" data-fade-in data-delay="0.2"></div>
+    <div class="ph ph--4" style="grid-column: 10 / span 3" data-fade-in data-delay="0.3"></div>
+  </div>
+</section>
+
+<section class="section container" data-theme="accent" data-labels="BOLD MOVE[/split/]RED ALERT[/split/]HOW WE PAY RENT">
+  <div class="grid">
+    <h2 class="h2 text-reveal col-a" data-label="Services">Three blocks of lorem ipsum describing services that do not exist, revealed line by line.</h2>
+    <p class="body-md text-reveal col-b">Each paragraph is its own trigger, so they reveal independently as they enter.</p>
+  </div>
+  <div class="media-grid" style="margin-top: 48px">
+    <div class="ph ph--5" style="grid-column: 1 / span 4; aspect-ratio: 16/10" data-fade-in></div>
+    <div class="ph ph--6" style="grid-column: 5 / span 4; aspect-ratio: 16/10" data-fade-in data-delay="0.15"></div>
+    <div class="ph ph--1" style="grid-column: 9 / span 4; aspect-ratio: 16/10" data-fade-in data-delay="0.3"></div>
+  </div>
+</section>
+
+<section class="section container" data-theme="dark" data-labels="BACK TO DARK[/split/]THE END IS NEAR">
+  <h2 class="h2 text-reveal" data-label="Culture" data-indent="true">And back to dark. Resize the window: SplitText re-splits automatically and the finished state is preserved.</h2>
+</section>
+<div class="spacer"></div>
+
+<div class="demo-note"><strong>02 · Scroll reveals.</strong> SplitText line masks, ScrollTrigger.batch for media, and CSS-variable theme tweens per section. <a href="index.html">all demos</a></div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrambleTextPlugin.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);
+
+/* ---------- 1. Text reveal: label (scramble) + lines (mask + slide) ---------- */
+document.fonts.ready.then(() => {           // split only after fonts load, otherwise line breaks shift
+  gsap.utils.toArray(".text-reveal").forEach(el => {
+    // Optional data-indent: prepend an inline spacer so the first line starts indented (studied markup has an empty inline-block span)
+    if (el.dataset.indent) el.insertAdjacentHTML("afterbegin", '<span class="indent"></span>');
+
+    // Optional data-label: a small mono label above the text that decodes first
+    let label = null;
+    if (el.dataset.label) {
+      label = document.createElement("span");
+      label.className = "text-reveal__label";
+      label.textContent = el.dataset.label;
+      el.parentNode.insertBefore(label, el);
+      gsap.set(label, { opacity: 0 });
+    }
+
+    SplitText.create(el, {
+      type: "lines",
+      mask: "lines",                          // wraps every line in an overflow:hidden parent so yPercent:100 hides it
+      autoSplit: true,                        // re-split on resize when line count changes
+      onSplit(self) {                         // return the animation so autoSplit can revert + rebuild it correctly
+        const tl = gsap.timeline({
+          scrollTrigger: { trigger: el, start: "top 85%", once: true }
+        });
+        if (label) tl.to(label, { opacity: 1, duration: 0.3 })
+                     .to(label, { scrambleText: { text: el.dataset.label, chars: "[]/\\|-_=+*#", speed: 0.6, tweenLength: false }, duration: 0.6 }, "<");
+        tl.set(el, { opacity: 1 })            // element was opacity:0 in CSS; show it the instant the lines start moving
+          .from(self.lines, {
+            yPercent: 110,                    // start fully below the mask
+            duration: 1,
+            ease: "power3.out",
+            stagger: 0.09                     // line-by-line cascade
+          }, label ? "-=0.35" : 0);
+        return tl;
+      }
+    });
+  });
+});
+
+/* ---------- 2. Media fade-in with ScrollTrigger.batch ----------
+ * batch() groups elements that enter in the same tick so a whole row staggers together,
+ * instead of every image starting its own trigger at slightly different times. */
+ScrollTrigger.batch("[data-fade-in]", {
+  start: "top 90%",
+  once: true,
+  onEnter: batch => {
+    batch.forEach(el => gsap.fromTo(el,
+      { opacity: 0, y: 24, scale: 0.98 },
+      { opacity: 1, y: 0, scale: 1, duration: 1.1, ease: "power2.out",
+        delay: parseFloat(el.dataset.delay || 0) }    // per-element data-delay from the markup drives the stagger
+    ));
+  }
+});
+
+/* ---------- 3. Section theme: tween CSS variables on <body> ----------
+ * Each section declares data-theme. When it crosses the viewport middle (in either direction),
+ * the page colours tween to that theme. GSAP can animate CSS custom properties directly. */
+const THEMES = {
+  dark:   { "--bg": "#111111", "--bg2": "#1f1f1f", "--fg": "#f1efe8" },
+  light:  { "--bg": "#ece9e1", "--bg2": "#dcd8cd", "--fg": "#141414" },
+  accent: { "--bg": "#ff4d2e", "--bg2": "#e03d22", "--fg": "#141414" }
+};
+const headerMsg = document.getElementById("headerMsg");
+gsap.utils.toArray("[data-theme]").forEach(section => {
+  const labels = (section.dataset.labels || "").split("[/split/]");
+  const apply = () => {
+    gsap.to("body", { ...THEMES[section.dataset.theme], duration: 0.7, ease: "power2.inOut", overwrite: "auto" });
+    gsap.to(headerMsg, { duration: 0.6, scrambleText: { text: "[ " + gsap.utils.random(labels) + " ]", chars: "[]/\\|-_=+*#", speed: 0.6, tweenLength: false }, overwrite: "auto" });
+  };
+  ScrollTrigger.create({ trigger: section, start: "top 50%", end: "bottom 50%", onEnter: apply, onEnterBack: apply });
+});
+</script>
+</body>
+</html>

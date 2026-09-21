@@ -1,0 +1,5 @@
+# Private site scrape used for R&D only; never commit it
+lamalama.com/
+__MACOSX/
+*.zip
+.DS_Store

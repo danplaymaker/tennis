@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06 · Nav pill + button micro-interactions</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* ---------- Menu pill (fixed, top-centre, blurred backdrop) ---------- */
+  .menu { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 40; width: calc(100vw - 32px); max-width: 438px;
+    border-radius: var(--radius); overflow: hidden; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .menu__bg { position: absolute; inset: 0; background: var(--bg2); opacity: 0.6; }
+  .menu__bar { position: relative; display: flex; align-items: center; justify-content: space-between; height: 50px; padding: 0 13px 0 9px; cursor: pointer; }
+  .menu__logo { width: 22px; height: 22px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; }
+  .menu__logo i { background: currentColor; }
+  .menu__msg { font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; }
+  .burger { display: flex; flex-direction: column; gap: 3px; padding: 12px 7px; }
+  .burger i { display: block; height: 2px; width: 16px; background: currentColor; }
+  .menu__items { height: 0; overflow: hidden; position: relative; }
+
+  /* Nav item: full-width row. Hidden layers: top line (scaleX 0), backdrop (opacity 0), text (clip-path), icon frames (opacity 0) */
+  .nav-item { position: relative; display: flex; align-items: center; height: 50px; width: 100%; padding-left: 43px; font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; }
+  .nav-item__bg { position: absolute; inset: 0; background: rgba(255,255,255,0.1); opacity: 0; }
+  .nav-item__line { position: absolute; left: 0; right: 0; top: 0; height: 1px; background: currentColor; opacity: 0.1; transform: scaleX(0); transform-origin: left; }
+  .nav-item__icon { position: absolute; left: 12px; width: 10px; height: 10px; }
+  .nav-item__icon svg { position: absolute; inset: 0; width: 10px; height: 10px; opacity: 0; }
+  .nav-item__icon svg:last-child { opacity: 1; }
+  .nav-item__text { position: relative; clip-path: inset(0 0 100% 0); }
+  .menu-blur { position: fixed; inset: 0; z-index: 39; background: rgba(0,0,0,0.4); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); opacity: 0; pointer-events: none; }
+
+  /* ---------- Button ---------- */
+  .btn { position: relative; display: inline-flex; border-radius: var(--radius); white-space: nowrap; font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; }
+  .btn__fill { position: absolute; inset: 0; border-radius: var(--radius); background: var(--fg); opacity: 0; }   /* fills on hover */
+  .btn__inner, .btn__hover { display: flex; align-items: center; justify-content: center; gap: 10px; height: 50px; padding: 0 16px; border-radius: var(--radius); }
+  .btn__inner { position: relative; border: 1px solid var(--line); }
+  .btn__hover { position: absolute; inset: 0; color: var(--bg); }                       /* inverted copy shown on hover */
+  .btn__hover .btn__text { opacity: 0; }
+  .btn__arrow { width: 7px; height: 7px; }
+  .btn__inner .btn__arrow { transform-origin: top right; }                              /* leaves toward top-right */
+  .btn__hover .btn__arrow { transform-origin: bottom left; transform: scale(0); }        /* arrives from bottom-left */
+
+  /* ---------- Contact card ---------- */
+  .card { position: relative; display: inline-flex; align-items: center; gap: 20px; height: 50px; padding: 0 32px 0 11px; border-radius: var(--radius); overflow: hidden; white-space: nowrap; font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; }
+  .card__bg { position: absolute; inset: 0; background: var(--bg2); }
+  .card__fill { position: absolute; inset: 0; background: var(--fg); opacity: 0; }
+  .card__avatar { position: relative; z-index: 2; width: 28px; height: 28px; border-radius: 3px; }
+  .card__label { position: relative; z-index: 2; }
+  .card__label-hover { position: absolute; right: 32px; z-index: 2; color: var(--bg); opacity: 0; }
+
+  .section h2 { margin-bottom: 32px; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+</style>
+</head>
+<body>
+
+<div class="menu-blur" id="menuBlur"></div>
+<div class="menu" id="menu">
+  <div class="menu__bg"></div>
+  <div class="menu__bar" id="menuToggle">
+    <div class="menu__logo" id="logo"></div>
+    <div class="menu__msg" id="menuMsg">[ menu ]</div>
+    <button class="burger" aria-label="Toggle menu"><i class="t"></i><i class="m"></i><i class="b"></i></button>
+  </div>
+  <div class="menu__items" id="menuItems">
+    <a class="nav-item" href="#"><span class="nav-item__bg"></span><span class="nav-item__line"></span><span class="nav-item__icon"></span><span class="nav-item__text">Work</span></a>
+    <a class="nav-item" href="#"><span class="nav-item__bg"></span><span class="nav-item__line"></span><span class="nav-item__icon"></span><span class="nav-item__text">Services</span></a>
+    <a class="nav-item" href="#"><span class="nav-item__bg"></span><span class="nav-item__line"></span><span class="nav-item__icon"></span><span class="nav-item__text">About</span></a>
+    <a class="nav-item" href="#"><span class="nav-item__bg"></span><span class="nav-item__line"></span><span class="nav-item__icon"></span><span class="nav-item__text">Contact</span></a>
+  </div>
+</div>
+
+<section class="section section--hero container">
+  <div>
+    <p class="mono" style="color:var(--fg-dim);margin-bottom:24px">[ Micro-interactions ]</p>
+    <h1 class="h1">Open the pill menu.<br>Hover the buttons.</h1>
+  </div>
+</section>
+
+<section class="section container">
+  <h2 class="h2">Buttons: fill + text swap + arrow hand-off</h2>
+  <div class="row">
+    <a class="btn" href="#"><span class="btn__fill"></span>
+      <span class="btn__inner"><span class="btn__text">View case</span><svg class="btn__arrow" viewBox="0 0 7 7"><path d="M0 0h7v7H5V3.4L1.4 7 0 5.6 3.6 2H0z" fill="currentColor"/></svg></span>
+      <span class="btn__hover"><span class="btn__text">View case</span><svg class="btn__arrow" viewBox="0 0 7 7"><path d="M0 0h7v7H5V3.4L1.4 7 0 5.6 3.6 2H0z" fill="currentColor"/></svg></span>
+    </a>
+    <a class="btn" href="#"><span class="btn__fill"></span>
+      <span class="btn__inner"><span class="btn__text">Our pitchdeck</span></span>
+      <span class="btn__hover"><span class="btn__text">Our pitchdeck</span></span>
+    </a>
+    <a class="btn" href="#"><span class="btn__fill"></span>
+      <span class="btn__inner"><span class="btn__text">Schedule a call</span><svg class="btn__arrow" viewBox="0 0 7 7"><path d="M0 0h7v7H5V3.4L1.4 7 0 5.6 3.6 2H0z" fill="currentColor"/></svg></span>
+      <span class="btn__hover"><span class="btn__text">Schedule a call</span><svg class="btn__arrow" viewBox="0 0 7 7"><path d="M0 0h7v7H5V3.4L1.4 7 0 5.6 3.6 2H0z" fill="currentColor"/></svg></span>
+    </a>
+  </div>
+</section>
+
+<section class="section container">
+  <h2 class="h2">Contact card: fill sweeps in, label swaps side</h2>
+  <div class="row">
+    <a class="card" href="#"><span class="card__bg"></span><span class="card__fill"></span>
+      <span class="card__label-hover">Get in touch</span>
+      <span class="card__avatar ph ph--2"></span><span class="card__label">Get in touch</span>
+    </a>
+    <a class="card" href="#"><span class="card__bg"></span><span class="card__fill"></span>
+      <span class="card__label-hover">+00 00 000 0000</span>
+      <span class="card__avatar ph ph--3"></span><span class="card__label">+00 00 000 0000</span>
+    </a>
+  </div>
+</section>
+<div style="height:40vh"></div>
+
+<div class="demo-note"><strong>06 · Nav + buttons.</strong> One paused timeline per component, play() on enter and reverse() on leave. Menu opens with height:auto, staggered lines, clip-path text, pixel-icon frame cycling. <a href="index.html">all demos</a></div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrambleTextPlugin.min.js"></script>
+<script>
+gsap.registerPlugin(ScrambleTextPlugin);
+
+/* ---------- Pixel icon frames ----------
+ * The studied nav item stacks four 10×10 pixel SVG frames and toggles them in sequence, like a tiny sprite sheet.
+ * We generate four random 5×5 pixel glyphs so no brand marks are copied. */
+function pixelSVG(seed) {
+  let s = "";
+  for (let y = 0; y < 5; y++) for (let x = 0; x < 5; x++) {
+    if (((x * 7 + y * 3 + seed * 5) % 4) < 2) s += `<rect x="${x * 2}" y="${y * 2}" width="2" height="2"/>`;
+  }
+  return `<svg viewBox="0 0 10 10" fill="currentColor">${s}</svg>`;
+}
+document.querySelectorAll(".nav-item__icon").forEach(box => { box.innerHTML = pixelSVG(1) + pixelSVG(2) + pixelSVG(3) + pixelSVG(0); });
+document.getElementById("logo").innerHTML = Array.from({ length: 25 }, (_, i) => `<i style="opacity:${(i * 7) % 3 ? 1 : 0.25}"></i>`).join("");
+
+/* Cycle the four icon frames: a stepped stagger shows one frame at a time, then lands on the last. */
+function iconCycle(box) {
+  const frames = box.querySelectorAll("svg");
+  const tl = gsap.timeline();
+  frames.forEach((f, i) => {
+    tl.set(frames, { opacity: 0 }, i * 0.07).set(f, { opacity: 1 }, i * 0.07);   // discrete frames, no cross-fade
+  });
+  return tl;
+}
+
+/* ---------- 1. Menu open / close ----------
+ * Built once as a paused timeline. toggle: play() or reverse(). Reversing gives a free, perfectly mirrored close. */
+const items = gsap.utils.toArray(".nav-item");
+const menuTl = gsap.timeline({
+  paused: true,
+  defaults: { ease: "power3.out" },
+  onStart: () => gsap.set("#menuBlur", { pointerEvents: "auto" }),            // blur catches clicks only while open
+  onReverseComplete: () => gsap.set("#menuBlur", { pointerEvents: "none" })
+});
+menuTl
+  .to("#menuBlur", { opacity: 1, duration: 0.4 }, 0)
+  .to("#menuItems", { height: "auto", duration: 0.55, ease: "power3.inOut" }, 0)   // height:auto is measured by GSAP
+  .to(".burger .t", { y: 5, rotate: 45, duration: 0.3 }, 0)
+  .to(".burger .b", { y: -5, rotate: -45, duration: 0.3 }, 0)
+  .to(".burger .m", { scaleX: 0, duration: 0.2 }, 0)
+  .to("#menuMsg", { duration: 0.5, scrambleText: { text: "[ close ]", chars: "[]/\\|-_=+*#", speed: 0.6, tweenLength: false } }, 0)
+  // per-item cascade: line grows from the left, text is unclipped from the top, icon frames flip through
+  .to(items.map(i => i.querySelector(".nav-item__line")), { scaleX: 1, duration: 0.6, stagger: 0.06 }, 0.1)
+  .to(items.map(i => i.querySelector(".nav-item__text")), { clipPath: "inset(0 0 0% 0)", duration: 0.5, stagger: 0.06 }, 0.15);
+items.forEach((item, i) => menuTl.add(iconCycle(item.querySelector(".nav-item__icon")), 0.15 + i * 0.06));
+
+let open = false;
+document.getElementById("menuToggle").addEventListener("click", () => {
+  open = !open;
+  open ? menuTl.play() : menuTl.reverse();
+});
+document.getElementById("menuBlur").addEventListener("click", () => { open = false; menuTl.reverse(); });
+
+/* Nav item hover: backdrop fades in and the icon re-cycles. overwrite avoids stacking on fast hovers. */
+items.forEach(item => {
+  const bg = item.querySelector(".nav-item__bg");
+  item.addEventListener("mouseenter", () => { gsap.to(bg, { opacity: 1, duration: 0.25, overwrite: "auto" }); iconCycle(item.querySelector(".nav-item__icon")); });
+  item.addEventListener("mouseleave", () => gsap.to(bg, { opacity: 0, duration: 0.25, overwrite: "auto" }));
+});
+
+/* ---------- 2. Buttons ----------
+ * Layers: .btn__fill (bg), .btn__inner (default text + arrow), .btn__hover (inverted text + arrow, absolutely stacked).
+ * On hover: fill appears, default text fades and its arrow shrinks toward the top-right, while the hover arrow grows
+ * from the bottom-left — reads as one arrow leaving and another taking its place along a diagonal. */
+gsap.utils.toArray(".btn").forEach(btn => {
+  const tl = gsap.timeline({ paused: true, defaults: { duration: 0.35, ease: "power2.out" } });
+  tl.to(btn.querySelector(".btn__fill"), { opacity: 1 }, 0)
+    .to(btn.querySelector(".btn__inner .btn__text"), { opacity: 0, duration: 0.2 }, 0)
+    .to(btn.querySelector(".btn__hover .btn__text"), { opacity: 1, duration: 0.25 }, 0.1);
+  if (btn.querySelector(".btn__arrow")) {                     // arrows are optional (some buttons are text-only)
+    tl.to(btn.querySelector(".btn__inner .btn__arrow"), { scale: 0, duration: 0.25 }, 0)
+      .to(btn.querySelector(".btn__hover .btn__arrow"), { scale: 1, duration: 0.3, ease: "back.out(2)" }, 0.12);
+  }
+  btn.addEventListener("mouseenter", () => tl.play());
+  btn.addEventListener("mouseleave", () => tl.reverse());
+});
+
+/* ---------- 3. Contact card ----------
+ * Fill fades in, the normal label slides right and fades out, the inverted label (pre-positioned at the right edge) fades in. */
+gsap.utils.toArray(".card").forEach(card => {
+  const tl = gsap.timeline({ paused: true, defaults: { duration: 0.35, ease: "power2.out" } });
+  tl.to(card.querySelector(".card__fill"), { opacity: 1 }, 0)
+    .to(card.querySelector(".card__label"), { x: 16, opacity: 0, duration: 0.25 }, 0)
+    .to(card.querySelector(".card__avatar"), { x: 6 }, 0)
+    .fromTo(card.querySelector(".card__label-hover"), { x: -12, opacity: 0 }, { x: 0, opacity: 1 }, 0.1);
+  card.addEventListener("mouseenter", () => tl.play());
+  card.addEventListener("mouseleave", () => tl.reverse());
+});
+</script>
+</body>
+</html>

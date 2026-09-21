@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GSAP interaction prototypes</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .list { display: grid; gap: 2px; max-width: 720px; }
+  .list a { display: grid; grid-template-columns: 4ch 1fr; gap: 16px; padding: 18px 0; border-top: 1px solid var(--line); }
+  .list a:hover .h6 { text-decoration: underline; }
+  .list small { display: block; color: var(--fg-dim); margin-top: 4px; }
+</style>
+</head>
+<body>
+<section class="section container">
+  <p class="mono" style="color:var(--fg-dim);margin-bottom:24px">[ Private R&D · placeholder content only ]</p>
+  <h1 class="h2" style="margin-bottom:40px">GSAP interaction studies</h1>
+  <div class="list">
+    <a href="01-mono-text-reveal.html"><span class="mono">01</span><span><span class="h6">Mono text reveal</span><small>ScrambleTextPlugin · ScrollTrigger · two-layer label structure · hover re-trigger · A→B swap · DIY version</small></span></a>
+    <a href="02-scroll-reveals.html"><span class="mono">02</span><span><span class="h6">Scroll reveals + section themes</span><small>SplitText line masks · ScrollTrigger.batch media stagger · CSS-variable theme tween per section · header label cycling</small></span></a>
+    <a href="03-parallax-cursor.html"><span class="mono">03</span><span><span class="h6">Smooth scroll, parallax, cursor label</span><small>ScrollSmoother wrapper/content · scrubbed inner-layer parallax vs data-speed · quickTo cursor follower · exclusion-blend hero</small></span></a>
+    <a href="04-case-list-morph.html"><span class="mono">04</span><span><span class="h6">Case list: filter + expand</span><small>Flip.getState / Flip.from for both filtering rows and moving thumbnails into a draggable strip · Draggable + Inertia</small></span></a>
+    <a href="05-page-transition.html"><span class="mono">05</span><span><span class="h6">Preloader + page transitions</span><small>Counter tweens · async out→swap→in timeline (Swup hook order) · persistent header label morph · history routing</small></span></a>
+    <a href="06-nav-buttons.html"><span class="mono">06</span><span><span class="h6">Nav pill + button micro-interactions</span><small>Paused timelines with play/reverse · height:auto menu · clip-path text · pixel-icon frame cycling · arrow hand-off buttons</small></span></a>
+  </div>
+  <p class="mono" style="color:var(--fg-dim);margin-top:40px">GSAP 3.13 from jsDelivr, no build step. Open any file directly in a browser. See AUDIT.md for the pattern audit.</p>
+</section>
+</body>
+</html>

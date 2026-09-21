@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05 · Preloader + page transitions</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Preloader: full-screen, counts 0→100 while assets load, then lifts */
+  .loader { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: #000; color: #fff; font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; }
+
+  /* Transition layers (studied site: a bg-coloured overlay at z-8 plus a percentage counter at z-9) */
+  .transition { position: fixed; inset: 0; z-index: 80; background: var(--bg); opacity: 0; pointer-events: none; }
+  .transition-counter { position: fixed; inset: 0; z-index: 81; display: grid; place-items: center; pointer-events: none; opacity: 0; font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase; }
+
+  /* Persistent header: never re-rendered between "pages". Its label morphs to the new page title (the data-swup-morph idea). */
+  .header { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 90; display: flex; align-items: center; gap: 20px; padding: 10px 14px; border-radius: var(--radius); background: rgba(31,31,31,0.75); backdrop-filter: blur(8px); }
+  .header nav { display: flex; gap: 14px; }
+  .header a { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; opacity: 0.6; }
+  .header a.is-active { opacity: 1; }
+  .header .title { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; min-width: 12ch; }
+
+  .page { min-height: 120svh; }
+  .page .h1 { max-width: 14ch; }
+  .page .h1 { opacity: 0; }
+  .page .lead { max-width: 40ch; color: var(--fg-dim); margin-top: 24px; }
+  .page .ph { aspect-ratio: 16/9; margin-top: 48px; }
+  .page__body { padding-top: 140px; }
+  [data-fade-in] { opacity: 0; }
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader"><span><span id="loaderCount">0</span>%</span></div>
+
+<header class="header">
+  <span class="title" id="headerTitle">Home</span>
+  <nav>
+    <a href="#home" data-route="home" class="is-active">Home</a>
+    <a href="#work" data-route="work">Work</a>
+    <a href="#about" data-route="about">About</a>
+  </nav>
+</header>
+
+<main id="page" class="container"></main>
+
+<!-- Page templates: stand-ins for server-rendered pages that Swup would fetch -->
+<template data-page="home">
+  <div class="page page__body" data-title="Home">
+    <p class="mono" style="color:var(--fg-dim)">[ Home ]</p>
+    <h1 class="h1">A fake home page with lorem ipsum.</h1>
+    <p class="lead body-md">Click the nav. The overlay covers the page, a counter runs, the content swaps underneath, and the new page's reveals play on enter.</p>
+    <div class="ph ph--1" data-fade-in></div>
+  </div>
+</template>
+<template data-page="work">
+  <div class="page page__body" data-title="Work">
+    <p class="mono" style="color:var(--fg-dim)">[ Work ]</p>
+    <h1 class="h1">Work that placeholder works.</h1>
+    <p class="lead body-md">Every "page" is a template in this file. In production, Swup fetches the real HTML and swaps a container; the hooks are the same.</p>
+    <div class="ph ph--3" data-fade-in></div>
+  </div>
+</template>
+<template data-page="about">
+  <div class="page page__body" data-title="About">
+    <p class="mono" style="color:var(--fe-dim)">[ About ]</p>
+    <h1 class="h1">About nobody in particular.</h1>
+    <p class="lead body-md">Use the browser back button: popstate routes through the same transition.</p>
+    <div class="ph ph--4" data-fade-in></div>
+  </div>
+</template>
+
+<div class="transition" id="transition"></div>
+<div class="transition-counter" id="transitionCounter"><span><span id="transitionCount">0</span>%</span></div>
+
+<div class="demo-note"><strong>05 · Page transitions.</strong> Preloader counter, then an out → swap → in sequence built as a single async timeline. Header persists and morphs its label. <a href="index.html">all demos</a></div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrambleTextPlugin.min.js"></script>
+<script>
+gsap.registerPlugin(SplitText, ScrambleTextPlugin);
+
+const page = document.getElementById("page");
+const headerTitle = document.getElementById("headerTitle");
+const overlay = document.getElementById("transition");
+const counterWrap = document.getElementById("transitionCounter");
+const counterEl = document.getElementById("transitionCount");
+
+/* ---------- Counter helper ----------
+ * Tween a plain object and write the rounded value into the DOM each frame. snap keeps integers. */
+function countTo(el, from, to, duration, ease = "power2.inOut") {
+  const o = { n: from };
+  return gsap.to(o, { n: to, duration, ease, snap: { n: 1 }, onUpdate: () => (el.textContent = o.n) });
+}
+
+/* ---------- 1. Preloader ----------
+ * Real sites drive this from asset progress. Here: count to ~80 quickly, hold, then finish when window.load fires. */
+const loader = document.getElementById("loader");
+const loaderTl = gsap.timeline();
+loaderTl.add(countTo(document.getElementById("loaderCount"), 0, 80, 0.9));
+window.addEventListener("load", () => {
+  loaderTl.add(countTo(document.getElementById("loaderCount"), 80, 100, 0.35))
+          .to(loader, { opacity: 0, duration: 0.5, ease: "power2.inOut" })
+          .set(loader, { display: "none" })
+          .add(() => enterPage(), "-=0.3");   // start the first page's reveals while the loader is still fading
+});
+
+/* ---------- 2. Render + enter animation ----------
+ * Everything that should animate on a fresh page lives here so both the initial load and every transition reuse it. */
+function render(route) {
+  const tpl = document.querySelector(`template[data-page="${route}"]`);
+  page.replaceChildren(tpl.content.cloneNode(true));
+  document.querySelectorAll("[data-route]").forEach(a => a.classList.toggle("is-active", a.dataset.route === route));
+}
+function enterPage() {
+  const h1 = page.querySelector(".h1");
+  const split = SplitText.create(h1, { type: "lines", mask: "lines" });
+  const tl = gsap.timeline();
+  tl.set(h1, { opacity: 1 })
+    .from(split.lines, { yPercent: 110, duration: 0.9, ease: "power3.out", stagger: 0.08 })
+    .to(page.querySelectorAll("[data-fade-in]"), { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" }, "-=0.5")
+    .from(page.querySelectorAll("[data-fade-in]"), { y: 30, duration: 0.9, ease: "power2.out" }, "<");
+  return tl;
+}
+
+/* ---------- 3. Transition ----------
+ * out:  overlay fades up, counter fades in and runs 0→100
+ * swap: scroll to top instantly while covered, replace content, morph header label
+ * in:   counter fades, overlay fades away, enterPage() plays
+ * GSAP timelines are thenable, so `await tl` waits for completion — this reads like Swup's hook order
+ * (visit:start → content:replace → visit:end). */
+let busy = false;
+async function goTo(route, pushHistory = true) {
+  if (busy) return;
+  busy = true;
+  if (pushHistory) history.pushState({ route }, "", "#" + route);
+
+  // OUT
+  const out = gsap.timeline();
+  out.to(overlay, { opacity: 1, duration: 0.45, ease: "power2.inOut" })
+     .to(counterWrap, { opacity: 1, duration: 0.2 }, "<")
+     .add(countTo(counterEl, 0, 100, 0.7), "<0.1");
+  await out;
+
+  // SWAP (page is fully covered, so the jump is invisible)
+  window.scrollTo(0, 0);
+  render(route);
+  const newTitle = page.querySelector(".page").dataset.title;
+  gsap.to(headerTitle, { duration: 0.6, scrambleText: { text: newTitle, chars: "[]/\\|-_=+*#", speed: 0.6, tweenLength: false } });
+
+  // IN
+  const inTl = gsap.timeline();
+  inTl.to(counterWrap, { opacity: 0, duration: 0.2 })
+      .to(overlay, { opacity: 0, duration: 0.5, ease: "power2.inOut" }, "<")
+      .add(enterPage(), "-=0.25");
+  await inTl;
+  busy = false;
+}
+
+/* Routing: intercept nav clicks; handle back/forward the same way. */
+document.addEventListener("click", e => {
+  const link = e.target.closest("[data-route]");
+  if (!link) return;
+  e.preventDefault();
+  if (!link.classList.contains("is-active")) goTo(link.dataset.route);
+});
+window.addEventListener("popstate", e => goTo((e.state && e.state.route) || "home", false));
+
+// Initial route from the hash, rendered before the loader lifts
+const initial = (location.hash.slice(1) || "home");
+render(document.querySelector(`template[data-page="${initial}"]`) ? initial : "home");
+history.replaceState({ route: initial }, "", "#" + initial);
+</script>
+</body>
+</html>
