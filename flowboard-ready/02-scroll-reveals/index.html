@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 · Scroll reveals + section themes (Flowboard-ready)</title>
+<style>
+/* @snippet CSS: Page base + layout. body colours are tweened by GSAP per section, so nothing else hard-codes them. */
+*, *::before, *::after { box-sizing: border-box; }   /* Webflow default; keeps min-height/aspect-ratio maths sane */
+body { margin: 0; background-color: #111111; color: #f1efe8; font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.4; }
+.section { padding: 120px 40px; border-top: 1px solid rgba(128, 128, 128, 0.35); }
+.section--hero { min-height: 100vh; display: flex; align-items: flex-end; border-top: 0; padding-bottom: 8vh; }
+.section__grid { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 16px; width: 100%; }
+.section__col-main { grid-column: 1 / span 7; }
+.section__col-side { grid-column: 9 / span 4; align-self: end; }
+.section__title { font-size: 48px; line-height: 1.05; letter-spacing: -0.02em; font-weight: 500; margin: 0 0 40px 0; max-width: 24ch; }
+.hero__title { font-size: 80px; line-height: 0.98; letter-spacing: -0.03em; font-weight: 500; margin: 0; }
+.lead { font-size: 18px; margin: 0; }
+.spacer { height: 40vh; }
+@media (max-width: 800px) { .section__col-main, .section__col-side { grid-column: 1 / -1; } }
+
+/* @snippet CSS: Components — text reveal, media grid, header pill. Elements start at opacity 0 to avoid a flash before JS. */
+.text-reveal { opacity: 0; }
+.text-reveal__indent { display: inline-block; width: 2.5em; }
+.text-reveal__label { display: block; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; text-transform: uppercase; opacity: 0.55; margin-bottom: 1em; }
+.media-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+.media-grid__item { grid-column: span 3; aspect-ratio: 4 / 5; opacity: 0; }
+.media-grid__item--wide { grid-column: span 4; aspect-ratio: 16 / 10; }
+.placeholder-image { position: relative; overflow: hidden; border-radius: 6px; background-color: #3a3a3a; background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.06) 0 6px, transparent 6px 14px); }
+.placeholder-image--blue { background-color: #4a5d73; }
+.placeholder-image--brown { background-color: #7a5a45; }
+.placeholder-image--green { background-color: #4f6b52; }
+.placeholder-image--purple { background-color: #6b4f6b; }
+.placeholder-image--olive { background-color: #8a7a3a; }
+.placeholder-image--teal { background-color: #3d5c6b; }
+.header-pill { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 40; display: flex; gap: 16px; align-items: center; padding: 10px 14px; border-radius: 6px; background-color: rgba(128, 128, 128, 0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.header-pill__dot { width: 10px; height: 10px; border-radius: 2px; background-color: currentColor; }
+.header-pill__message { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; text-transform: uppercase; min-width: 22ch; }
+</style>
+</head>
+<body>
+
+<!-- @snippet HTML: Header pill — message re-scrambles per section. -->
+<div class="header-pill"><span class="header-pill__dot"></span><span class="header-pill__message">[ scroll ]</span></div>
+
+<!-- @snippet HTML: Sections. data-theme drives the body colour tween, data-labels feeds the header pill, data-delay staggers media. -->
+<section class="section section--hero" data-theme="dark" data-labels="YOU MADE IT[/split/]NICE ENTRANCE[/split/]LOOKING SHARP">
+  <div class="section__grid">
+    <div class="section__col-main">
+      <h1 class="hero__title text-reveal" data-label="[ Placeholder studio ]">A heading that arrives one line at a time.</h1>
+    </div>
+    <p class="lead text-reveal section__col-side">Lines are split with SplitText, masked, and slid up with a stagger. Labels decode with a scramble first, then the lines follow.</p>
+  </div>
+</section>
+
+<section class="section" data-theme="light" data-labels="PROOF OF WORK[/split/]THE HITS[/split/]LOOK AT THESE">
+  <h2 class="section__title text-reveal" data-label="Not just pretty" data-indent="true">The section theme flips to light as this block takes over the viewport, driven by a data-theme attribute.</h2>
+  <div class="media-grid">
+    <div class="media-grid__item placeholder-image placeholder-image--blue" data-fade-in></div>
+    <div class="media-grid__item placeholder-image placeholder-image--brown" data-fade-in data-delay="0.1"></div>
+    <div class="media-grid__item placeholder-image placeholder-image--green" data-fade-in data-delay="0.2"></div>
+    <div class="media-grid__item placeholder-image placeholder-image--purple" data-fade-in data-delay="0.3"></div>
+  </div>
+</section>
+
+<section class="section" data-theme="accent" data-labels="BOLD MOVE[/split/]RED ALERT[/split/]HOW WE PAY RENT">
+  <div class="section__grid">
+    <h2 class="section__title text-reveal section__col-main" data-label="Services">Three blocks of lorem ipsum describing services that do not exist, revealed line by line.</h2>
+    <p class="lead text-reveal section__col-side">Each paragraph is its own trigger, so they reveal independently as they enter.</p>
+  </div>
+  <div class="media-grid" style="margin-top: 48px">
+    <div class="media-grid__item media-grid__item--wide placeholder-image placeholder-image--olive" data-fade-in></div>
+    <div class="media-grid__item media-grid__item--wide placeholder-image placeholder-image--teal" data-fade-in data-delay="0.15"></div>
+    <div class="media-grid__item media-grid__item--wide placeholder-image placeholder-image--blue" data-fade-in data-delay="0.3"></div>
+  </div>
+</section>
+
+<section class="section" data-theme="dark" data-labels="BACK TO DARK[/split/]THE END IS NEAR">
+  <h2 class="section__title text-reveal" data-label="Culture" data-indent="true">And back to dark. Resize the window: SplitText re-splits automatically and the finished state is preserved.</h2>
+</section>
+<div class="spacer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrambleTextPlugin.min.js"></script>
+<script>
+// @snippet JS: Media fade-in + section theme (convertible) and SplitText / scramble reveals (Embed).
+gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);
+
+/* [FLOWBOARD: CONVERTIBLE] Media fade-in. One "scroll into view" trigger per element, basic opacity/y/scale tween,
+ * data-delay becomes the per-element delay. */
+gsap.utils.toArray("[data-fade-in]").forEach(el => {
+  gsap.fromTo(el, { opacity: 0, y: 24, scale: 0.98 }, {
+    opacity: 1, y: 0, scale: 1, duration: 1.1, ease: "power2.out",
+    delay: parseFloat(el.dataset.delay || 0),
+    scrollTrigger: { trigger: el, start: "top 90%", once: true }
+  });
+});
+
+/* [FLOWBOARD: CONVERTIBLE] Section theme. Body background-color + color tweens when a section crosses the viewport
+ * middle (onEnter / onEnterBack ≈ "scroll into view" both directions). Colours are tweened directly, not via CSS variables. */
+const THEMES = {
+  dark:   { backgroundColor: "#111111", color: "#f1efe8" },
+  light:  { backgroundColor: "#ece9e1", color: "#141414" },
+  accent: { backgroundColor: "#ff4d2e", color: "#141414" }
+};
+gsap.utils.toArray("[data-theme]").forEach(section => {
+  const apply = () => gsap.to("body", { ...THEMES[section.dataset.theme], duration: 0.7, ease: "power2.inOut", overwrite: "auto" });
+  ScrollTrigger.create({ trigger: section, start: "top 50%", end: "bottom 50%", onEnter: apply, onEnterBack: apply });
+});
+
+/* [FLOWBOARD: EMBED ONLY] Header pill label uses ScrambleTextPlugin. */
+const headerMsg = document.querySelector(".header-pill__message");
+gsap.utils.toArray("[data-labels]").forEach(section => {
+  const labels = section.dataset.labels.split("[/split/]");
+  const pick = () => gsap.to(headerMsg, { duration: 0.6, scrambleText: { text: "[ " + gsap.utils.random(labels) + " ]", chars: "[]/\\|-_=+*#", speed: 0.6, tweenLength: false }, overwrite: "auto" });
+  ScrollTrigger.create({ trigger: section, start: "top 50%", end: "bottom 50%", onEnter: pick, onEnterBack: pick });
+});
+
+/* [FLOWBOARD: EMBED ONLY] Text reveal: SplitText (mask + autoSplit) and the scrambled label. Wait for fonts so line
+ * breaks are final before splitting. */
+document.fonts.ready.then(() => {
+  gsap.utils.toArray(".text-reveal").forEach(el => {
+    if (el.dataset.indent) el.insertAdjacentHTML("afterbegin", '<span class="text-reveal__indent"></span>');
+    let label = null;
+    if (el.dataset.label) {
+      label = document.createElement("span");
+      label.className = "text-reveal__label";
+      label.textContent = el.dataset.label;
+      el.parentNode.insertBefore(label, el);
+      gsap.set(label, { opacity: 0 });
+    }
+    SplitText.create(el, {
+      type: "lines", mask: "lines", autoSplit: true,
+      onSplit(self) {
+        const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: "top 85%", once: true } });
+        if (label) tl.to(label, { opacity: 1, duration: 0.3 })
+                     .to(label, { scrambleText: { text: el.dataset.label, chars: "[]/\\|-_=+*#", speed: 0.6, tweenLength: false }, duration: 0.6 }, "<");
+        tl.set(el, { opacity: 1 })
+          .from(self.lines, { yPercent: 110, duration: 1, ease: "power3.out", stagger: 0.09 }, label ? "-=0.35" : 0);
+        return tl;
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
